@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-06T17:13:34.544Z",
+  "status": "passed",
+  "previousGoalTurn": "progress",
+  "goalStatus": "active",
+  "userResources": "No existing server or second machine; user requests preparation",
+  "unchangedEngineeringFiles": 107,
+  "unchangedTestBaseline": 108,
+  "nodeProbeStillMatches": true,
+  "capturedFiles": 8,
+  "capturedCommit": "8b86874a2daea49e3ff0fb53d699203146c5c77d",
+  "downloadedProjectCodeExecuted": false,
+  "environmentObserved": true,
+  "localPermissionDefectPaths": [
+    ".env",
+    "data",
+    ".runtime",
+    "output/dev-evidence/private"
+  ],
+  "nextReadyTask": "M0-04d local permission protection and verification",
+  "localDocLinks": 540,
+  "modelRequests": 0,
+  "changedOS": false,
+  "purchasedResources": false,
+  "remoteDeployed": false
+}

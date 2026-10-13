@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T12:49:28.200Z",
+  "modelRequests": 0,
+  "preservedUserSessions": 31,
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "service": {
+    "pid": 428,
+    "instanceId": "d0ad120e-5a31-4dee-a2d2-c1f43b582e09",
+    "launchId": "94bf8178-9d4d-4348-8a73-44719a45e548",
+    "creationUtc": "2026-10-06T12:48:52.0799450Z",
+    "url": "http://127.0.0.1:4310",
+    "owner": "local-service.ps1",
+    "workspace": "E:\\AI\\OS"
+  },
+  "finalDraftPreserved": true,
+  "chromeDesktopAnd390": true,
+  "pageErrors": 0,
+  "callCountersUnchanged": true,
+  "cleanupRestart": {
+    "reason": "PowerShell launcher output handles inherited by background service kept the owned verification parent alive; authenticated idle stop released handles and parent exited 0; restarted via direct owned launcher",
+    "priorPid": 37828,
+    "ownedVerificationExitCode": 0
+  },
+  "afterCleanupConnectionAndCanonicalDraftPreserved": true,
+  "finalDraftSha256": "d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931"
+}

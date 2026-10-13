@@ -1,0 +1,29 @@
+import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
+import {join,resolve,dirname} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {config} from '../../server/config.ts';
+const base='output/dev-evidence/',read=p=>readFileSync(p,'utf8').replace(/^\uFEFF/,''),json=p=>JSON.parse(read(p)),sha=v=>createHash('sha256').update(v).digest('hex'),target=base+'portable-deployment-final-audit.json';
+assert(!existsSync(target),'Do not repeat documentation mutation');
+const report=json(base+'verification/report.json');assert.equal(report.status,'passed');assert.equal(Object.keys(report.baseline).length,127);
+for(const [path,hash]of Object.entries(report.baseline))assert.equal(sha(readFileSync(path)),hash,path);
+for(const check of report.checks){assert.equal(check.exitCode,0);assert.equal(sha(readFileSync(base+'verification/'+check.name+'.log')),check.outputSha256);}
+const log=read(base+'verification/integration-tests.log');for(const pattern of [/tests 116\b/,/pass 116\b/,/fail 0\b/,/cancelled 0\b/,/skipped 0\b/])assert(pattern.test(log));
+for(const name of ['backup source dialect maps Windows and POSIX addresses','foreign backup paths restore native Run and binding'])assert(log.includes(name));
+const previous=json(base+'chatgpt-transfer-crash-final-audit.json');
+const historyFolders=readdirSync(base+'verification/history');const matching=historyFolders.filter(name=>{const p=base+'verification/history/'+name+'/report.json';return existsSync(p)&&sha(readFileSync(p))===previous.verificationSha256;});assert.equal(matching.length,1);const historical='verification/history/'+matching[0]+'/report.json';
+const product=json(base+'portable-deployment-production.json'),priorProduct=json(base+'chatgpt-transfer-crash-production.json');assert.equal(product.status,'passed');
+for(const key of ['instanceId','pid','creationUtc'])assert.equal(product.service[key],priorProduct.service[key]);
+for(const key of ['sessionFingerprintPreserved','callCountersUnchanged','canonicalDraftPreserved','ownLoginRetired'])assert.equal(product[key],true);assert.equal(product.preservedUserSessions,31);assert.equal(product.currentBrowserSessionReplaced,false);
+for(const name of ['transfer-recipient.json','transfer-outgoing.json','transfer-incoming.json','transfer-offer.json'])assert(!existsSync(join(config.dataDir,'private-model',name)));
+priorProduct.verification=historical;writeFileSync(base+'chatgpt-transfer-crash-production.json',JSON.stringify(priorProduct,null,2));previous.historicalVerification=historical;writeFileSync(base+'chatgpt-transfer-crash-final-audit.json',JSON.stringify(previous,null,2));
+const failure=json(base+'portable-backup-failure.json');assert.equal(failure.exitCode,1);assert.equal(failure.status,'reproduced-before-fix');
+const lead='038：[跨平台备份路径与云候选](iterations/038-portable-backup-and-cloud-candidates.md)修复按宿主规则重定位旧会话与前缀误判；实际本机恢复包/原生SDK重开及原件字节、两种路径语义和越界拒绝通过。116项完整工程、127文件通过。核对[云资源费用](云资源候选与费用.md)：DO基础33美元/月、AWS31美元/月，另计域名/税费/超额/实验。原主产品/连接/文章/31登录/用量/备份保持，零模型请求；未重启加载修复、未购买部署或真实两机迁移。完整M0/M1门槛保持。';
+function prepend(path,value){const text=read(path),i=text.indexOf('\n');writeFileSync(path,text.slice(0,i+1)+'\n'+value+'\n'+text.slice(i+1));}
+for(const path of ['doc/dev/current.md','doc/dev/backlog.md','doc/dev/acceptance.md'])prepend(path,lead);
+for(const [path,a,b]of [['doc/dev/current.md','- 114项测试、类型检查','- 116项测试、类型检查'],['doc/dev/backlog.md','| M0-07 | verifying | 01a至06 | 114项集成','| M0-07 | verifying | 01a至06 | 116项集成'],['doc/dev/acceptance.md','更新：2026-10-07。114项测试通过','更新：2026-10-07。116项测试通过'],['doc/dev/acceptance.md','113项为工程测试','116项为工程测试']])writeFileSync(path,read(path).replace(a,b));
+prepend('doc/README.md','最新执行：[038跨平台恢复修复](dev/iterations/038-portable-backup-and-cloud-candidates.md)、[云资源候选与费用](dev/云资源候选与费用.md)、[收尾审计](../output/dev-evidence/portable-deployment-final-audit.json)。116项工程通过；真实Linux/迁移、资源采购与完整M0/M1尚未完成。');
+prepend('doc/deployment.md','038修复[跨平台备份会话重定位](dev/iterations/038-portable-backup-and-cloud-candidates.md)，本机合成外来地址恢复与原生SDK通过；真实Linux与跨机器仍待验收。[公开资源报价](dev/云资源候选与费用.md)已核对，未购买或部署。');
+writeFileSync(target,JSON.stringify({status:'auditing'}));const docs=['README.md'];const walk=dir=>{for(const e of readdirSync(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory())walk(p);else if(p.endsWith('.md'))docs.push(p);}};walk('doc');walk('deployment');let links=0;
+for(const p of docs)for(const m of read(p).matchAll(/\]\(([^)]+)\)/g)){let ref=m[1].trim();if(/^(https?:|app:|codex:|#)/.test(ref))continue;ref=ref.replace(/^<|>$/g,'').split('#')[0];if(ref){assert(existsSync(resolve(dirname(p),ref)),p+' -> '+ref);links++;}}
+const result={at:new Date().toISOString(),status:'passed',engineeringFiles:127,tests:116,checks:report.checks.length,verificationSha256:sha(readFileSync(base+'verification/report.json')),priorVerification:historical,priorVerificationSha256:previous.verificationSha256,failurePreserved:true,portableBackupTests:2,actualBackupRestoreAndSdkReopen:true,foreignPathsSynthetic:true,linuxExecuted:false,crossMachine:false,mainServiceUnchanged:true,mainNewChangesLoaded:false,modelRequests:0,preservedUserSessions:31,sessionFingerprintPreserved:true,realAccountTransferRecordsAbsent:true,resourcesPurchased:false,publicDeployment:false,quoteCheckedDate:'2026-10-07',candidateBasicMonthlyUsd:{digitalOcean:24+40*0.10+5,awsLightsail:24+40*0.10+3},quoteScope:'public prices, not account order; excludes domain/tax/overage/lab/temporary recovery',localDocLinks:links,goalStatus:'active',remaining:['Resource selection/account access and purchase authorization','Actual Linux and filesystem quota/WAL','Real-account handoff/HTTPS/phone','Independent encrypted offsite restore','OS sleep/wake','Tencent isolated comparison and user feedback','M1 gate']};writeFileSync(target,JSON.stringify(result,null,2));console.log(JSON.stringify(result));

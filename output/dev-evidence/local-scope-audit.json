@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-07T05:16:37.421Z",
+  "status": "passed",
+  "scope": "User-directed local desktop first; remote requirements deferred, not passed",
+  "documents": 16,
+  "localDocumentLinks": 705,
+  "originalSnapshotsVerified": true,
+  "manifestSha256": "28a01d623530e315ba46f8fe6f39391a1e98a64b1ad7aa46860f33ab213c9413",
+  "engineeringBaselineUnchanged": true,
+  "engineeringFiles": 143,
+  "verificationSha256": "43ed46d3bac24f9817320cac265b0232e4d7ede1879f6a47c9797307d0830ea7",
+  "existingPassedTests": 128,
+  "freshTestsRun": false,
+  "productionService": {
+    "ready": true,
+    "pid": 52144,
+    "instanceId": "975f5a08-dbd3-44a0-b088-179895604ffa",
+    "launchId": "05233f80-59f9-40c2-a5b3-ac827a9d0699"
+  },
+  "productionRestarted": false,
+  "sourceEdited": false,
+  "modelRequestsByThisTurn": 0,
+  "cloudPurchased": false,
+  "networkConfigured": false,
+  "vmBooted": false,
+  "tencentExecuted": false,
+  "privateGpgAgentStopped": true,
+  "goalComplete": false,
+  "remainingLocal": [
+    "L-01 actual desktop user path",
+    "Windows login/default browser/sleep wake",
+    "Local disk/WAL and sustained usage boundaries",
+    "Real user task and feedback",
+    "M1 controlled subagents and plugin"
+  ],
+  "deferred": [
+    "R-01 real phone/private or cloud HTTPS",
+    "R-02 remote computer node",
+    "R-03 migration/offsite restore",
+    "R-04 real Linux deployment"
+  ],
+  "separateBlocked": "MEM-01 Tencent isolated experiment"
+}

@@ -1,0 +1,43 @@
+{
+  "status": "partial",
+  "iteration": "029",
+  "modelRequests": 0,
+  "engineeringChanged": false,
+  "defaultHttpBrowser": "ChromeHTML",
+  "actualOpenCommand": {
+    "entry": "scripts/open-workbench.ps1",
+    "exitCode": 0,
+    "state": "ready",
+    "browserRequested": true,
+    "url": "http://127.0.0.1:4310",
+    "servicePid": 47124
+  },
+  "actualBackendHealth": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8"
+  },
+  "actualSupervisor": {
+    "running": true,
+    "pid": 40816,
+    "instance": "7bb4d564-738b-4a45-8dab-6724dccc9dbc",
+    "restartCount": 0,
+    "state": "ready"
+  },
+  "windowsInventory": {
+    "app": "Chrome",
+    "windowId": 3280256,
+    "title": "工作台 / Studio - Google Chrome"
+  },
+  "browserConnector": "Chrome getState/getTab attempts reported nodeRepl.fetch request failed. Existing in-app tab remained accessible to selection, but its returned accessibility state only showed 正在连接工作台; that is not proof of successful page loading.",
+  "nativeObservation": {
+    "status": "stopped-by-policy",
+    "reason": "Computer Use could not determine the current browser URL on Windows with enough confidence to enforce policy.",
+    "screenshotReceived": false,
+    "pageContentVerified": false,
+    "furtherAppInput": false
+  },
+  "scope": "Actual default-browser launch command and window existence verified; workbench page contents, browser authentication, Windows logon and sleep/wake remain unproven. No authentication dialog automated, global credentials copied, browser security changed, model task submitted or product process restarted.",
+  "next": "Do not bypass the browser policy guard. Continue independent deployment work in later turns; page usability requires a working permitted browser connection or direct user feedback. Full M0/M1 remains incomplete."
+}

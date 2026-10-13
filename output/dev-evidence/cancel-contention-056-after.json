@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-07T07:34:13.159Z",
+  "status": "passed",
+  "scope": "Same 300ms real child writer scenario via the async cancellation entry used by HTTP; no model request",
+  "firstStatus": 200,
+  "firstCancelRecorded": true,
+  "lockHeldMs": 300,
+  "durationMs": 317,
+  "heartbeatTicks": 19,
+  "cancelEvents": 1,
+  "duplicateUnchanged": true,
+  "childPid": 31840,
+  "modelRequests": 0
+}

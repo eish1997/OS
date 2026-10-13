@@ -1,0 +1,20 @@
+{
+  "node": {
+    "version": "24.19.0",
+    "archive": "node-v24.19.0-linux-x64.tar.xz",
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.xz",
+    "sha256": "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647",
+    "checksumSource": "https://nodejs.org/dist/v24.19.0/SHASUMS256.txt",
+    "checksumFetchedOverHttps": true,
+    "archiveDownloaded": true,
+    "signatureVerified": false,
+    "linuxExecuted": false,
+    "downloadEvidence": "../../output/dev-evidence/linux-runtime-download.json"
+  },
+  "buildNpm": {
+    "version": "11.21.0",
+    "integrity": "sha512-Zov8KhamNneiLdELtj5YALtNmJW4L4fCLTzjfpzXG2w6MSHcf0UxgdlK5uloCuksWT+7mGUU7wi79cO6RqivPg=="
+  },
+  "caddyLock": "../caddy-lock.json",
+  "acceptance": "Prepared, not installed or run under Linux"
+}

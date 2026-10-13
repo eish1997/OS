@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {resolve} from 'node:path';
+import {readFileSync,writeFileSync} from 'node:fs';
+const root=process.cwd(),shell=resolve(process.env.SystemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe');
+const invoke=(exe,args)=>new Promise((done,reject)=>{const child=spawn(exe,args,{windowsHide:true,stdio:['ignore','pipe','pipe']});let out='',err='';child.stdout.on('data',v=>out+=String(v));child.stderr.on('data',v=>err+=String(v));child.once('error',reject);child.once('exit',code=>{child.stdout.destroy();child.stderr.destroy();try{code===0?done(JSON.parse(out.trim())):reject(new Error(err));}catch(error){reject(error);}});});
+const entries=await invoke(shell,['-NoProfile','-ExecutionPolicy','Bypass','-File',resolve(root,'scripts/desktop-entry.ps1'),'-Action','status','-ShortcutDir',resolve(process.env.USERPROFILE,'Desktop')]);
+assert(entries.startupConfigured&&entries.entries.every(e=>e.owned&&e.exists&&e.windowStyle===7));
+const split=args=>args.match(/"[^"]*"|\S+/g).map(s=>s.startsWith('"')?s.slice(1,-1):s);
+const auto=entries.entries.find(e=>e.kind==='startup'),open=entries.entries.find(e=>e.kind==='open');
+assert.equal(auto.target.toLowerCase(),shell.toLowerCase());assert.equal(open.target.toLowerCase(),shell.toLowerCase());
+const started=await invoke(auto.target,split(auto.arguments));assert.equal(started.state,'ready');assert.equal(started.servicePid,47124);
+const opened=await invoke(open.target,[...split(open.arguments),'-NoBrowser']);assert.equal(opened.state,'ready');assert.equal(opened.servicePid,47124);assert.equal(opened.browserRequested,false);
+const status=await invoke(shell,['-NoProfile','-ExecutionPolicy','Bypass','-File',resolve(root,'scripts/supervise-service.ps1'),'-Action','status']);assert(status.running&&status.state==='ready');assert.equal(status.pid,started.pid);
+const profile=JSON.parse(readFileSync(resolve(root,'.runtime/supervisor-workbench.json'),'utf8').replace(/^\uFEFF/,''));
+const result={status:'passed',at:new Date().toISOString(),modelRequests:0,desktopShortcut:open,startupShortcut:auto,currentUserStartupConfigured:true,actualStoredStartupCommandExitCode:0,actualStoredOpenCommandExitCode:0,headlessOpen:opened,supervisor:{...status,creationUtc:profile.creationUtc,intervalMs:profile.intervalMs},servicePidUnchanged:47124,realWindowsLogonObserved:false,defaultBrowserObserved:false,scope:'Real current-user shortcut configuration and actual invocation of their stored commands; open command uses NoBrowser to preserve the active browser. Does not prove a physical login/reboot or default-browser UI.'};
+writeFileSync(resolve(root,'output/dev-evidence/desktop-entry.json'),JSON.stringify(result,null,2));console.log(JSON.stringify({status:result.status,desktop:open.path,startupConfigured:true,supervisor:result.supervisor,modelRequests:0}));

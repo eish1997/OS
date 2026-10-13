@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-06T17:07:14.667Z",
+  "status": "passed",
+  "unchangedEngineeringFiles": 107,
+  "unchangedTestBaseline": 108,
+  "baselineAt": "2026-10-06T16:40:51.530Z",
+  "baselineReportSha256": "a878dbf0ca2370df0b97eaca2dc0165b3ddf696b33f4b1bfd2d6c6744f6fcbd9",
+  "newProbe": "scripts/probe-node-reconnect.ts",
+  "newProbeSha256": "98f4069672f11a836f7454348b3e25d19559dce5ad1dc07335bd6d4f37260f42",
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0,
+    "stdout": "",
+    "evidence": "Actual tool command completed before probe exit; no subsequent engineering edit"
+  },
+  "actualProbe": "passed",
+  "actualProbeSha256": "a098e55e0ee1333671ec0f703d889e2ac7aace130061867b06b7a0dfea37be60",
+  "modelRequests": 0
+}

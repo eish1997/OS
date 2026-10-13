@@ -1,0 +1,8 @@
+{
+  "paused": false,
+  "dropRequests": false,
+  "reads": 31,
+  "writes": 0,
+  "proxyRequests": 31,
+  "backendPid": 49088
+}

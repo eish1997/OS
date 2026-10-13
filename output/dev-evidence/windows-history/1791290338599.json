@@ -1,0 +1,43 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T12:37:22.232Z",
+  "modelRequests": 0,
+  "workspace": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-21d68e20-28d5-438a-b130-cebb596e2e0a\\中文 工作台",
+  "data": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-21d68e20-28d5-438a-b130-cebb596e2e0a\\项目 数据",
+  "restored": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-21d68e20-28d5-438a-b130-cebb596e2e0a\\恢复 数据",
+  "backupRoot": "C:\\Users\\15128\\AI-OS-Backups\\windows-probes\\21d68e20-28d5-438a-b130-cebb596e2e0a\\备份 空间",
+  "nodeDirectory": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-21d68e20-28d5-438a-b130-cebb596e2e0a\\电脑 节点",
+  "scope": "Full code and installed dependency copy, actual PowerShell build/start/stop/restart, fixture worker/node CLI, daily backup and manual clean restore; primary product untouched",
+  "previousGoalTurn": "no progress; revalidated current files and selected available Windows deployment gate",
+  "step": "managed-start-reuse-and-actual-http",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 48304,
+    "instanceId": "3ee0a995-12fa-401f-84cd-4dd1bddf36c0",
+    "launchId": "40a4e813-c438-42cf-8aa9-c6f3c6eebce9"
+  },
+  "dependencyCopy": {
+    "files": 17089,
+    "bytes": 201755381,
+    "hash": "7102cd9f2cdf6cdcaae896ce4ed67ae61958ba157a56cb440bf3a58e386d9031"
+  },
+  "codeFilesCopied": [
+    "server",
+    "shared",
+    "src",
+    "scripts",
+    "tests",
+    "doc"
+  ],
+  "credentialAndDataCopyExcluded": true,
+  "copiedBuildAndOfflinePi": false,
+  "nativeSeed": {
+    "runId": "ae2a0391-a82c-49cc-b518-d31d987c8668",
+    "sessionId": "01a11138-5b88-71f9-8a24-3f3d81c91a87",
+    "sessionHash": "3379109a4ce85b764229636e31d14a4549a8b6eb6e623c8c6a241d188c8eba42",
+    "projectId": "228a6826-97a3-4c43-b538-4db7496d5f0a"
+  },
+  "reason": "Owned deployment command failed; private diagnostic retained: undefined",
+  "validationCorrection": "First isolated environment omitted PATHEXT; PowerShell did not execute native binaries. Original preliminary build claim invalidated; follow-up checks require emitted dist and probe receipt.",
+  "previousBuildArtifactsPresent": false
+}

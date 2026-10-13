@@ -1,0 +1,751 @@
+{
+  "repository": "TencentCloud/TencentDB-Agent-Memory",
+  "commit": "8b86874a2daea49e3ff0fb53d699203146c5c77d",
+  "capturedAt": "2026-10-06T17:10:23.731656+00:00",
+  "executedCode": false,
+  "installed": false,
+  "files": [
+    {
+      "path": "deploy/global-images/.env.example",
+      "file": "deploy__global-images__.env.example",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/.env.example",
+      "sha256": "eb9f4d52cb3b0414fa069f65cd539ec144cbd6a08ac90b753d3d9099e82fe0cd",
+      "captureFile": ".env.example.source.txt",
+      "origin": "verified-original-capture"
+    },
+    {
+      "path": "deploy/global-images/start-all.sh",
+      "file": "deploy__global-images__start-all.sh",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/start-all.sh",
+      "sha256": "f586edda5901eda28ef3788fe97f64724434be2e554c285750086d4f3d57c98e",
+      "captureFile": "start-all.sh.source.txt",
+      "origin": "verified-original-capture"
+    },
+    {
+      "path": "deploy/global-images/_lib.sh",
+      "captureFile": "_lib.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/_lib.sh",
+      "sha256": "0ddd1a8abde29ca3520bfbc01a13db1e6380d73886dbea5866cc3a62b9c604f0",
+      "bytes": 19129,
+      "origin": "fixed-revision-download"
+    },
+    {
+      "path": "deploy/global-images/start-memory-core.sh",
+      "captureFile": "start-memory-core.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/start-memory-core.sh",
+      "sha256": "6087f794651db325a3e04a35c139e3c82a94ce2c9f5ffa5f9fbcac3637a65ffb",
+      "bytes": 13638,
+      "origin": "fixed-revision-download"
+    },
+    {
+      "path": "deploy/global-images/start-memory-hub.sh",
+      "captureFile": "start-memory-hub.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/start-memory-hub.sh",
+      "sha256": "a97f0784681e1f072367e77860b4999882f0141c88f6c5c54c5cc325c3d95bd4",
+      "bytes": 5098,
+      "origin": "fixed-revision-download"
+    },
+    {
+      "path": "deploy/global-images/start-proxy.sh",
+      "captureFile": "start-proxy.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/start-proxy.sh",
+      "sha256": "436b167c9ea46c07520cbb66c9e63945cc149fcffef318e306bbaf022f98e97e",
+      "bytes": 5367,
+      "origin": "fixed-revision-download"
+    },
+    {
+      "path": "deploy/global-images/stop-all.sh",
+      "captureFile": "stop-all.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/stop-all.sh",
+      "sha256": "267f16751b97c7af68653fa8843d4026196a561bd8dff8ef2c56a3bb4c52e5ed",
+      "bytes": 2384,
+      "origin": "fixed-revision-download"
+    },
+    {
+      "path": "deploy/global-images/verify.sh",
+      "captureFile": "verify.sh.source.txt",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/verify.sh",
+      "sha256": "fba5daf00890cd333307a865a2804407ab2c490fbb0318535100b14e14f1d544",
+      "bytes": 11138,
+      "origin": "fixed-revision-download"
+    }
+  ],
+  "failures": {},
+  "references": [
+    {
+      "file": ".env.example",
+      "line": 7,
+      "text": "#   ./start-all.sh"
+    },
+    {
+      "file": ".env.example",
+      "line": 16,
+      "text": "# 默认走 Docker Hub 公开镜像（多架构 amd64 + arm64，docker pull 无需登录）："
+    },
+    {
+      "file": ".env.example",
+      "line": 17,
+      "text": "#   https://hub.docker.com/r/agentmemory/memory-core"
+    },
+    {
+      "file": ".env.example",
+      "line": 18,
+      "text": "#   https://hub.docker.com/r/agentmemory/memory-proxy"
+    },
+    {
+      "file": ".env.example",
+      "line": 19,
+      "text": "#   https://hub.docker.com/r/agentmemory/memory-hub"
+    },
+    {
+      "file": ".env.example",
+      "line": 22,
+      "text": "# 想拉最新的一版，用 `PULL=1 ./start-all.sh`。"
+    },
+    {
+      "file": ".env.example",
+      "line": 29,
+      "text": "# 走公网 Docker Hub。使用前先 `docker login mirrors.tencent.com`。"
+    },
+    {
+      "file": ".env.example",
+      "line": 55,
+      "text": "# 本地场景默认用 host.docker.internal 让容器内可回环到宿主。"
+    },
+    {
+      "file": ".env.example",
+      "line": 56,
+      "text": "KNOWLEDGE_PUBLIC_BASE_URL=http://host.docker.internal:8424/v3"
+    },
+    {
+      "file": ".env.example",
+      "line": 80,
+      "text": "# ./start-all-mongo.sh，它会把 MEMORY_CORE_STORE_MODE=mongodb 写入本文件"
+    },
+    {
+      "file": ".env.example",
+      "line": 81,
+      "text": "# 并复用 start-all.sh 的全部流程（本行保持注释即可）。"
+    },
+    {
+      "file": ".env.example",
+      "line": 82,
+      "text": "# 只有已经启用过、或想用 ./start-all.sh 直接走 mongo 时，才取消下面这行的注释："
+    },
+    {
+      "file": ".env.example",
+      "line": 90,
+      "text": "# （mongod + mongot 一体，数据卷 mongo-local-* 持久化，stop-all.sh --purge 会一并清理）："
+    },
+    {
+      "file": ".env.example",
+      "line": 106,
+      "text": "#                    仅在此配置下能与 memory-core 直连，见 start-memory-core.sh 顶部注释）"
+    },
+    {
+      "file": "start-all.sh",
+      "line": 8,
+      "text": "#   ./start-all.sh            # 交互式引导填写 LLM（回车保留当前值），自动检查通路，通过后一键起"
+    },
+    {
+      "file": "start-all.sh",
+      "line": 9,
+      "text": "#   PULL=1 ./start-all.sh     # 先 docker pull 三个镜像，升级到最新 latest"
+    },
+    {
+      "file": "start-all.sh",
+      "line": 19,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "start-all.sh",
+      "line": 20,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "start-all.sh",
+      "line": 47,
+      "text": "\"$SCRIPT_DIR/start-memory-core.sh\""
+    },
+    {
+      "file": "start-all.sh",
+      "line": 50,
+      "text": "\"$SCRIPT_DIR/start-memory-hub.sh\""
+    },
+    {
+      "file": "start-all.sh",
+      "line": 55,
+      "text": "PROXY_FULL_STACK=\"${PROXY_FULL_STACK:-1}\" \"$SCRIPT_DIR/start-proxy.sh\""
+    },
+    {
+      "file": "start-all.sh",
+      "line": 75,
+      "text": "echo \"  查看日志：  docker logs -f tdai-memory-core | tdai-memory-hub | tdai-proxy\""
+    },
+    {
+      "file": "start-all.sh",
+      "line": 76,
+      "text": "echo \"  停止服务：  ./stop-all.sh\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 3,
+      "text": "# 由 start-*.sh 通过 `source _lib.sh` 引入，不单独执行。"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 29,
+      "text": "  source \"$ENV_FILE\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 51,
+      "text": "# 找到可用 docker 命令（兼容 Homebrew 独立安装 + colima）"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 52,
+      "text": "# 优先级：PATH 中的 docker → Homebrew apple silicon → Homebrew intel → /usr/local"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 55,
+      "text": "  if command -v docker >/dev/null 2>&1; then"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 56,
+      "text": "    echo \"docker\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 60,
+      "text": "  for prefix in /opt/homebrew/Cellar/docker /usr/local/Cellar/docker; do"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 63,
+      "text": "      if [[ -n \"$candidate\" && -x \"$prefix/$candidate/bin/docker\" ]]; then"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 64,
+      "text": "        echo \"$prefix/$candidate/bin/docker\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 69,
+      "text": "  for path in /opt/homebrew/bin/docker /usr/local/bin/docker; do"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 75,
+      "text": "  die \"找不到 docker 命令。请先安装 Docker Desktop / OrbStack / colima + docker CLI。\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 81,
+      "text": "# 默认关闭：docker run 在本地没有镜像时会自动拉，但本地已有同名 :latest 时会直接复用，"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 95,
+      "text": "    $DOCKER rm -f \"$name\" >/dev/null"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 153,
+      "text": "# LLM 通路检查（与 verify.sh 同源逻辑；供 start-all.sh 交互式流程复用）"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 156,
+      "text": "CURL=\"${CURL:-/usr/bin/curl}\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 158,
+      "text": "  if command -v curl >/dev/null 2>&1; then"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 159,
+      "text": "    CURL=\"$(command -v curl)\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 161,
+      "text": "    CURL=\"curl\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 189,
+      "text": "    rm -f \"$body_file\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 196,
+      "text": "  rm -f \"$body_file\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 242,
+      "text": "  rm -f \"$body_file\""
+    },
+    {
+      "file": "_lib.sh",
+      "line": 316,
+      "text": "    awk -v k=\"$key\" -v v=\"$value\" '"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 334,
+      "text": "    if command -v openssl >/dev/null 2>&1; then"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 429,
+      "text": "  if command -v lsof >/dev/null 2>&1; then"
+    },
+    {
+      "file": "_lib.sh",
+      "line": 431,
+      "text": "  elif command -v ss >/dev/null 2>&1; then"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 6,
+      "text": "#   ./start-memory-core.sh"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 13,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 14,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 41,
+      "text": "  info \"创建 docker 网络 $NETWORK\""
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 82,
+      "text": "        --network \"$NETWORK\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 83,
+      "text": "        --network-alias mongo-search \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 84,
+      "text": "        -v mongo-local-db:/data/db \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 85,
+      "text": "        -v mongo-local-configdb:/data/configdb \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 86,
+      "text": "        -v mongo-local-mongot:/data/mongot \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 94,
+      "text": "      if $DOCKER exec \"$MONGO_LOCAL_CONTAINER\" mongosh --quiet --eval \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 100,
+      "text": "    [[ \"$mongo_ready\" == \"1\" ]] || die \"mongo 容器 60s 内未就绪，docker logs $MONGO_LOCAL_CONTAINER 排查\""
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 128,
+      "text": "mkdir -p \"$CORE_CONFIG_DIR\""
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 132,
+      "text": "# 由 start-memory-core.sh 自动生成 —— 每次启动覆盖，请不要手动改。"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 177,
+      "text": "  # gateway 形态下存储后端实际由 STORE_MODE 环境变量决定（见 docker run -e STORE_MODE），"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 205,
+      "text": "  --network \"$NETWORK\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 206,
+      "text": "  --network-alias memory-core \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 207,
+      "text": "  -p \"${MEMORY_CORE_PORT}:8420\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 208,
+      "text": "  -v \"${MEMORY_CORE_VOLUME}:/data/tdai-memory\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 209,
+      "text": "  -v \"$CORE_CONFIG_FILE:/data/config/tdai-gateway.yaml:ro\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 235,
+      "text": "  if command -v openssl >/dev/null 2>&1; then"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 247,
+      "text": "  code=$(/usr/bin/curl -sS -o /dev/null -w \"%{http_code}\" --max-time 5 \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 268,
+      "text": "init_resp=$(/usr/bin/curl -sS -o /tmp/init-admin.$$ -w \"%{http_code}\" \\"
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 288,
+      "text": "      warn \"选项 A: 清理 volume 重建 —— ./stop-all.sh --purge && ./start-memory-core.sh\""
+    },
+    {
+      "file": "start-memory-core.sh",
+      "line": 297,
+      "text": "rm -f /tmp/init-admin.$$"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 9,
+      "text": "#   ./start-memory-hub.sh"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 16,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 17,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 45,
+      "text": "  if command -v hostname >/dev/null 2>&1; then"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 50,
+      "text": "  if command -v ipconfig >/dev/null 2>&1; then"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 57,
+      "text": "  if command -v ip >/dev/null 2>&1; then"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 76,
+      "text": "  info \"创建 docker 网络 $NETWORK\""
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 83,
+      "text": "  warn \"建议先 ./start-memory-core.sh 再来这里，或直接 ./start-all.sh\""
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 93,
+      "text": "  --network \"$NETWORK\" \\"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 94,
+      "text": "  --network-alias memory-hub \\"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 95,
+      "text": "  --add-host=host.docker.internal:host-gateway \\"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 96,
+      "text": "  -p \"${PANEL_PORT}:8125\" \\"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 97,
+      "text": "  -p \"${KNOWLEDGE_PORT}:8424\" \\"
+    },
+    {
+      "file": "start-memory-hub.sh",
+      "line": 98,
+      "text": "  -v \"${PANEL_VOLUME}:/data/knowledge\" \\"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 9,
+      "text": "#   ./start-proxy.sh"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 16,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 17,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 31,
+      "text": "  info \"创建 docker 网络 $NETWORK\""
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 50,
+      "text": "mkdir -p \"$CONFIG_DIR\""
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 78,
+      "text": "# 由 start-proxy.sh 自动生成 —— 每次启动覆盖，请不要手动改。"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 154,
+      "text": "  --network \"$NETWORK\" \\"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 155,
+      "text": "  --network-alias proxy \\"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 156,
+      "text": "  --add-host=host.docker.internal:host-gateway \\"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 157,
+      "text": "  -p \"${PROXY_PORT}:8096\" \\"
+    },
+    {
+      "file": "start-proxy.sh",
+      "line": 158,
+      "text": "  -v \"$CONFIG_FILE:/data/config.yaml:ro\" \\"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 5,
+      "text": "#   ./stop-all.sh              # 停容器，保留 volume（数据保留）"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 6,
+      "text": "#   ./stop-all.sh --purge      # 停容器 + 删 volume + 删网络（彻底清理）"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 10,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 11,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 20,
+      "text": "  set -a; source \"$ENV_FILE\"; set +a"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 29,
+      "text": "    $DOCKER rm -f \"$c\" >/dev/null"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 39,
+      "text": "      $DOCKER volume rm \"$v\" >/dev/null && ok \"已删除 volume $v\" || warn \"删除 volume $v 失败\""
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 43,
+      "text": "    $DOCKER network rm tdai-memory-stack >/dev/null && ok \"已删除网络 tdai-memory-stack\" || true"
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 49,
+      "text": "    rm -f \"$ADMIN_KEY_FILE\" && ok \"已删除 admin key 文件 $ADMIN_KEY_FILE\""
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 54,
+      "text": "    rm -rf \"$PROXY_CFG_DIR\" && ok \"已删除 proxy config 目录 $PROXY_CFG_DIR\""
+    },
+    {
+      "file": "stop-all.sh",
+      "line": 58,
+      "text": "    rm -rf \"$CORE_CFG_DIR\" && ok \"已删除 memory-core config 目录 $CORE_CFG_DIR\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 5,
+      "text": "#   ./verify.sh               # 默认全检（含 LLM 通路预检）"
+    },
+    {
+      "file": "verify.sh",
+      "line": 6,
+      "text": "#   ./verify.sh --skip-llm    # 跳过 LLM 检查（离线环境或不希望发外部请求时用）"
+    },
+    {
+      "file": "verify.sh",
+      "line": 9,
+      "text": "#   1. docker 命令可用"
+    },
+    {
+      "file": "verify.sh",
+      "line": 17,
+      "text": "#      - 若容器已运行，额外 docker exec 从容器内再打一次（验证容器 → LLM 网络可达）"
+    },
+    {
+      "file": "verify.sh",
+      "line": 23,
+      "text": "# shellcheck source=./_lib.sh"
+    },
+    {
+      "file": "verify.sh",
+      "line": 24,
+      "text": "source \"$SCRIPT_DIR/_lib.sh\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 40,
+      "text": "CURL=/usr/bin/curl"
+    },
+    {
+      "file": "verify.sh",
+      "line": 64,
+      "text": "    rm -f \"$body_file\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 69,
+      "text": "    rm -f \"$body_file\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 75,
+      "text": "    rm -f \"$body_file\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 79,
+      "text": "    rm -f \"$body_file\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 109,
+      "text": "      rm -f \"$body_file\"; return 0 ;;"
+    },
+    {
+      "file": "verify.sh",
+      "line": 113,
+      "text": "      rm -f \"$body_file\"; return 1 ;;"
+    },
+    {
+      "file": "verify.sh",
+      "line": 116,
+      "text": "      rm -f \"$body_file\"; return 1 ;;"
+    },
+    {
+      "file": "verify.sh",
+      "line": 121,
+      "text": "        rm -f \"$body_file\"; return 1"
+    },
+    {
+      "file": "verify.sh",
+      "line": 124,
+      "text": "      rm -f \"$body_file\"; return 0 ;;"
+    },
+    {
+      "file": "verify.sh",
+      "line": 127,
+      "text": "      rm -f \"$body_file\"; return 1 ;;"
+    },
+    {
+      "file": "verify.sh",
+      "line": 141,
+      "text": "# 容器内 curl 验证（可选，容器已运行时才做）"
+    },
+    {
+      "file": "verify.sh",
+      "line": 155,
+      "text": "      code=$($DOCKER exec \"$container\" curl -sS -o /dev/null --max-time 15 \\"
+    },
+    {
+      "file": "verify.sh",
+      "line": 164,
+      "text": "      code=$($DOCKER exec \"$container\" curl -sS -o /dev/null --max-time 10 \\"
+    },
+    {
+      "file": "verify.sh",
+      "line": 176,
+      "text": "# 1. docker"
+    },
+    {
+      "file": "verify.sh",
+      "line": 177,
+      "text": "if command -v \"$DOCKER\" >/dev/null 2>&1 || [[ -x \"$DOCKER\" ]]; then"
+    },
+    {
+      "file": "verify.sh",
+      "line": 178,
+      "text": "  ok \"docker 可用: $DOCKER\""
+    },
+    {
+      "file": "verify.sh",
+      "line": 181,
+      "text": "  echo \"${C_RED}[error]${C_RST} docker 不可用\" >&2"
+    },
+    {
+      "file": "verify.sh",
+      "line": 190,
+      "text": "  set -a; source \"$ENV_FILE\"; set +a"
+    },
+    {
+      "file": "verify.sh",
+      "line": 281,
+      "text": "  echo \"${C_GRN}✓ 全部检查通过 —— 可以直接 ./start-all.sh${C_RST}\""
+    }
+  ],
+  "limits": {
+    "files": 24,
+    "fileBytes": 1048576
+  },
+  "limitation": "Text references include comments; not a formal complete shell execution graph or container image audit"
+}

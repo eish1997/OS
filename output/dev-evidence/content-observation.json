@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T11:47:07.371Z",
+  "modelRequests": 0,
+  "projectId": "988a40a4-7bc0-4677-9337-e798df54fd26",
+  "runIds": [
+    "8d161561-d227-46a6-81d7-2d9146847504",
+    "ee1bd850-c899-459d-95df-86644ada8d39",
+    "909aaa90-9854-4950-8959-f170ae895b92"
+  ],
+  "checks": [
+    "completed exact runs and full usage",
+    "workers gone and operations complete",
+    "native source hashes unchanged",
+    "current preferences and fixed summary",
+    "source bytes/hash and report/draft lineage",
+    "export bytes unchanged",
+    "Chrome desktop and 390 final draft"
+  ]
+}

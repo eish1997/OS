@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T12:12:06.484Z",
+  "modelRequests": 0,
+  "service": {
+    "pid": 48304,
+    "instanceId": "3ee0a995-12fa-401f-84cd-4dd1bddf36c0",
+    "launchId": "40a4e813-c438-42cf-8aa9-c6f3c6eebce9",
+    "creationUtc": "2026-10-06T12:10:54.9637540Z"
+  },
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "finalDraftPreserved": true,
+  "chromeDesktopAnd390": true,
+  "pageErrors": 0
+}

@@ -1,0 +1,38 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:26:36.596Z",
+  "modelRequests": 0,
+  "before": {
+    "assetsMs": 170800.6126,
+    "seedMs": 172373.085,
+    "writeMedianMs": 249.7560999999987,
+    "writeP95Ms": 511.9006999999983,
+    "writeMaxMs": 721.2724999999919,
+    "maxPrimaryHealthMs": 46.93210000000545,
+    "primaryHealthSamples": 639,
+    "usageBytes": 776142217,
+    "maxRssKiB": 397588
+  },
+  "after": {
+    "assetsMs": 119315.8077,
+    "seedMs": 120993.1084,
+    "writeMedianMs": 164.92589999999473,
+    "writeP95Ms": 354.554999999993,
+    "writeMaxMs": 596.3475000000035,
+    "maxPrimaryHealthMs": 37.895400000001246,
+    "primaryHealthSamples": 454,
+    "usageBytes": 776138121,
+    "maxRssKiB": 375604
+  },
+  "assetManifestMatched": true,
+  "verifiedHashesPerDataset": 661,
+  "assetBytes": 522977325,
+  "seedReductionPercent": 29.807424169498386,
+  "sourceTypeCorrection": "batch-write-type-correction.json",
+  "limitations": [
+    "One fresh before/after workload each, not statistical repeats",
+    "Own direct app writes, not production HTTP write latency",
+    "Original 021 seedMs included different backup setup; use this fresh pair for comparison",
+    "Large-body search 2057ms and production/remote/Tencent/M1 gates remain"
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+data/
+.runtime/
+output/dev-evidence/private/
+*.log
+/打开工作台.lnk

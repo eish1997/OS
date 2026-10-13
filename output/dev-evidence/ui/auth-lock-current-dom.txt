@@ -1,0 +1,150 @@
+- banner:
+  - button "S·"
+  - button "工作台" [active]
+  - button "腾讯 Memory 验证"
+  - button "关闭 腾讯 Memory 验证 标签": ×
+  - generic: ●
+  - text: 已连接
+- complementary:
+  - generic: YOUR STUDIO
+  - navigation:
+    - button "▦ 项目":
+      - generic: ▦
+      - text: 项目
+    - button ">_ 收件箱 2":
+      - generic: ">_"
+      - text: 收件箱
+      - generic: "2"
+    - button "◇ 记忆":
+      - generic: ◇
+      - text: 记忆
+    - button "⚙ 设置":
+      - generic: ⚙
+      - text: 设置
+  - generic: OPEN PROJECTS
+  - button "└ 腾讯 Memory 验证":
+    - generic: └
+    - text: 腾讯 Memory 验证
+  - generic: "[ 00 ]"
+  - generic: 项任务等待或执行
+  - button "退出登录 ↗"
+- main:
+  - generic: WORKSPACE / OVERVIEW
+  - heading "你的工作室" [level=1]
+  - paragraph: 让想法成为项目，让过程留下成果。
+  - button "＋ 新建项目"
+  - text: PROJECTS
+  - generic: / 10
+  - textbox "搜索项目":
+    - /placeholder: 搜索项目 /
+  - button "固定数据图表.svg 腾讯 Memory 验证 ↗ 验证 Pi 助手的长期记忆：准确召回、来源追溯、纠正与隔离，形成报告和文章。 执行结束 17 资产":
+    - img "固定数据图表.svg"
+    - heading "腾讯 Memory 验证 ↗" [level=2]:
+      - text: 腾讯 Memory 验证
+      - generic: ↗
+    - paragraph: 验证 Pi 助手的长期记忆：准确召回、来源追溯、纠正与隔离，形成报告和文章。
+    - generic: 执行结束
+    - generic: 17 资产
+  - button "[02] assets/ ├─ pi-probe.md └─ 1 个真实资产 REAL OUTPUT Pi 真实接口探针 ↗ 非敏感固定输入；只允许write_asset，不读取其他项目或网络。 执行结束 1 资产":
+    - generic: "[02]"
+    - generic: assets/ ├─ pi-probe.md └─ 1 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 真实接口探针 ↗" [level=2]:
+      - text: Pi 真实接口探针
+      - generic: ↗
+    - paragraph: 非敏感固定输入；只允许write_asset，不读取其他项目或网络。
+    - generic: 执行结束
+    - generic: 1 资产
+  - button "[03] assets/ ├─ 保留检查点.md └─ 3 个真实资产 REAL OUTPUT Pi 停止控制验证 ↗ 固定无敏感输入：取消/超时及保留成果验证。 失败 3 资产":
+    - generic: "[03]"
+    - generic: assets/ ├─ 保留检查点.md └─ 3 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 停止控制验证 ↗" [level=2]:
+      - text: Pi 停止控制验证
+      - generic: ↗
+    - paragraph: 固定无敏感输入：取消/超时及保留成果验证。
+    - generic: 失败
+    - generic: 3 资产
+  - button "[04] assets/ ├─ 保留检查点.md └─ 3 个真实资产 REAL OUTPUT Pi 停止控制验证 ↗ 固定无敏感输入：取消/超时及保留成果验证。 失败 3 资产":
+    - generic: "[04]"
+    - generic: assets/ ├─ 保留检查点.md └─ 3 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 停止控制验证 ↗" [level=2]:
+      - text: Pi 停止控制验证
+      - generic: ↗
+    - paragraph: 固定无敏感输入：取消/超时及保留成果验证。
+    - generic: 失败
+    - generic: 3 资产
+  - button "[05] assets/ ├─ session-first.md └─ 2 个真实资产 REAL OUTPUT Pi 会话接续验证 ↗ 固定无敏感随机标记；验证服务重启后原生会话接续与写入不重放。 执行结束 2 资产":
+    - generic: "[05]"
+    - generic: assets/ ├─ session-first.md └─ 2 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 会话接续验证 ↗" [level=2]:
+      - text: Pi 会话接续验证
+      - generic: ↗
+    - paragraph: 固定无敏感随机标记；验证服务重启后原生会话接续与写入不重放。
+    - generic: 执行结束
+    - generic: 2 资产
+  - button "[06] assets/ ├─ checkpoint.md └─ 2 个真实资产 REAL OUTPUT Pi 中断恢复验证 ↗ 非敏感随机标记；只在本工程项目执行，不修改用户项目。 执行结束 2 资产":
+    - generic: "[06]"
+    - generic: assets/ ├─ checkpoint.md └─ 2 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 中断恢复验证 ↗" [level=2]:
+      - text: Pi 中断恢复验证
+      - generic: ↗
+    - paragraph: 非敏感随机标记；只在本工程项目执行，不修改用户项目。
+    - generic: 执行结束
+    - generic: 2 资产
+  - button "[07] assets/ ├─ checkpoint.md └─ 2 个真实资产 REAL OUTPUT Pi 排队追问验证 ↗ 非敏感随机标记；只在本工程项目执行，不修改用户项目。 执行结束 2 资产":
+    - generic: "[07]"
+    - generic: assets/ ├─ checkpoint.md └─ 2 个真实资产
+    - generic: REAL OUTPUT
+    - heading "Pi 排队追问验证 ↗" [level=2]:
+      - text: Pi 排队追问验证
+      - generic: ↗
+    - paragraph: 非敏感随机标记；只在本工程项目执行，不修改用户项目。
+    - generic: 执行结束
+    - generic: 2 资产
+  - button "固定数据图表.svg 排队验证的独立工程项目 ↗ 固定资料计算，不调用模型。 执行结束 2 资产":
+    - img "固定数据图表.svg"
+    - heading "排队验证的独立工程项目 ↗" [level=2]:
+      - text: 排队验证的独立工程项目
+      - generic: ↗
+    - paragraph: 固定资料计算，不调用模型。
+    - generic: 执行结束
+    - generic: 2 资产
+  - button "[09] assets/ ├─ 四周固定资料.md └─ 4 个真实资产 REAL OUTPUT 资料到文章 · AI闭环验证 ↗ 合成资料；真实Pi使用记忆、提出摘要、形成草稿及偏好修正/删除。 执行结束 4 资产":
+    - generic: "[09]"
+    - generic: assets/ ├─ 四周固定资料.md └─ 4 个真实资产
+    - generic: REAL OUTPUT
+    - heading "资料到文章 · AI闭环验证 ↗" [level=2]:
+      - text: 资料到文章 · AI闭环验证
+      - generic: ↗
+    - paragraph: 合成资料；真实Pi使用记忆、提出摘要、形成草稿及偏好修正/删除。
+    - generic: 执行结束
+    - generic: 4 资产
+  - button "[10] workspace/ ├─ 目标 └─ 等待第一份成果 EMPTY WORKSPACE 隔离验证 · 其他项目 ↗ 仅用于校验记忆不会串入文章。 准备开始 0 资产":
+    - generic: "[10]"
+    - generic: workspace/ ├─ 目标 └─ 等待第一份成果
+    - generic: EMPTY WORKSPACE
+    - heading "隔离验证 · 其他项目 ↗" [level=2]:
+      - text: 隔离验证 · 其他项目
+      - generic: ↗
+    - paragraph: 仅用于校验记忆不会串入文章。
+    - generic: 准备开始
+    - generic: 0 资产
+  - button "[ + ] 下一个想法 研究、实验，或一份新的作品。":
+    - generic: "[ + ]"
+    - heading "下一个想法" [level=2]
+    - paragraph: 研究、实验，或一份新的作品。
+  - generic: IDEA → EVIDENCE → OUTPUT
+  - generic: 模型已就绪 · gpt-5.6-sol
+- contentinfo:
+  - generic: ">_ 收件箱"
+  - button "收起输入": 收起
+  - button "查看对话记录": 记录 ↑
+  - textbox "输入目标":
+    - /placeholder: 一个链接、一个想法，或一件待办…
+  - button "提交目标" [disabled]: ↑
+  - text: Ctrl / ⌘ + Enter 发送
+  - generic: 保存到收件箱

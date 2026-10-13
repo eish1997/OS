@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-05T17:22:04.843Z",
+  "runtime": "v24.19.0",
+  "platform": "win32",
+  "baseline": {
+    "index.html": "111192d3250af51de980cb5e9bed19b49dd1e92e6733a19c87a3bbb7a9cc12cb",
+    "package-lock.json": "365f11145829d8b817d5a729eb7a60e2b4c7034f9ed07508b28e778542d6c5ac",
+    "package.json": "94a19416c5ca43d1c3e03b027446804ba5b56c0663996d12fdc0bb0963861ddf",
+    "scripts/backup.ts": "2da1ac48e60f4063fb8ad42fd5f645c1e7427a1d9d481659a7c934f562ca6703",
+    "scripts/cleanup-assets.ts": "ccf9622ac5ad84209997178885892ea265b61a62d9c3b65e2fdd72c11107879c",
+    "scripts/fetch-memory-source.py": "c9bac4d505594ef10b476a2d9ccca881136b1f92c086554257cedf8c94cdc57f",
+    "scripts/import-research.ts": "86e34b14dc953debb5e7711e4297dfc0b32425185e4c501311152ea3ff4b8bd0",
+    "scripts/local-node.ts": "e3bcdff713f8e87828816f18b3d4ede0554e4923a8efc398f93509357273a770",
+    "scripts/probe-pi.ts": "b5e1709dfe58b4eea8843f2b224607987bf533703fa472d9dd047c99fc7ff208",
+    "scripts/probe-real.ts": "bc8002bf5d31c5b744a7f4278330e41acd90d3b55fcbcf1cf951f7fb34a7a587",
+    "scripts/project-ui-qa.ts": "915e952cfffc1c7ace0bd1f233410f1b6f5a7c688eee2c698062395524fbdf29",
+    "scripts/research-memory.ts": "389a65c0ffc9e8f00c2c23e062bc8143eb92211d5df4c55cde7f4afe3f9addda",
+    "scripts/run.ps1": "aa7cfb61766ab066db04f75033e69c2e0efc102517bff1f24753aa6500558a4c",
+    "scripts/setup.ts": "30e6a7f67b50d8c60362e62bd7baf3df867c9923a7a2e22909a3d9f05e7bd15e",
+    "scripts/verify.mjs": "f94de608d2c59b16b35cf65b06cb7f6e3baa6511f465fa9be1799591bd283f89",
+    "scripts/visual-qa.mjs": "2f208a80cc1d807f5524c6731fb17e5d84585628586f7560d8f55d0a5a8f1d93",
+    "server/app.ts": "a591ca9a679ff6f26f0f856bbc1fd0f8ff9aa26c3ccb6ebbf2ddd85096b3430f",
+    "server/assets.ts": "7347e3eee5d0af7e3847c002a7168ce026c46e881bcdf5a36b7b494c12fc0a41",
+    "server/auth.ts": "04152aae6d51398996c39ab3df4d635af87a564fc66b7c5a022458264657e1d7",
+    "server/backup.ts": "7c06ce597b327293e69ff3759bda0297ba965ca0f622a6c3acacfcf07f8fcffb",
+    "server/config.ts": "f75d30808a981451065f4d895e65d5aba8a56c25feb972c2e6d9211d78229da6",
+    "server/index.ts": "aa077c5057d87a9471ae2d3ff41f7e8b2464cfe1b3e548914e5b6bd5db1da11e",
+    "server/pi-adapter.ts": "a196c8badd3fc74bce54d3dde78ab670f1f791b60f8945446209e4dadb2e7038",
+    "server/scheduler.ts": "24b2ad5656529c4ecda5b45abcd131d69e5fe375bbeeab22df667beeb3e042c6",
+    "server/service.ts": "30fef1d30044d84204e75f44edb4c94c81f535ce1e14a2c577f11f2397b569cd",
+    "server/store.ts": "b9e2e41d2ee9ede4c32bf2ca3056ae1bfd842e86181e0076888ad3b9efc8e6f2",
+    "server/worker.ts": "0d21d2e0ee60e4ba7405f8fd0a9ad038c6c3fdc82818f05c9a5993613fc26090",
+    "shared/contracts.ts": "ef911029ee743f9147f6f6b5659e8ccb60cab2b3598c3ba26e0de6dd7ed997ab",
+    "src/draft-editor.tsx": "3012d18e9261fd543755dd9173cf6700f737f70df196ae889090bc485c1e5b4a",
+    "src/env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+    "src/main.tsx": "0490e258106d417de700591754342b0789277db257d0356897de4f9453710b34",
+    "src/project-summary.tsx": "ba8546166099693535f0d9ebb66be16cb7dec5bc3adb6f6deeb07a21ee365066",
+    "src/style.css": "d82ca53e95b3efd6a8e52d731103145a1e3a0dcf89c58467a6611a30925f0bad",
+    "tests/api.test.ts": "3e490f77ea707b93b6f9ab2b583cee3d760d1e710ae4859284a5d504b7095ff5",
+    "tests/core.test.ts": "b0019e90d5df93a188415f5d20c6ae33569178d482e4095cf1030db45f07bfa6",
+    "tests/faults.test.ts": "33b8e7e28a27cd493f8f9bd0722b6aa6a391d6b4332fd4603c053da965d352e1",
+    "tests/fixtures/memory-suite.json": "b95a277c9ac5a08d5af5c15d87eba57d289dfe57f28c3e0f8dbcc1ba362dc074",
+    "tests/helpers/crash-asset.ts": "77d3baaaa4d961e906a323479bf0bd9eadeb24a186dab1f8c98a04d01e1ce167",
+    "tests/helpers/lock-file.ps1": "0571f7296350ae9850a540b0bb33f3eb41b50a685c996c97be75175447337d97",
+    "tests/node-cli.test.ts": "dd62355265c492924c187acebe5ac4f286cfb2504ac7a8fd03fea6f349bd0775",
+    "tests/storage-faults.test.ts": "9da9fe21395e196e0ecfb38601c5001683d34678dbde8446977ac3904e3d3be5",
+    "tests/summary.test.ts": "770e207c2224f99eedfdaa9459b28821ad8ec458f524d61a3f0489c5b6be977c",
+    "tsconfig.json": "1613dc268aa82a5ffb55627d6029d41a921cb464375e53e13b724e7b443d45dd",
+    "vite.config.ts": "7fffa329c9e5d0ab9b942815046457d93c7e4dbd798f90be81a1eee8372e9cd2"
+  },
+  "status": "passed",
+  "checks": [
+    {
+      "name": "integration-tests",
+      "exitCode": 0,
+      "outputSha256": "9f1798b048bb797db1926a4c48aadabe8bba3f4dfd894b40a99ba35f75c5378d"
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "outputSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0,
+      "outputSha256": "19909d7186e0c72e8c36cb14b3856f7564137500de136cf0f38eac423bf83f0a"
+    },
+    {
+      "name": "pi-offline-probe",
+      "exitCode": 0,
+      "outputSha256": "f8c0077a34cca897da070472a18ef7e3c21fe2b375b5a9968844fc45339932de"
+    }
+  ],
+  "limitations": [
+    "No model request",
+    "No Tencent Memory runtime",
+    "No remote phone or independent backup storage"
+  ]
+}

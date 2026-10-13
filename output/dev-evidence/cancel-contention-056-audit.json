@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-07T07:40:29.978Z",
+  "status": "passed",
+  "scope": "Asynchronous cancellation acquisition and atomic record; synthetic real process and HTTP tests; no model requests",
+  "engineeringTests": 159,
+  "engineeringFiles": 150,
+  "verificationAt": "2026-10-07T07:33:32.572Z",
+  "verificationSha256": "613103b41b990da2c01144e5558f9d68a8fc3491decf5557e82db6a7a07361ff",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 16796,
+    "instanceId": "ab27f774-754e-4d9e-b218-04dd4eb6ae18",
+    "launchId": "cdbe27c0-ddd5-439e-95c1-11e9020cfd98"
+  },
+  "supervisor": {
+    "pid": 50876,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "counts": {
+    "projects": 18,
+    "entities": 261,
+    "assets": 46,
+    "sessions": 31
+  },
+  "allEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "modelRequests": 0,
+  "documents": 116,
+  "links": 800,
+  "cancelContention": "fixed; L-03b done",
+  "taskBudgetScope": "mismatch reproduced; L-03c ready",
+  "browserAcceptance": "pending; policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

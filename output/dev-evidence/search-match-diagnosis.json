@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-06T14:03:24.761Z",
+  "modelRequests": 0,
+  "status": "measured",
+  "results": [
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1360.8963,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1371.5831,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1364.3375,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2244.2877,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2122.338600000001,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2148.2834000000003,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1342.2642000000014,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1280.3629,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1324.0514999999996,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2175.623199999998,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2113.046199999997,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2130.3263000000006,
+      "items": 119
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1275.1748000000007,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1307.0119999999988,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1316.402399999999,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "blob-regex",
+      "ms": 1340.8943999999974,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "blob-regex",
+      "ms": 1183.2315000000017,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "blob-regex",
+      "ms": 1175.5198000000019,
+      "items": 129
+    }
+  ]
+}

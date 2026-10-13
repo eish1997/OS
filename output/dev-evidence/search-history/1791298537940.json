@@ -1,0 +1,290 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:55:03.427Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: mixed capacity, native archive and background startup applied",
+  "thresholds": {
+    "searchMs": 2000,
+    "snapshotMs": 500
+  },
+  "profiles": [
+    {
+      "profile": "default",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "projectId": "8ccaeb23-d9ad-4efb-8817-e16cdffe7291",
+      "base": "http://127.0.0.1:12154",
+      "assets": 691,
+      "storageSamples": [
+        {
+          "ms": 52.76559999999972,
+          "measuredBytes": 778182529,
+          "issues": 0
+        },
+        {
+          "ms": 50.37689999999975,
+          "measuredBytes": 778182529,
+          "issues": 0
+        },
+        {
+          "ms": 47.947099999999864,
+          "measuredBytes": 778182529,
+          "issues": 0
+        },
+        {
+          "ms": 56.05040000000008,
+          "measuredBytes": 778182529,
+          "issues": 0
+        },
+        {
+          "ms": 47.5313000000001,
+          "measuredBytes": 778182529,
+          "issues": 0
+        }
+      ],
+      "writeProject": {
+        "name": "单次遍历写入测量 · ec28555f-b875-4a0c-afd9-018e77113c88",
+        "description": "",
+        "archived": false,
+        "id": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "revision": 1,
+        "createdAt": "2026-10-06T13:47:38.307Z",
+        "updatedAt": "2026-10-06T13:47:38.307Z"
+      },
+      "previousWrites": 30,
+      "search": [
+        {
+          "query": "CAPACITY_SMALL_NEEDLE",
+          "samples": [
+            {
+              "ms": 441.2658000000001,
+              "requests": 7,
+              "maxSnapshotMs": 32.971900000000005,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 395.75,
+              "requests": 7,
+              "maxSnapshotMs": 22.51879999999983,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 486.87519999999995,
+              "requests": 8,
+              "maxSnapshotMs": 23.947499999999764,
+              "total": 600,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "CAPACITY_LARGE_NEEDLE",
+          "samples": [
+            {
+              "ms": 709.4649,
+              "requests": 13,
+              "maxSnapshotMs": 24.496799999999894,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 778.5668999999998,
+              "requests": 13,
+              "maxSnapshotMs": 21.499700000000303,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 757.5969999999998,
+              "requests": 14,
+              "maxSnapshotMs": 22.587100000000646,
+              "total": 24,
+              "items": 24
+            }
+          ]
+        },
+        {
+          "query": "大文件-",
+          "samples": [
+            {
+              "ms": 715.7447999999995,
+              "requests": 12,
+              "maxSnapshotMs": 21.421699999999873,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 730.9475999999995,
+              "requests": 12,
+              "maxSnapshotMs": 22.317299999999705,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 672.4135999999999,
+              "requests": 12,
+              "maxSnapshotMs": 22.42110000000048,
+              "total": 60,
+              "items": 50
+            }
+          ]
+        }
+      ],
+      "writeProgress": {
+        "projectId": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "previousFiles": 30,
+        "completed": 30
+      },
+      "controlledWrites": {
+        "projectId": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "files": 30,
+        "previousFiles": 30,
+        "measuredNewFiles": 0,
+        "bytesPerFile": 32768,
+        "ms": [],
+        "totalMs": 0,
+        "note": "Appended only new synthetic assets in a separate owned project; same default storage boundaries. Prior successful file is preserved; its lost wall time is not invented."
+      },
+      "ownedChildExited": true
+    },
+    {
+      "profile": "full",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+      "projectId": "e36908f2-42df-4f79-b1b2-829c23a6264f",
+      "base": "http://127.0.0.1:12273",
+      "assets": 256,
+      "storageSamples": [
+        {
+          "ms": 18.63670000000002,
+          "measuredBytes": 2142241146,
+          "issues": 0
+        },
+        {
+          "ms": 21.44750000000022,
+          "measuredBytes": 2142241146,
+          "issues": 0
+        },
+        {
+          "ms": 20.558500000000095,
+          "measuredBytes": 2142241146,
+          "issues": 0
+        },
+        {
+          "ms": 19.722099999999955,
+          "measuredBytes": 2142241146,
+          "issues": 0
+        },
+        {
+          "ms": 18.032700000000204,
+          "measuredBytes": 2142241146,
+          "issues": 0
+        }
+      ],
+      "previousWrites": 0,
+      "search": [
+        {
+          "query": "CAPACITY_SMALL_NEEDLE",
+          "samples": [
+            {
+              "ms": 1214.7402999999995,
+              "requests": 25,
+              "maxSnapshotMs": 20.987600000000384,
+              "total": 128,
+              "items": 50
+            },
+            {
+              "ms": 1160.5805,
+              "requests": 24,
+              "maxSnapshotMs": 26.805900000001202,
+              "total": 128,
+              "items": 50
+            },
+            {
+              "ms": 1158.6285000000007,
+              "requests": 24,
+              "maxSnapshotMs": 25.008499999999913,
+              "total": 128,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "CAPACITY_LARGE_NEEDLE",
+          "samples": [
+            {
+              "ms": 1846.316499999999,
+              "requests": 39,
+              "maxSnapshotMs": 18.941600000000108,
+              "total": 119,
+              "items": 50
+            },
+            {
+              "ms": 1849.6398000000008,
+              "requests": 39,
+              "maxSnapshotMs": 22.75659999999698,
+              "total": 119,
+              "items": 50
+            },
+            {
+              "ms": 1847.1203999999998,
+              "requests": 39,
+              "maxSnapshotMs": 20.060699999998178,
+              "total": 119,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "大文件-",
+          "samples": [
+            {
+              "ms": 965.8258000000023,
+              "requests": 20,
+              "maxSnapshotMs": 21.872800000001007,
+              "total": 127,
+              "items": 50
+            },
+            {
+              "ms": 956.1379000000015,
+              "requests": 20,
+              "maxSnapshotMs": 20.582699999999022,
+              "total": 127,
+              "items": 50
+            },
+            {
+              "ms": 922.5586999999978,
+              "requests": 20,
+              "maxSnapshotMs": 20.547699999999168,
+              "total": 127,
+              "items": 50
+            }
+          ]
+        }
+      ],
+      "ownedChildExited": true
+    }
+  ],
+  "primaryBefore": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "activeObservation": {
+    "profile": "full",
+    "pid": 25408,
+    "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data"
+  },
+  "primaryIdentityUnchanged": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "remaining": [
+    "Results cover local measured queries, not all queries or production OS quotas",
+    "Physical quota/WAL, remote phone, offsite restore, Tencent and M1 remain"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-07T07:23:21.305Z",
+  "status": "failed",
+  "scope": "Real Pi on independent synthetic draft; cancel after first save, retry same Task; no browser or publication",
+  "maximumRequests": 8,
+  "projectId": "e9fd67e9-08f0-42b3-b026-10b24cb89114",
+  "draftId": "9fcd0655-706e-4969-8581-0e45dd154bdf",
+  "firstRunId": "89cb80c9-01bf-4db6-b925-9e839f5a55a6",
+  "taskId": "7aef44f6-fe09-4665-b420-e84a754bbb0a",
+  "step": "first-attempt-running",
+  "error": "Probe HTTP 423 at /runs/89cb80c9-01bf-4db6-b925-9e839f5a55a6/cancel",
+  "cleanupRun": "cancelled",
+  "loginSessionsPreserved": true,
+  "configurationHashesPreserved": false
+}

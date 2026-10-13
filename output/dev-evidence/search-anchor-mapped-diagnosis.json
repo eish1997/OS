@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-06T14:52:53.940Z",
+  "modelRequests": 0,
+  "status": "measured",
+  "results": [
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1060.0506,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 755.9479000000001,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 774.3875,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 608.9225999999999,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 612.0841,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 646.3432000000003,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 832.5338000000002,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 850.9137000000001,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 876.4179999999997,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 546.7395000000006,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 607.2745999999997,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 591.3258999999998,
+      "items": 119
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 727.0522999999994,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 741.1273000000001,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 779.2335999999996,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 495.78290000000015,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 492.02410000000054,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 532.3135999999995,
+      "items": 129
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-07T06:50:28.886Z",
+  "phase": "before",
+  "root": "C:\\Users\\15128\\AppData\\Local\\Temp\\授权释放 真实竞争 MSQPms",
+  "status": "reproduced",
+  "callbacks": 1,
+  "callbackSideEffectPersisted": true,
+  "firstError": {
+    "status": 423,
+    "message": "其他进程正在写入，稍后重试"
+  },
+  "secondError": {
+    "status": 423,
+    "message": "另一项模型授权操作正在处理"
+  },
+  "recovered": false,
+  "authLockRemaining": true,
+  "childPid": 49848,
+  "childExit": [
+    0,
+    null
+  ],
+  "modelRequests": 0
+}

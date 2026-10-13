@@ -1,0 +1,29 @@
+import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {join,resolve,dirname} from 'node:path';
+import assert from 'node:assert/strict';
+import {config} from '../../server/config.ts';
+const base='output/dev-evidence/',read=f=>readFileSync(f,'utf8').replace(/^\uFEFF/,''),json=f=>JSON.parse(read(f)),sha=b=>createHash('sha256').update(b).digest('hex');
+const target=base+'chatgpt-transfer-final-audit.json';assert(!existsSync(target),'Do not duplicate documentation updates');
+const report=json(base+'verification/report.json');assert.equal(report.status,'passed');assert.equal(Object.keys(report.baseline).length,123);
+for(const [file,hash] of Object.entries(report.baseline))assert.equal(sha(readFileSync(file)),hash,file);
+for(const check of report.checks){assert.equal(check.exitCode,0);assert.equal(sha(readFileSync(base+'verification/'+check.name+'.log')),check.outputSha256);}
+const log=read(base+'verification/integration-tests.log');for(const re of [/tests 113\b/,/pass 113\b/,/fail 0\b/,/cancelled 0\b/,/skipped 0\b/])assert(re.test(log));
+for(const phrase of ['authenticated encrypted handoff preserves VM host/model','wrong destination, altered ciphertext','interrupted destination commit and source retirement','active model task and in-flight token refresh'])assert(log.includes(phrase));
+const product=json(base+'chatgpt-transfer-production.json');assert.equal(product.status,'passed');assert.equal(product.preservedUserSessions,31);assert.equal(product.sessionFingerprintPreserved,true);assert.equal(product.currentBrowserSessionReplaced,false);assert.equal(product.callCountersUnchanged,true);assert.equal(product.canonicalDraftPreserved,true);assert.equal(product.ownLoginRetired,true);
+for(const name of ['transfer-recipient.json','transfer-outgoing.json','transfer-incoming.json','transfer-offer.json'])assert(!existsSync(join(config.dataDir,'private-model',name)),'No real-account transfer records expected');
+const prior=json(base+'linux-preparation-final-audit.json');const historical='verification/history/2026-10-06T17-42-33-216Z/report.json';assert.equal(sha(readFileSync(base+historical)),prior.verificationSha256);
+const oldProduct=json(base+'linux-preparation-production.json');assert.equal(product.service.instanceId,oldProduct.service.instanceId);assert.equal(product.service.pid,oldProduct.service.pid);assert.equal(product.service.creationUtc,oldProduct.service.creationUtc);
+oldProduct.verification=historical;writeFileSync(base+'linux-preparation-production.json',JSON.stringify(oldProduct,null,2));prior.historicalVerification=historical;writeFileSync(base+'linux-preparation-final-audit.json',JSON.stringify(prior,null,2));
+const lead='036：[ChatGPT专属会话迁移](iterations/036-chatgpt-session-transfer.md)按官方VM路线实现加密交接、来源先冻结、目标提交/签收、来源退役与唯一刷新所有者，共用授权锁，排队/未对账任务拒绝；四项实际HTTP/文件测试含定点异常与实例重建。113项完整工程、123文件通过。原产品实例/自动连接/文章/31登录与用量/备份保持，零模型请求；未迁移真实账户、未重启主服务加载新接口。实际进程崩溃/跨机器及原完整M0/M1门槛保持。';
+function prepend(f,s){const value=read(f),p=value.indexOf('\n');writeFileSync(f,value.slice(0,p+1)+'\n'+s+'\n'+value.slice(p+1));}
+for(const f of ['doc/dev/current.md','doc/dev/backlog.md','doc/dev/acceptance.md'])prepend(f,lead);
+let current=read('doc/dev/current.md').replace('- 109项测试、类型检查','- 113项测试、类型检查');writeFileSync('doc/dev/current.md',current);
+let backlog=read('doc/dev/backlog.md').replace('| M0-07 | verifying | 01a至06 | 109项集成','| M0-07 | verifying | 01a至06 | 113项集成');writeFileSync('doc/dev/backlog.md',backlog);
+prepend('doc/README.md','最新执行：[036ChatGPT会话交接](dev/iterations/036-chatgpt-session-transfer.md)、[ADR-023](adr/023-chatgpt-session-transfer.md)、[实际HTTP测试](../tests/chatgpt-transfer.test.ts)、[收尾审计](../output/dev-evidence/chatgpt-transfer-final-audit.json)。真实账户/跨机器与完整目标保持未验收。');
+prepend('doc/deployment.md','036按[官方VM路线与ADR-023](adr/023-chatgpt-session-transfer.md)允许本工作台选中授权的受保护迁移：来源冻结、目标保留自身host ID并接管刷新、来源验签退役。113项工程通过；真实账户与远程未迁移。初始合成数据安装不携带凭据，正式迁移另走受控交接，保持普通备份排除凭据。');
+prepend('doc/dev/接入与上线解决计划.md','036已实现[受保护的专属ChatGPT会话交接](iterations/036-chatgpt-session-transfer.md)，依据官方自托管VM说明更新此前不转移凭据的假设；不读取全局Codex授权。113项工程通过，实际账户与新接口主产品加载均未执行；远程资源、HTTPS/手机、真实刷新及完整生产/腾讯门槛保持。');
+writeFileSync(target,JSON.stringify({status:'auditing'}));
+const docs=['README.md'];function walk(dir){for(const entry of readdirSync(dir,{withFileTypes:true})){const file=join(dir,entry.name);if(entry.isDirectory())walk(file);else if(file.endsWith('.md'))docs.push(file);}}walk('doc');walk('deployment');let links=0;
+for(const file of docs)for(const match of read(file).matchAll(/\]\(([^)]+)\)/g)){let p=match[1].trim();if(/^(https?:|app:|codex:|#)/.test(p))continue;p=p.replace(/^<|>$/g,'').split('#')[0];if(!p)continue;assert(existsSync(resolve(dirname(file),p)),file+' -> '+p);links++;}
+const result={at:new Date().toISOString(),status:'passed',engineeringFiles:123,tests:113,checks:report.checks.length,verificationSha256:sha(readFileSync(base+'verification/report.json')),priorVerification:historical,priorVerificationSha256:prior.verificationSha256,transferTests:4,syntheticProviderOnly:true,twoAppsSameTestProcess:true,interruptionMethod:'Targeted file-write exceptions; actual process crash pending',mainServiceUnchanged:true,mainNewEndpointsLoaded:false,realAccountTransferPerformed:false,realAccountTransferRecordsAbsent:true,modelRequests:0,preservedUserSessions:31,sessionFingerprintPreserved:true,localDocLinks:links,goalStatus:'active',remaining:['Actual process crashes and cross-machine credential handoff','Real-account VM refresh/inference and trusted HTTPS/SSH','Cloud resources/HTTPS/phone and production Linux','Filesystem quota/WAL and offsite restore','OS sleep/wake','Tencent isolated comparison and user feedback','M1 gate']};writeFileSync(target,JSON.stringify(result,null,2));console.log(JSON.stringify(result));

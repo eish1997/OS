@@ -1,0 +1,8 @@
+{
+  "status": "failed-before-final-fix",
+  "cause": "Reading auth and snapshot alone did not reopen an errored EventSource after actual backend stop/restart",
+  "unsentInputPreserved": true,
+  "freshDraftNotYetVisible": true,
+  "resolution": "Close failed stream, verify auth, reload snapshot, explicitly recreate stream with backoff",
+  "modelRequests": 0
+}

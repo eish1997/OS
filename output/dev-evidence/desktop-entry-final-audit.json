@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T15:51:35.500Z",
+  "modelRequests": 0,
+  "tests": 103,
+  "verifiedCodeFiles": 101,
+  "verificationSha256": "eb24a3ca5723cb77fdb28664b2c56f59c79c2ef3c655a8a430b6dbff1092af4a",
+  "historical027Sha256": "4feca4261424cbb0a93877b2232ac30fd9ad97cff933cb44046c16d8186e4673",
+  "changedExistingEngineeringFiles": [
+    "scripts/supervise-service.ps1"
+  ],
+  "addedEngineeringFiles": [
+    "scripts/desktop-entry.ps1",
+    "scripts/open-workbench.ps1",
+    "tests/desktop-entry.test.ts"
+  ],
+  "gitignoreSha256": "1a48136d751467f08073d18fb768bccbe5a335ceb6a7b34120339b5916eecfad",
+  "actualOwnSupervisor": {
+    "instance": "7bb4d564-738b-4a45-8dab-6724dccc9dbc",
+    "name": "workbench",
+    "pid": 40816,
+    "running": true,
+    "restartCount": 0,
+    "state": "ready",
+    "lastError": null
+  },
+  "checks": 15,
+  "actualShortcuts": [
+    {
+      "kind": "open",
+      "path": "C:\\Users\\15128\\Desktop\\打开工作台.lnk",
+      "owned": true,
+      "sha256": "83ae6baa063caaaf2ad001d75c0ba36dedbc1f0009bd32285423972f7a4c1815"
+    },
+    {
+      "kind": "startup",
+      "path": "C:\\Users\\15128\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\AIOS-43cc99262901.lnk",
+      "owned": true,
+      "sha256": "116e72b1b6cbbfec45c799beaa8918aee0bf2897d88e4364b07fc65b5e1b46ee"
+    }
+  ],
+  "serviceNotRestarted": true,
+  "originalService": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8",
+    "creationUtc": "2026-10-06T15:01:42.5543450Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "preservedUserSessions": 31,
+  "productionSha256": "d38d24867b6e7815735a800af5ce9f4138b07b7c54a697f3cf7a89468192ff25",
+  "localLinksChecked": 253,
+  "goalStatus": "active: confirmed with get_goal in this turn",
+  "remaining": [
+    "Real Windows login/default-browser page and sleep/wake observation",
+    "Production physical quota/WAL and remote phone HTTPS",
+    "Offsite/independent-machine restore",
+    "Tencent isolated runtime/comparison and user feedback",
+    "M1 parallel agents and plugins after complete M0 gates"
+  ]
+}

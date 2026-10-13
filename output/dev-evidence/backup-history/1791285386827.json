@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T11:13:46.574Z",
+  "modelRequests": 0,
+  "scope": "Own private backup directory on another physical internal disk; no original data replacement or credential migration",
+  "physicalDisks": {
+    "sourceDrive": "E",
+    "sourceDisk": 0,
+    "targetDrive": "C",
+    "targetDisk": 1
+  },
+  "step": "original-connection-status",
+  "backupDirectory": "C:\\Users\\15128\\AI-OS-Backups\\snapshot-2026-10-06T11-13-50-289Z-fdd22062-ece9-4f18-90d8-3472589bbe35",
+  "restoreCheckDirectory": "C:\\Users\\15128\\AI-OS-Backups\\restore-check-2026-10-06T11-13-50-289Z-bd69c78c-8711-4ae0-8f78-d6f3cf46b0e6",
+  "reason": "The expression evaluated to a falsy value:\n\n  assert(response.ok)\n"
+}

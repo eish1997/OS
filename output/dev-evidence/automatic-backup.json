@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T11:31:16.362Z",
+  "modelRequests": 0,
+  "scope": "Isolated synthetic source on E and owned backup root on C; real timer; controlled clock advances daily due times for retention; production data unchanged",
+  "realWorkerNotInterrupted": true,
+  "firstScheduledRecoveryCheck": true,
+  "root": "C:\\Users\\15128\\AI-OS-Backups\\automation-probes\\1a1a2ebc-07e2-4bcf-80d6-216c8b3d8814",
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\automatic-1a1a2ebc-07e2-4bcf-80d6-216c8b3d8814",
+  "statusAfterScheduledPruning": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 2,
+    "retained": 2,
+    "pruned": 1,
+    "nextDueAt": "2026-10-09T11:31:08.377Z",
+    "lastSuccessAt": "2026-10-08T11:31:08.377Z",
+    "restoreCheckedAt": "2026-10-08T11:31:08.377Z"
+  },
+  "verifiedRecoveryPoints": 2,
+  "manualBackupPreserved": true,
+  "extraCleanRestore": true,
+  "chromeDesktopAnd390Mobile": true,
+  "pageErrors": 0
+}

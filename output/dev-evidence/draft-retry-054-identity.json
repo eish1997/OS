@@ -1,0 +1,10 @@
+{
+  "servicePid": 10940,
+  "launchId": "9a2e5fee-f5ec-4a95-adf5-f698af2b703a",
+  "at": "2026-10-07T07:19:17.6327215Z",
+  "supervisorMatches": true,
+  "supervisorCreationUtc": "2026-10-07T07:18:54.130609Z",
+  "serviceMatches": true,
+  "supervisorPid": 17120,
+  "serviceCreationUtc": "2026-10-07T07:18:55.88398Z"
+}

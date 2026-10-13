@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-06T10:52:30.016Z",
+  "status": "passed",
+  "checks": [
+    "default-continuation-without-configuration",
+    "optional-new-topic-toggle",
+    "actual-continuation-shown-in-task-history",
+    "390-mobile-no-horizontal-overflow"
+  ],
+  "modelRequests": 0,
+  "scope": "Own probe project; no submission, account change or content edit",
+  "pageErrors": 0
+}

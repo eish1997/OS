@@ -1,0 +1,14 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {DatabaseSync} from 'node:sqlite';
+import assert from 'node:assert/strict';
+const input=JSON.parse(readFileSync('output/dev-evidence/search-performance.json','utf8'));const p=input.profiles.find(p=>p.profile==='full');assert(p.ownedChildExited);assert.equal(await fetch(p.base+'/api/health',{signal:AbortSignal.timeout(3000)}).then(()=>false).catch(e=>e.cause?.code==='ECONNREFUSED'),true);
+const db=new DatabaseSync(join(p.source,'workbench.sqlite'),{readOnly:true});db.exec('PRAGMA mmap_size=1073741824');const results=[];
+try{for(const query of ['CAPACITY_SMALL_NEEDLE','CAPACITY_LARGE_NEEDLE','中文']){
+ const pattern='%'+query+'%',needle=Buffer.from(query);const first=needle[0];const alternate=first>=65&&first<=90?first+32:first>=97&&first<=122?first-32:first;
+ db.function('probe_anchor',{deterministic:true},value=>{const b=Buffer.from(value.buffer,value.byteOffset,value.byteLength);const nul=b.indexOf(0);const end=nul<0?b.length:nul;let at=0;
+ for(let checks=0;checks<64;checks++){const a=b.indexOf(first,at),c=alternate===first?-1:b.indexOf(alternate,at);const pos=a<0?c:c<0?a:Math.min(a,c);if(pos<0||pos+needle.length>end)return 0;let same=true;for(let i=0;i<needle.length;i++){const x=b[pos+i],y=needle[i];if(x!==y&&!(y>=65&&y<=90&&x===y+32)&&!(y>=97&&y<=122&&x===y-32)){same=false;break;}}if(same)return 1;at=pos+1;}return -1;});
+ const where="FROM asset_search x JOIN entities e ON e.id=x.asset_id AND e.kind='asset' WHERE x.project_id=? AND e.project_id=? AND json_extract(e.body,'$.status')='ready' AND e.revision=x.revision AND (x.name LIKE ? ESCAPE '\\' OR x.tags LIKE ? ESCAPE '\\' OR ";
+ let expected;for(const mode of ['like','anchor'])for(let i=0;i<3;i++){const sql='SELECT x.asset_id '+where+(mode==='like'?"x.content LIKE ? ESCAPE '\\')":"CASE probe_anchor(CAST(x.content AS BLOB)) WHEN 1 THEN 1 WHEN 0 THEN 0 ELSE x.content LIKE ? ESCAPE '\\' END)")+' ORDER BY e.rowid DESC';const at=performance.now();const rows=db.prepare(sql).all(p.projectId,p.projectId,pattern,pattern,pattern);const elapsed=performance.now()-at;const ids=rows.map(v=>v.asset_id);if(mode==='like')expected=ids;else assert.deepEqual(ids,expected);const r={query,mode,ms:elapsed,items:rows.length};results.push(r);console.log(JSON.stringify(r));}
+}}finally{db.close();}
+writeFileSync('output/dev-evidence/search-anchor-mapped-diagnosis.json',JSON.stringify({at:new Date().toISOString(),modelRequests:0,status:'measured',results},null,2));

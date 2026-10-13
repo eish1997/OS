@@ -1,0 +1,10 @@
+{
+  "status": "failed-observation",
+  "modelRequests": 0,
+  "actualExitCode": 1,
+  "script": "observe-anchor-production.ts",
+  "stage": "final readonly query counter comparison",
+  "cause": "The observer compared objects with undefined optional keys against a JSON-normalized baseline that omitted those keys; value changes were not reported.",
+  "repair": "Apply the same JSON normalization to both snapshots; repeat only the corrected readonly observation.",
+  "scope": "Observation helper only; no application change or repeated model task. Finally logged out its own temporary session. Prior successful restart observation remains a separate valid result."
+}

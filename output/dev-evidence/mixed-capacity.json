@@ -1,0 +1,455 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T13:25:50.137Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: Windows deployment, node original bytes and production update",
+  "scope": "Actual E/C mixed default asset bound plus isolated full 2GiB total profile; no primary data or credentials copied",
+  "thresholds": {
+    "snapshotMs": 500,
+    "searchMs": 2000,
+    "startupMs": 15000
+  },
+  "profiles": [
+    {
+      "profile": "default",
+      "base": "http://127.0.0.1:7967",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "root": "C:\\Users\\15128\\AI-OS-Backups\\mixed-probes\\27c54772-5f64-4a55-a57f-81811b3261e7",
+      "projectId": "8ccaeb23-d9ad-4efb-8817-e16cdffe7291",
+      "selectedAssetId": "00c38490-88d5-4309-883f-a6b9d779ec12",
+      "selectedHash": "202da4d9b3cb279fbe4cfaaaec53a60e8ad78d3080c62966c6c51f5b5aa665f2",
+      "draftId": "f00ea23c-6edc-4044-9546-4964207383ef",
+      "usage": {
+        "at": "2026-10-06T13:18:16.443Z",
+        "groups": {
+          "database": {
+            "bytes": 222761040,
+            "files": 3
+          },
+          "assets": {
+            "bytes": 522977325,
+            "files": 661
+          },
+          "uploads": {
+            "bytes": 4194304,
+            "files": 1
+          },
+          "sessions": {
+            "bytes": 8391784,
+            "files": 1
+          },
+          "workspaces": {
+            "bytes": 16777216,
+            "files": 1
+          },
+          "logs": {
+            "bytes": 1048702,
+            "files": 2
+          }
+        },
+        "measuredBytes": 776150552,
+        "assetQuotaBytes": 524288000,
+        "assetQuotaUsedBytes": 522977325,
+        "disk": {
+          "totalBytes": 1000116133888,
+          "availableBytes": 250188914688
+        },
+        "issues": [],
+        "scope": "whole data directory; external backups/runtime launcher logs excluded; credentials measured by size only",
+        "automaticCleanup": false,
+        "limits": {
+          "totalBytes": 2147483648,
+          "databaseBytes": 805306368,
+          "assetsBytes": 524288000,
+          "uploadsBytes": 20971520,
+          "sessionsBytes": 134217728,
+          "workspacesBytes": 67108864,
+          "logsBytes": 4194304,
+          "minFreeBytes": 67108864,
+          "controlReserveBytes": 4194304
+        },
+        "overLimits": [],
+        "totalOverLimit": false,
+        "enforcement": "controlled-write admission and SQLite main-file page limit; external filesystem changes require deployment quota"
+      },
+      "limits": {
+        "totalBytes": 2147483648,
+        "databaseBytes": 805306368,
+        "assetsBytes": 524288000,
+        "uploadsBytes": 20971520,
+        "sessionsBytes": 134217728,
+        "workspacesBytes": 67108864,
+        "logsBytes": 4194304,
+        "minFreeBytes": 67108864,
+        "controlReserveBytes": 4194304
+      },
+      "seedMs": 2408.6214999999997,
+      "resumedOriginalDataset": true,
+      "assets": 661,
+      "syntheticNativeMessages": 16,
+      "modelCalls": 0,
+      "launchWallMs": 4930.9341,
+      "maintenance": [
+        {
+          "step": 1,
+          "ms": 24370.155600000002,
+          "requests": 446,
+          "maxSnapshotMs": 234.0001000000011,
+          "rssKiB": 287096,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 1,
+            "pruned": 0,
+            "nextDueAt": "2026-10-07T13:18:13.431Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-06T13:18:13.431Z",
+            "restoreCheckedAt": "2026-10-06T13:18:13.431Z"
+          }
+        },
+        {
+          "step": 2,
+          "ms": 26380.298499999997,
+          "requests": 500,
+          "maxSnapshotMs": 238.1327999999994,
+          "rssKiB": 287452,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 2,
+            "pruned": 0,
+            "nextDueAt": "2026-10-08T13:18:13.432Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-07T13:18:13.432Z",
+            "restoreCheckedAt": "2026-10-07T13:18:13.432Z"
+          }
+        },
+        {
+          "step": 3,
+          "ms": 30424.338499999998,
+          "requests": 587,
+          "maxSnapshotMs": 217.8588000000018,
+          "rssKiB": 287732,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 3,
+            "pruned": 0,
+            "nextDueAt": "2026-10-09T13:18:13.433Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-08T13:18:13.433Z",
+            "restoreCheckedAt": "2026-10-08T13:18:13.433Z"
+          }
+        },
+        {
+          "step": 4,
+          "ms": 35261.35370000001,
+          "requests": 688,
+          "maxSnapshotMs": 208.255799999999,
+          "rssKiB": 287736,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 4,
+            "pruned": 0,
+            "nextDueAt": "2026-10-10T13:18:13.434Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-09T13:18:13.434Z",
+            "restoreCheckedAt": "2026-10-09T13:18:13.434Z"
+          }
+        },
+        {
+          "step": 5,
+          "ms": 39528.81290000002,
+          "requests": 769,
+          "maxSnapshotMs": 206.83690000000934,
+          "rssKiB": 287736,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 5,
+            "pruned": 0,
+            "nextDueAt": "2026-10-11T13:18:13.435Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-10T13:18:13.435Z",
+            "restoreCheckedAt": "2026-10-10T13:18:13.435Z"
+          }
+        },
+        {
+          "step": 6,
+          "ms": 43707.87760000001,
+          "requests": 857,
+          "maxSnapshotMs": 198.34189999999944,
+          "rssKiB": 287780,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 6,
+            "pruned": 0,
+            "nextDueAt": "2026-10-12T13:18:13.436Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-11T13:18:13.436Z",
+            "restoreCheckedAt": "2026-10-11T13:18:13.436Z"
+          }
+        },
+        {
+          "step": 7,
+          "ms": 47860.05069999999,
+          "requests": 937,
+          "maxSnapshotMs": 355.22750000000815,
+          "rssKiB": 287780,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 7,
+            "pruned": 0,
+            "nextDueAt": "2026-10-13T13:18:13.437Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-12T13:18:13.437Z",
+            "restoreCheckedAt": "2026-10-12T13:18:13.437Z"
+          }
+        }
+      ],
+      "originalSeedMs": 580263.3693,
+      "snapshot": [
+        8.456299999999828,
+        241.92159999999967,
+        197.76449999999932,
+        203.47960000000057,
+        175.4405999999999
+      ],
+      "search": [
+        600.9904999999999,
+        633.3437000000004,
+        687.7682000000004,
+        644.7870999999996,
+        559.5589999999993
+      ],
+      "capacityRejection": {
+        "error": "资产空间已满，请归档或调整配额"
+      },
+      "limitUnderTest": "Default 500MiB asset limit",
+      "rejectedUploadPreservedExistingBytes": true,
+      "restart": {
+        "profile": "default",
+        "base": "http://127.0.0.1:11142",
+        "ms": 18722.55170000001,
+        "backup": {
+          "enabled": true,
+          "waitingForIdle": false,
+          "intervalHours": 24,
+          "retainCount": 7,
+          "retained": 7,
+          "pruned": 0,
+          "lastSuccessAt": "2026-10-12T13:18:13.437Z",
+          "restoreCheckedAt": "2026-10-12T13:18:13.437Z",
+          "nextDueAt": "2026-10-13T13:18:13.437Z"
+        },
+        "assets": 661,
+        "wallMs": 18739.317899999965
+      },
+      "restore": {
+        "profile": "default",
+        "ms": 6247.13949999999,
+        "assets": 661,
+        "nativeMessages": 16,
+        "target": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\clean-restore"
+      },
+      "ownedChildExited": true,
+      "httpStallObserved": false,
+      "searchSlow": false,
+      "startupSlow": true
+    },
+    {
+      "profile": "full",
+      "base": "http://127.0.0.1:3751",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+      "root": "C:\\Users\\15128\\AI-OS-Backups\\mixed-probes\\e5364e66-9222-4e31-b358-c8f9e7eb3606",
+      "projectId": "e36908f2-42df-4f79-b1b2-829c23a6264f",
+      "selectedAssetId": "ff9386a0-f5e5-4e46-96bf-6f74bbf3c984",
+      "selectedHash": "202da4d9b3cb279fbe4cfaaaec53a60e8ad78d3080c62966c6c51f5b5aa665f2",
+      "draftId": "035c6264-353a-4e50-b8a6-b13aae691dee",
+      "usage": {
+        "at": "2026-10-06T13:24:54.180Z",
+        "groups": {
+          "database": {
+            "bytes": 1004105808,
+            "files": 3
+          },
+          "assets": {
+            "bytes": 1069547565,
+            "files": 256
+          },
+          "uploads": {
+            "bytes": 4194304,
+            "files": 1
+          },
+          "sessions": {
+            "bytes": 33566392,
+            "files": 1
+          },
+          "workspaces": {
+            "bytes": 29786151,
+            "files": 2
+          },
+          "logs": {
+            "bytes": 1048639,
+            "files": 2
+          }
+        },
+        "measuredBytes": 2142249040,
+        "assetQuotaBytes": 1073741824,
+        "assetQuotaUsedBytes": 1069547565,
+        "disk": {
+          "totalBytes": 1000116133888,
+          "availableBytes": 247289630720
+        },
+        "issues": [],
+        "scope": "whole data directory; external backups/runtime launcher logs excluded; credentials measured by size only",
+        "automaticCleanup": false,
+        "limits": {
+          "totalBytes": 2147483648,
+          "databaseBytes": 1073741824,
+          "assetsBytes": 1073741824,
+          "uploadsBytes": 20971520,
+          "sessionsBytes": 134217728,
+          "workspacesBytes": 67108864,
+          "logsBytes": 4194304,
+          "minFreeBytes": 67108864,
+          "controlReserveBytes": 4194304
+        },
+        "overLimits": [],
+        "totalOverLimit": false,
+        "enforcement": "controlled-write admission and SQLite main-file page limit; external filesystem changes require deployment quota"
+      },
+      "limits": {
+        "totalBytes": 2147483648,
+        "databaseBytes": 1073741824,
+        "assetsBytes": 1073741824,
+        "uploadsBytes": 20971520,
+        "sessionsBytes": 134217728,
+        "workspacesBytes": 67108864,
+        "logsBytes": 4194304,
+        "minFreeBytes": 67108864,
+        "controlReserveBytes": 4194304
+      },
+      "seedMs": 117716.4927,
+      "resumedOriginalDataset": false,
+      "assets": 256,
+      "syntheticNativeMessages": 64,
+      "modelCalls": 0,
+      "launchWallMs": 119839.70950000006,
+      "maintenance": [
+        {
+          "step": 1,
+          "ms": 29804.606899999984,
+          "requests": 632,
+          "maxSnapshotMs": 112.89929999999003,
+          "rssKiB": 361268,
+          "status": {
+            "enabled": true,
+            "waitingForIdle": false,
+            "intervalHours": 24,
+            "retainCount": 7,
+            "retained": 1,
+            "pruned": 0,
+            "nextDueAt": "2026-10-07T13:22:56.345Z",
+            "running": false,
+            "lastSuccessAt": "2026-10-06T13:22:56.345Z",
+            "restoreCheckedAt": "2026-10-06T13:22:56.345Z"
+          }
+        }
+      ],
+      "snapshot": [
+        3.5064000000129454,
+        87.2673000000068,
+        101.19459999998799,
+        72.84869999997318,
+        72.00359999999637
+      ],
+      "search": [
+        2717.6910999999964,
+        2745.353300000017,
+        2720.193800000008,
+        2637.479099999997,
+        2721.610099999991
+      ],
+      "capacityRejection": {
+        "error": "存储已达uploads写入上限；导出/归档后按保留规则清理或调整配额"
+      },
+      "limitUnderTest": "Default 2GiB total limit with explicitly enlarged isolated asset/database sublimits",
+      "rejectedUploadPreservedExistingBytes": true,
+      "restart": {
+        "profile": "full",
+        "base": "http://127.0.0.1:2728",
+        "ms": 4869.253399999987,
+        "backup": {
+          "enabled": true,
+          "waitingForIdle": false,
+          "intervalHours": 24,
+          "retainCount": 7,
+          "retained": 1,
+          "pruned": 0,
+          "lastSuccessAt": "2026-10-06T13:22:56.345Z",
+          "restoreCheckedAt": "2026-10-06T13:22:56.345Z",
+          "nextDueAt": "2026-10-07T13:22:56.345Z"
+        },
+        "assets": 256,
+        "wallMs": 4882.83520000003
+      },
+      "restore": {
+        "profile": "full",
+        "ms": 6720.76860000001,
+        "assets": 256,
+        "nativeMessages": 64,
+        "target": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\clean-restore"
+      },
+      "ownedChildExited": true,
+      "httpStallObserved": false,
+      "searchSlow": true,
+      "startupSlow": false
+    }
+  ],
+  "primaryBefore": {
+    "ready": true,
+    "pid": 428,
+    "instanceId": "d0ad120e-5a31-4dee-a2d2-c1f43b582e09",
+    "launchId": "94bf8178-9d4d-4348-8a73-44719a45e548"
+  },
+  "activeObservation": {
+    "profile": "full",
+    "cwd": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606",
+    "root": "C:\\Users\\15128\\AI-OS-Backups\\mixed-probes\\e5364e66-9222-4e31-b358-c8f9e7eb3606",
+    "stage": "measurement",
+    "resumed": false,
+    "pid": 38576,
+    "count": 120
+  },
+  "primaryAfter": {
+    "ready": true,
+    "pid": 428,
+    "instanceId": "d0ad120e-5a31-4dee-a2d2-c1f43b582e09",
+    "launchId": "94bf8178-9d4d-4348-8a73-44719a45e548"
+  },
+  "primaryIdentityUnchanged": true,
+  "remaining": [
+    "Results are local measurements, not production filesystem quota/WAL or machine crash acceptance",
+    "Full profile only raises isolated asset/database sublimits to 1GiB; total stays default 2GiB, other limits unchanged",
+    "7 due times use a controlled clock; not 7 real days",
+    "Actual phone/remote deployment/Tencent comparison/user feedback/M1 remain"
+  ]
+}

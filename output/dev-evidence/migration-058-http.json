@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-08T05:50:31.455Z",
+  "health": {
+    "ready": true,
+    "pid": 3492,
+    "instanceId": "20da4440-3dab-4244-aa9f-9673f4976ced",
+    "launchId": "29e9965c-7a36-4c6b-9f42-e71d85b325b0"
+  },
+  "login": true,
+  "counts": {
+    "projects": 18,
+    "assets": 46,
+    "drafts": 16,
+    "tasks": 29,
+    "runs": 30
+  },
+  "modelConnection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitScope": "task"
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "offsite": {
+      "enabled": false,
+      "pending": 0,
+      "running": false
+    },
+    "checking": false,
+    "nextDueAt": "2026-10-09T05:50:07.954Z",
+    "running": false,
+    "lastSuccessAt": "2026-10-08T05:50:07.954Z",
+    "restoreCheckedAt": "2026-10-08T05:50:07.954Z"
+  },
+  "page": {
+    "status": 200,
+    "html": true
+  },
+  "temporarySessionRevoked": true
+}

@@ -1,0 +1,19 @@
+# Agent-only template, never a usable credential file.
+# Fill and protect outside the app/repository before invoking the CLI.
+[workbench-store]
+type = s3
+provider = Other
+env_auth = false
+access_key_id =
+secret_access_key =
+endpoint = https://storage.example.invalid
+acl = private
+
+[workbench-offsite]
+type = crypt
+remote = workbench-store:replace-with-owned-private-bucket/workbench
+filename_encryption = standard
+directory_name_encryption = true
+password =
+password2 =
+no_data_encryption = false

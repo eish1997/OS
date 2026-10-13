@@ -1,0 +1,162 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:42:49.960Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "no progress: automatic settings explanation only",
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\batch-6260e7a2-0cad-410b-aab6-2b00d959c6f7\\data",
+  "root": "E:\\AI\\OS\\output\\dev-evidence\\private\\large-upload-78a78251-3508-4a02-bb03-bf75f93aae3d",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "thresholds": {
+    "snapshotMs": 500
+  },
+  "preparation": "Product backup and restore; remove four unreferenced generated binaries in clone only, using isolated retention clock; no quota increase",
+  "samples": [
+    {
+      "index": 0,
+      "bytes": 8388608,
+      "beginMs": 61.115999999999985,
+      "putMs": 461.976200000001,
+      "operationMs": 527.2922999999992,
+      "assetId": "db7249cc-9f4a-4e11-a74c-9a6cc9bfb446",
+      "hash": "c4dc2e6114a33da4e24afabc81f4654511cae231c9594a59eea315768741ae5d",
+      "dataReads": 4,
+      "maxSnapshotMs": 409.83010000000104
+    },
+    {
+      "index": 1,
+      "bytes": 8388608,
+      "beginMs": 61.500599999999395,
+      "putMs": 457.07620000000134,
+      "operationMs": 522.7294000000002,
+      "assetId": "51ca2dd7-40ce-4586-8084-a281c1759128",
+      "hash": "bd59ad99d2b73b865929d9b8a7a967d1cf91cc54793313a8573385ed15bdfc98",
+      "dataReads": 3,
+      "maxSnapshotMs": 435.0744999999988
+    },
+    {
+      "index": 2,
+      "bytes": 8388608,
+      "beginMs": 71.64220000000023,
+      "putMs": 348.20930000000044,
+      "operationMs": 424.40110000000095,
+      "assetId": "e4534f8f-5596-4a40-b92c-1d603df98f04",
+      "hash": "3949f8d0b4f03b3f6ab018aac2efb9e10ed338ea5eae2e221e1ca769a9b29294",
+      "dataReads": 3,
+      "maxSnapshotMs": 332.69620000000214
+    }
+  ],
+  "progress": [
+    {
+      "kind": "progress",
+      "stage": "backup-clone-source",
+      "assets": 685
+    },
+    {
+      "kind": "progress",
+      "stage": "restore-complete",
+      "assets": 685
+    }
+  ],
+  "ownedPid": 9800,
+  "setup": {
+    "kind": "ready",
+    "base": "http://127.0.0.1:12189",
+    "limits": {
+      "totalBytes": 2147483648,
+      "databaseBytes": 805306368,
+      "assetsBytes": 524288000,
+      "uploadsBytes": 20971520,
+      "sessionsBytes": 134217728,
+      "workspacesBytes": 67108864,
+      "logsBytes": 4194304,
+      "minFreeBytes": 67108864,
+      "controlReserveBytes": 4194304
+    },
+    "usageBefore": {
+      "at": "2026-10-06T14:42:44.233Z",
+      "groups": {
+        "database": {
+          "bytes": 223823320,
+          "files": 3
+        },
+        "assets": {
+          "bytes": 490209325,
+          "files": 681
+        },
+        "uploads": {
+          "bytes": 0,
+          "files": 0
+        },
+        "sessions": {
+          "bytes": 8391784,
+          "files": 1
+        },
+        "workspaces": {
+          "bytes": 0,
+          "files": 0
+        },
+        "logs": {
+          "bytes": 63,
+          "files": 1
+        }
+      },
+      "measuredBytes": 722424673,
+      "assetQuotaBytes": 524288000,
+      "assetQuotaUsedBytes": 490209325,
+      "disk": {
+        "totalBytes": 1000116133888,
+        "availableBytes": 242134241280
+      },
+      "issues": [],
+      "scope": "whole data directory; external backups/runtime launcher logs excluded; credentials measured by size only",
+      "automaticCleanup": false,
+      "limits": {
+        "totalBytes": 2147483648,
+        "databaseBytes": 805306368,
+        "assetsBytes": 524288000,
+        "uploadsBytes": 20971520,
+        "sessionsBytes": 134217728,
+        "workspacesBytes": 67108864,
+        "logsBytes": 4194304,
+        "minFreeBytes": 67108864,
+        "controlReserveBytes": 4194304
+      },
+      "overLimits": [],
+      "totalOverLimit": false,
+      "enforcement": "controlled-write admission and SQLite main-file page limit; external filesystem changes require deployment quota"
+    },
+    "originalManifestSha256": "e831071b1c0667c85c79093e6e1345073683ac750ffb45398638196a6137c191",
+    "cloneSourceAssets": 685,
+    "retainedReadyAssets": 681,
+    "purgedOnlyCloneIds": [
+      "5b255b1e-b90f-4062-8490-f1e4c36bbb95",
+      "4a4a5428-3aa3-4d89-8c64-0129497faea5",
+      "c68cc041-6bcd-4115-9138-cf0941f1d975",
+      "485148db-3a54-4672-b573-424c598b0b2e"
+    ],
+    "restoredSecretsExcluded": true
+  },
+  "projectId": "cf42c258-ec3d-4340-be1c-8b3fa3b18e86",
+  "allReadyAssetHashesVerified": 684,
+  "originalSourceVerified": {
+    "kind": "source-verified",
+    "assets": 685,
+    "manifestSha256": "e831071b1c0667c85c79093e6e1345073683ac750ffb45398638196a6137c191"
+  },
+  "ownedChildExited": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "primaryIdentityUnchanged": true,
+  "maxSnapshotMs": 435.0744999999988,
+  "maxPutMs": 461.976200000001,
+  "snapshotThresholdPassed": true
+}

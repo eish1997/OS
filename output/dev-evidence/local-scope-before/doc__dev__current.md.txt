@@ -1,0 +1,110 @@
+# 开发现场
+
+044已补充[无现成资源落地路线](无现成资源落地路线.md)：私人手机访问、本地Linux验证、持续在线云部署各自列出前置与费用。当前仅方案；尚未安装客户端/启动VM/采购或公开服务，完整远程与腾讯验收保持。
+
+043：[授权锁创建身份](iterations/043-auth-lock-process-identity.md)已实现并应用：明确退出或同平台创建身份不同才回收，活/旧格式活PID/跨平台/不明/损坏/链接保留。5次故障诊断未复现042错误，但观察到9个旧PID随后复用；原423根因仍未定位。最终128项工程/143文件通过；16项目/44资产/14原生会话/235实体/31登录及ChatGPT/文章/备份保持，零模型请求。真实Linux/云/手机/腾讯及完整M0/M1仍待验收。
+
+042：[本机更新应用](iterations/042-apply-local-preparation.md)已加载034至041准备源码并恢复守护；修复时间戳格式导致的停止拒绝。123项工程/141文件通过；16项目、44资产、14原生会话、235实体、31登录及ChatGPT/文章/备份保持，零模型请求。首次交接崩溃测试423保留归档，单独及完整复跑通过，原因仍待定位；未强清锁。真实云端、手机、腾讯及完整M0/M1仍待验收。
+
+041：[加密转存进程中断](iterations/041-offsite-process-crash.md)补齐工作根目录/尝试归属、启动前记录、真实close后可回收及同机死暂存回收；活/不明/CLI内容保留。三处实际SIGKILL与新自动进程恢复同ID、已有密文/原件/SDK保持，37个故障探针和14个加密回归记录均终态。123项工程/141文件通过；原主服务/ChatGPT/文章/31登录/用量/备份保持，零模型请求。未加载新源码，未验证传输中硬杀/断电/真实云端，完整M0/M1保持未验收。
+
+040：[自动备份与加密转存](iterations/040-automatic-offsite-backup.md)衔接固定ID、待确认副本保留、独立租约/后台进程及分开状态。实际Windows本地crypt验证失败保留、重启同ID、丢确认读回且密文不变、ID冲突拒绝与原生SDK恢复；21个记录进程均终态。121项完整工程/137文件通过。原主实例/自动ChatGPT/文章/31登录/用量/本机备份保持，零模型请求；源码新变化未加载，未配置真实云桶或部署，完整M0/M1保持未验收。
+
+039：[加密备份转存准备](iterations/039-encrypted-offsite-backup.md)复用固定rclone，完整上传/解密读回后提交标记，恢复前保护目录。实际Windows合成资料13个进程均退出，原生SDK/原件字节、额外凭据排除及错密钥/损坏/缺提交/改配置拒绝通过。118项完整工程、134文件通过；原主服务/自动ChatGPT/文章/31登录/用量/本机备份保持，零模型请求。没有云上传、Linux/跨机器或自动云调度，原完整M0/M1保持未验收。
+
+038：[跨平台备份路径与云候选](iterations/038-portable-backup-and-cloud-candidates.md)修复按宿主规则重定位旧会话与前缀误判；实际本机恢复包/原生SDK重开及原件字节、两种路径语义和越界拒绝通过。116项完整工程、127文件通过。核对[云资源费用](云资源候选与费用.md)：DO基础33美元/月、AWS31美元/月，另计域名/税费/超额/实验。原主产品/连接/文章/31登录/用量/备份保持，零模型请求；未重启加载修复、未购买部署或真实两机迁移。完整M0/M1门槛保持。
+
+037：[会话交接的实际进程崩溃恢复](iterations/037-chatgpt-transfer-process-crash.md)已完成同机独立Node进程三处SIGKILL与新进程恢复，5个自有进程均终态，合成目标单独刷新、来源持续拒绝，无API回退或远端撤销。114项完整工程、126文件通过。部署清单与回退步骤已补齐；原实例/自动ChatGPT/文章/31登录/用量/备份保持，零模型请求。未迁移真实账户、未加载新接口到原主服务；跨机器/断电及原M0/M1门槛保持。
+
+036：[ChatGPT专属会话迁移](iterations/036-chatgpt-session-transfer.md)按官方VM路线实现加密交接、来源先冻结、目标提交/签收、来源退役与唯一刷新所有者，共用授权锁，排队/未对账任务拒绝；四项实际HTTP/文件测试含定点异常与实例重建。113项完整工程、123文件通过。原产品实例/自动连接/文章/31登录与用量/备份保持，零模型请求；未迁移真实账户、未重启主服务加载新接口。实际进程崩溃/跨机器及原完整M0/M1门槛保持。
+
+035：[Linux部署准备](iterations/035-linux-deployment-files.md)修复必装Windows原生依赖，216包版本保持；实际npm Linux目标安装与干净Windows安装/构建通过。新增服务、环境模板、只读前置检查和版本锁。109项完整工程通过、120文件哈希，原实例/自动ChatGPT/文章/31登录/用量及备份保持，零模型请求。未执行Linux或公网部署，远程/隔离/恢复/腾讯及M1门槛保持。
+
+034：[Windows本机权限保护](iterations/034-local-permissions.md)已应用到密码/业务/运行/开发私有及应用代码目录，实际受限令牌从可读变为拒绝；启动和初始化自动处理。109项完整测试、类型/构建/Pi离线通过，112工程文件哈希；零模型请求。原主服务、自动ChatGPT、文章、31登录指纹、调用/备份时间保持。M0-04d本机项通过，完整远程/隔离/恢复/腾讯/反馈及M1门槛保持。
+
+033：[无现成资源的部署准备](iterations/033-deployment-preparation.md)已完成当前Windows环境实查与[具体方案](部署准备方案.md)。补齐腾讯固定版本8份启动/验证/停止文本，未执行；确认远程动态回调尚需桥接，.env/业务目录继承宽组权限需修复。用户确认无现成资源，未购买/上线。原工程108测试及新节点探针基线保持，零模型请求；完整目标active，M0/M1门槛保持。
+
+032：[真实节点断线恢复](iterations/032-node-reconnect.md)补齐实际CLI离线等待、提交后丢回复去重、提交前断线/真实租约到期/回执对账及后续排队继续。同一节点进程、3任务/3资产、原字节保持，零模型请求；原107工程文件/108测试基线保持，新探针类型与实际运行通过。主产品原实例和自动ChatGPT保持。远程主机/真手机、OS睡眠、生产/异地、腾讯和反馈门槛仍待验收。
+
+031：[断线自动恢复](iterations/031-client-recovery.md)已通过真实内置浏览器启动503、关闭事件流、恢复新内容、保留未发送文字及恢复期间撤销登录验证。108项测试、类型/构建/Pi离线通过，零模型请求。ChatGPT已连接且自动就绪。测试Cookie碰撞导致当前工作台登录轮换，其他30个登录保持、总数31；主服务和守护实际退出后已恢复，原因未确认。公网/真手机、生产/异地、腾讯和反馈门槛保持。
+
+030：[真实 HTTPS 底座](iterations/030-https-proxy.md)与 Caddy 官方配置已通过独立 Windows TLS/HTTP2 探针：认证、10 MiB 上传、双端冲突、65 秒事件流和撤销；修复远程接受开发来源问题。104 项完整工程/类型/构建/Pi 离线通过。当前本机已应用，ChatGPT 自动模式、文章、31 登录、用量与备份时间保持，零模型请求。仍无公网入口/真手机证据，远程资源、生产/异地、腾讯和反馈门槛保持。
+
+更新：2026-10-07（Asia/Shanghai）。授权：按执行文档开始执行并完成。主Agent执行，没有新增开发子Agent。初始工作区仅有文档/概念图，现在已有本地工作台。Git已初始化，尚未提交或推送。
+
+## 当前交付
+
+最新029：[默认浏览器观察](iterations/029-default-browser-observation.md)取得真实open-workbench命令退出0/browserRequested=true与唯一Chrome“工作台 / Studio”窗口，后台仍是原ready实例、原守护running且未重启。Chrome连接不可用，进一步窗口读取因无法可靠确认URL被Computer Use策略停止；无截图或页面内容，默认浏览器页面可用性仍未验证，不绕过保护。工程代码未变，103项基线保持，零模型请求。随后继续独立部署项，真实页面须正常浏览器连接或用户反馈补验，M0/M1与完整目标保持。
+
+最新028：桌面“打开工作台”入口和当前用户Startup入口已生成，后台隐藏启动、健康实例复用；真实保存命令实际退出0，打开观察使用NoBrowser保留原浏览器。103项完整工程/类型/构建/Pi离线通过，中文数据目录实际文件与外来快捷方式字节保护通过。原PID47124不重启，最新守护PID40816；原自动模型、文章、31登录、用量/备份时间保持，零模型请求。见[028](iterations/028-one-click-and-user-startup.md)、[ADR-019](../adr/019-one-click-and-user-startup.md)、[入口](../../output/dev-evidence/desktop-entry.json)、[产品观察](../../output/dev-evidence/desktop-entry-production.json)。实际Windows登录、默认浏览器新页面和睡眠唤醒仍未观察；远程/异地/腾讯/反馈原门槛继续，M0 verifying、M1未启动、完整目标active。
+
+前轮027：默认后台守护和实际隔离崩溃恢复已通过，认证停止不自动恢复、健康失联不重启、存活身份拒绝接管，10分钟最多5次启动尝试。原101项[固定通过基线](../../output/dev-evidence/verification/history/2026-10-06T15-30-46-133Z/report.json)、[027](iterations/027-owned-service-supervision.md)与[观察](../../output/dev-evidence/supervision-production.json)保留；守护PID25792为当时历史实例，当前以028为准。
+
+最新026：大正文搜索有界ASCII候选/原LIKE回退已应用。最终原完整256资产/约2043 MiB场景每页50/119结果最高1899ms，小正文1298ms/名称995ms，期间数据读取最高25ms；默认场景三类最高455/793/727ms。完整SHA256、索引字节核对、原Unicode片段和权限/取消/分页保持，无新索引/设置或容量扩大。99项完整工程/类型/构建/Pi离线通过。原自动模型、文章、31登录、用量和备份时间保持，实际产品四个只读搜索与原SQL一致。见[026](iterations/026-bounded-ascii-search.md)、[ADR-017](../adr/017-bounded-ascii-search.md)、[性能](../../output/dev-evidence/search-performance.json)、[产品观察](../../output/dev-evidence/search-anchor-production.json)。完整目标active，M0 verifying、M1未启动；下一步原生产/远程/异地/腾讯/反馈门槛。
+
+前轮025：默认重负载库24份32 KiB实际HTTP上传/项目读取最高325ms，685原件通过HTTP哈希；新恢复副本在默认容量内三份8 MiB上传/读取最高435ms，684现存原件通过HTTP哈希且原源库685原件保持。原98项基线94文件SHA256不变，两个新探针类型检查/实际退出0通过；未改业务代码或重启产品。原自动模型、文章、31登录完整指纹、调用计数及每日备份时间保持。见[025记录](iterations/025-http-upload-responsiveness.md)、[补充验证](../../output/dev-evidence/upload-probe-verification.json)和[产品观察](../../output/dev-evidence/upload-responsiveness-production.json)。完整大正文2057ms及原部署/腾讯/反馈门槛仍待验收。下文024及更早为历史迭代，不再把实际HTTP读取当作缺证据。
+
+TypeScript / React / Node24.19.0 / Pi SDK1.0.3 / SQLite。项目画廊/标签、作用域输入/持久对话、收件、单worker队列、取消/中断对账、真实文件/版本、名称标签/UTF-8正文搜索、来源预览、项目摘要/固定上下文、候选记忆确认/纠正/删除、草稿自动保存/离线冲突/Markdown导出、电脑节点可信文件任务、联合备份/恢复、本地后台服务和存储诊断。已有ChatGPT免配置订阅、项目原生接续/可选新话题及独立绑定；015补齐真实中断/排队追问、同机独立物理硬盘备份和恢复HTTP；016接入每天空闲自动备份、默认7点保留、逐次恢复检查及状态页；017补齐报告/文章原资料引用及真实记忆/摘要/文章闭环；019移出后台备份，界面可读写、新任务排队至维护结束。使用见[README](../../README.md)。
+
+打开 http://127.0.0.1:4310，仅本机回环。密码在忽略的本机.env；用户已完成真实ChatGPT登录；按012免配置要求启用自动模式，GPT-5.6-Sol基础文件往返通过，2次请求/620 tokens，使用ChatGPT额度。普通API未启用，未知仓库代码未运行。
+
+当前产品服务：PID7872，创建2026-10-06T16:59:36.4758360Z，实例b62fbfb6-f7b4-411b-b8ac-7dc7feed6986，启动标记3d6188ad-1653-464d-bb0d-85d34bcee649，所有者local-service.ps1，健康 http://127.0.0.1:4310/api/health。031工具传输结束后核对实际进程及监听均不存在，再通过默认守护恢复；退出原因未确认。ChatGPT自动模式、文章、调用/备份时间保持；当前浏览器登录已轮换，其他30登录保持，总31。030及更早身份为历史。
+
+日常入口：C:\Users\15128\Desktop\打开工作台.lnk；Startup已配置当前用户登录后后台启动。维护默认启动仍为scripts/run.ps1 start。当前守护PID35620，创建2026-10-06T16:59:32.9714630Z，实例cc9b79a7-40a5-482b-bf84-a6e618c43b74；默认15秒检查，身份记录.runtime/supervisor-workbench.json。守护状态/停止使用scripts/supervise-service.ps1 -Action status/stop；停止守护留下工作台运行。工作台状态/明确停止使用scripts/local-service.ps1 -Action status/stop；认证停止后守护会退出。身份不符不强停。桌面/Startup移除维护使用desktop-entry.ps1 -Action remove -ShortcutDir ([Environment]::GetFolderPath('Desktop'))；不停止正在运行的服务。尚未验收真实登录、默认浏览器、睡眠唤醒、系统服务或远程监控。
+
+020完整复制代码/依赖在中文空格目录实际构建、后台启动/重启、fixture worker、节点CLI、默认自动备份及备份恢复CLI通过。7文件/3草稿字节及12行业务元数据一致，离线合成原生会话重开，节点凭据/旧登录排除。发现并修复节点上传trim原文，旧回执重传仍去重；当前产品已应用且ChatGPT自动连接、文章和31个原浏览器会话保留。证据：[独立部署](../../output/dev-evidence/windows-deployment.json)、[当前产品](../../output/dev-evidence/windows-deployment-production.json)。零模型请求；不代表全新电脑安装/真实手机/生产部署已通过。
+
+## 已验证
+
+- 128项测试、类型检查、生产构建、Pi离线探针通过。[代码SHA256/日志](../../output/dev-evidence/verification/report.json)，历史报告保留。覆盖真实worker/节点、4阶段写入杀进程、Windows文件占用、响应丢失、去重/范围/冲突/预算/撤销/恢复、摘要固定与候选确认；专属订阅授权/Windows重启凭据保护、刷新与预算归属、真实SDK受控SSE工具往返；时限拒绝副作用、订阅序号去重、流终态结算等待确认、未知用量、015管理临时登录清理，以及021较长会话归档与后台历史恢复点检查、022后台搜索/撤销与新鲜单次容量遍历。
+- [订阅设置交互](../../output/dev-evidence/ui/chatgpt-interactions.json)：Chrome受控授权/取消、登录不启用、模型选择/用量确认、390手机尺寸、刷新保持连接和断开不回退API，无真实账户登录或模型请求。原失败报告保存在ui/history。
+- [项目交互](../../output/dev-evidence/ui/project-interactions.json)：实际Chrome验证A提交切B、输入缓存、摘要及选择固定、摘要冲突、持久对话、自动保存/保存中继续编辑、离线与双端冲突、损坏缓存和记忆确认。独立临时数据，零模型调用。
+- [搜索交互](../../output/dev-evidence/ui/search-interactions.json)：中文正文/名称/标签、安全片段、刷新选择/查询/页签、项目隔离、删除失效、默认视图、390手机阅读。后端包含100KB之后正文、分页、损坏索引/原文件与恢复重建。非UTF-8内容仅名称标签检索，不声称解析PDF/DOCX。
+- [基本界面/存储](../../output/dev-evidence/ui/report.json)：桌面1440×1000及390×844，两个客户端同一草稿，无页面异常/横向溢出，五张截图。视觉脚本仅编辑自己创建的工程项目，结束归档。手机尺寸不等于真实跨网络设备。
+- 实际后台进程在启动脚本退出后完成固定worker文件任务，重复启动复用、错误身份拒绝停止、认证退出释放端口；PowerShell5/7兼容。存储为只读用量，已增加整体/分项应用写入检查、SQLite主文件上限、原生会话保存与恢复预留；部署文件系统/WAL物理边界仍未验收。
+- Pi原生JSONL创建/重开、工具/abort/subscribe接口和会话绑定联合恢复通过；012真实两请求文件往返与013真实取消/超时通过，检查点保留、所属进程退出和停止后调用稳定。每停止场景2请求、结算2/完整回报1、已知305 tokens且complete=false，不能当成全部消费。014正常重启接续通过；015真实中断对账接续和排队追问/异项目隔离通过，8次请求、已知3103 tokens，两个源用量不完整。原件不变、检查点不重放、独立绑定及worker退出核验。[真实恢复/队列](../../output/dev-evidence/pi-real-recovery-queue.json)
+- [独立硬盘备份](../../output/dev-evidence/independent-backup.json)：E盘Disk0/C盘Disk1，当前用户专用C盘备份/干净恢复、40资产/52清单文件/5完成会话重开；恢复HTTP新登录/实体/全部成果逐字节比对通过。未复制模型或旧登录/节点凭据，原ChatGPT自动连接保留。零模型请求；同机双硬盘不代表异地灾难恢复。016已实现自动调度/保留，见自动定时条目。
+- 腾讯固定commit资料/哈希、ADR、21合成用例、计划与来源初稿已导入工作台；未运行或采用。
+- [自动定时/保留](../../output/dev-evidence/automatic-backup.json)：真实E/C独立硬盘、定时器和fixture worker；受控时钟推进两次每日到期，三份有效副本保留2份、清理1份，仅处理自有目录，手动文件保留；实际Chrome桌面/390无异常。当前产品默认24小时/7点的首备份由实际时钟生成并恢复检查，见[产品状态](../../output/dev-evidence/automatic-backup-production.json)。全程零模型请求；021已补齐默认661资产/七点及实际约2043MiB容量、较长归档和后台启动；搜索/写入扫描性能、生产及进程外守护仍待验证。
+
+- [真实记忆与内容](../../output/dev-evidence/pi-real-content.json)：三轮真实模型形成资料计算/报告/文章，候选确认、偏好修正及删除影响后续上下文和文章，原资料ID/哈希保留；11次请求、31258 tokens且完整。最后界面定位失败保留历史，用同一批原任务零模型观察补齐Chrome桌面/390，见[观察](../../output/dev-evidence/content-observation.json)及[最终文章](../../output/dev-evidence/content-final-draft.md)。合成确认不等于用户实际反馈。
+
+020历史交付：[Windows完整部署020](iterations/020-windows-deployment.md)、[节点原文ADR-011](../adr/011-node-receipt-content.md)；前轮：[后台备份019](iterations/019-background-backup.md)、[ADR-010](../adr/010-background-backup.md)、[解决计划](接入与上线解决计划.md)。源库只读快照，复制/恢复/轮转移到后台，维护期间界面可编辑、新任务排队；最后384MiB三次实测1180次数据接口最高49.6ms，保留2点清理1点，零模型请求。[当前产品更新](../../output/dev-evidence/background-backup-production.json)：新实例已应用、ChatGPT仍自动连接、最终文章字节及Chrome桌面/390通过；保留原最近备份时间，没有提前触发当前产品每日备份。M0-04c本地修复已通过，完整混合容量/启动扫描及生产条件未验收，保持verifying。020已完成Windows中文空格路径本地部署、节点原文修复及完整恢复；下一步完整混合容量/启动扫描和剩余性能。01b固定SDK已完成，03b本地真实恢复已补齐；其他原依赖、用户反馈、跨网络手机、腾讯及M1门槛保持。见[台账](backlog.md)/[验收](acceptance.md)，完整目标未完成。
+
+前轮交付：[022后台搜索与容量测量](iterations/022-search-performance.md)、[ADR-014](../adr/014-search-and-capacity-performance.md)、[实际性能](../../output/dev-evidence/search-performance.json)、[当前产品](../../output/dev-evidence/search-performance-production.json)。022已应用后台只读搜索、单次候选查询及每次准入单次容量遍历，保留原件哈希/权限/配额与恢复预留。95项工程检查通过。完整场景小资料搜索最高1633毫秒、期间数据读取最高23毫秒；50份8 MiB正文页仍2757毫秒超过2秒门槛。独立项目29份32 KiB新写入共14.8秒，不等同整批建档已通过。用户无需新增设置，原ChatGPT自动连接、文章、31登录完整指纹、调用计数及每日备份时间保持。 完整M0/M1目标未完成。
+
+## 等待条件与恢复
+
+历史024记录（当前以026为准）：661资产相同内容建档已实测约29.8%改善；完整大正文2057ms、单次写入596ms/实际HTTP响应及部署门槛待验证；以下021为前轮容量/启动记录：默认661资产约499 MiB/总740 MiB及七份每日到期备份、独立干净恢复通过；扩大隔离分项后实际约2043 MiB整体上限拒写/备份/恢复通过，8/32 MiB原生会话SDK重开。后台归档覆盖默认128 MiB，交互接续仍受2 MiB保护。启动七点原18.7秒，经后台完整检查后约3.7秒就绪，211次资料读取最高253毫秒；完整整体场景约2.7秒就绪。91项工程检查及当前产品更新通过。约1 GiB正文搜索最高2745毫秒超过2秒门槛，首次661资料创建580秒暴露重复扫描成本；下一步处理这两项，不能把完整容量测量视为全部性能通过。生产权限/物理配额/WAL、守护/唤醒、真手机、异地恢复、腾讯、用户反馈及M1范围保持。下文020及更早记录是对应迭代状态。
+
+020阶段记录（当前以本节021为准）：用户免配置要求改变011阻塞条件，goal保持active。默认自动选择兼容模型/每任务20次请求与300秒保护，无需再次填写参数。真实接续/中断/排队及同机独立磁盘手动备份通过。每天空闲自动备份/保留和当前产品首备份已通过。017三轮真实记忆/摘要/文章通过，11请求/31258 tokens，原任务零模型界面恢复通过；019后台维护与384MiB实测已通过；M0-04c保持verifying，完整容量/启动扫描仍待验证，020已完成Windows本地完整部署；下一步完整容量/启动扫描及剩余性能/用户体验；远程手机、生产权限/物理配额、腾讯及M1门槛保留。证据：[自动连接](../../output/dev-evidence/chatgpt-automatic-connection.json)、[基础探针](../../output/dev-evidence/pi-real-probe.json)、[停止探针](../../output/dev-evidence/pi-real-lifecycle.json)、[实际界面](../../output/dev-evidence/ui/chatgpt-real-automatic.json)。
+
+### 历史阻塞记录
+
+最新状态：010之后已连续三轮复核同一模型用量前置，实际connected=true、enabled=false、model为空、maxCalls=0、无在途任务、无独立ready任务。第三轮update_goal实际返回blocked，完整目标未完成；此前active描述为当时记录。证据和恢复条件见[迭代011](iterations/011-waiting-usage-audit.md)。用户确认或在设置启用额度后先从01b真实文件探针恢复，登录不需重做。
+
+010之后第二轮继续审计：前轮与本轮均为no progress，目前累计第2轮。重新通过HTTP鉴权读取：connected=true、enabled=false、model为空、maxCalls=0，无在途任务；代码匹配62项通过基线、台账无ready/doing行。证据：[011第二轮](../../output/dev-evidence/goal-audits/011-waiting-usage-2.json)。不消耗模型或重复未变化测试，goal保持active；不能把常驻空闲服务算成具体任务的verified wait。
+
+010之后首轮继续审计：上一轮为progress，本轮为no progress第1轮；实际服务ready、授权已连接，但enabled=false、model为空、maxCalls=0、无在途任务。代码仍匹配62项通过基线，无独立ready任务；没有重跑测试或消耗模型。证据：[011审计](../../output/dev-evidence/goal-audits/011-waiting-usage-1.json)。仍等待此前已提出的具体模型/用量确认，goal保持active，不沿用008旧计数。
+
+当前状态以本段为准：010真实授权与目录读取通过，get_goal本轮返回active，等待明确模型/用量确认。下文008/009的blocked和未登录描述仅记录当时历史。证据：[连接](../../output/dev-evidence/chatgpt-real-connection.json)、[实际Chrome目录](../../output/dev-evidence/ui/chatgpt-real-catalog.json)。
+
+2026-10-06已核实官方ChatGPT plan usage及固定Pi1.0.3的openai OAuth，之前“必须API密钥”的表述过窄。007完成M0-01c离线适配并取得工程/界面证据，没有使用全局Codex凭据或消耗模型额度。随后008连续三个回合复核，必要外部条件未变化、无独立ready任务，平台goal已由工具返回blocked；完整目标未完成。具体下一步见[接入与上线解决计划](接入与上线解决计划.md)。
+
+此前三轮blocked审计属于历史，见[迭代005](iterations/005-requirement-audit.md)、[迭代006](iterations/006-blocked-audit.md)。本轮有实现进展，不沿用旧阻塞计数，也不把离线通过当作模型前置已经解决。
+
+1. 原模型/用量前置已由012自动设置解决。后续无需用户填写；014/015真实原生接续、中断对账和排队追问通过。017真实记忆/摘要/输出已通过；下一步用户反馈与生产部署门槛；普通API是另行选择的付费途径，不复用Codex凭据，不重复未变化的真实模型探针。
+2. C盘专用独立物理硬盘位置及手动恢复已落实，016自动调度/保留已实现并验收，继续大规模维护性能与异地恢复。远程主机/HTTPS尚未配置；按[部署](../deployment.md)验证生产文件系统配额/WAL实际增长、监控、电脑手机不同网络、节点断线/唤醒及独立机器/异地恢复。同机双硬盘不替代异地灾难恢复。
+3. 腾讯隔离运行环境及同模型实验预算。当前无Docker，未执行下载脚本/仓库代码。按[实验计划](tencent-memory-experiment.md)完成21用例、无记忆基线、提取/召回计费、隔离/删除/回退、选型与用户反馈。
+
+输入改变后重新审计阻塞，从最早未完成M0任务恢复；全部M0通过再开始M1。未购买、部署、发布、提交或推送。系统Node18不适用，继续使用现有Node24。
+
+007后已连续三个回合复核同一前置条件：[迭代008](iterations/008-post-connection-audit.md)。代码摘要仍匹配通过报告，产品为同一ready实例；专属凭据文件仍不存在，真实.env修改时间未变，授权/部署输入尚未就绪。008三轮均为no progress，满足新的三次同条件阈值，update_goal已返回blocked。没有重跑未变化测试或启动真实探针；等待用户通过已准备的设置入口授权。恢复条件改变后重审依赖，不把阻塞或局部离线通过标为完成。
+
+2026-10-06用户实际登录报错后，[009](iterations/009-oauth-network-fix.md)取得新progress：无真实授权码诊断复现地区403，确认浏览器现有系统代理而服务直连；修复原生网络配置复用/worker继承、错误状态/步骤/代码保留。代理公开身份接口200，token端点无效诊断client得到正常JSON400 invalid_client；未替用户实际登录或消费模型。59项测试/构建/Pi离线及Chrome授权/新产品实例基本交互通过。旧未完成回调在重启时结束，用户需刷新重新授权。此前008阻塞事实为历史，本轮改变恢复条件，但goal工具最后实际状态仍blocked，不能伪称工具已恢复active或全目标完成。后续真实授权后按01b/03b推进。统一模型网关/Agent协议候选见[ADR-005](../adr/005-provider-and-agent-reuse.md)，尚未安装。
+
+
+前轮交付：[023只读搜索映射](iterations/023-search-mapping.md)、[ADR-015](../adr/015-read-only-search-mapping.md)、[当前产品](../../output/dev-evidence/search-mmap-production.json)。023已应用只读搜索数据库映射和UTF-8索引字节校验，原件完整哈希、损坏修复/权限/分页和存储边界保持。96项工程检查通过。完整容量小资料搜索最高1434毫秒、大正文页2057毫秒仍超过2000毫秒；期间数据读取最高23毫秒。用户无需新增设置，原ChatGPT自动连接、文章、31登录完整指纹、调用计数及每日备份时间保持。 完整目标active、M0 verifying、M1未启动。
+
+
+最新交付：[024完整建档](iterations/024-batch-write.md)、[ADR-016](../adr/016-upload-capacity-preflight.md)、[对比](../../output/dev-evidence/batch-write-comparison.json)、[当前产品](../../output/dev-evidence/batch-write-production.json)。024已应用同一次上传前置容量合并测量，没有跨阶段缓存或扩大配额。98项工程检查通过。同脚本新建661资产/约499 MiB原件及原生会话，完整建档172.4秒→121.0秒（约29.8%改善），两批内容清单一致、各661哈希和16条SDK消息重开通过。单次写入峰值596ms、完整大正文2057ms及实际HTTP期间数据响应仍待验收。无需新增设置，ChatGPT自动连接、文章、原31登录完整指纹、调用计数与每日备份时间保持。 完整目标active，M0 verifying，M1未启动。

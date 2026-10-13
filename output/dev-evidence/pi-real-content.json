@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T11:47:07.372Z",
+  "maximumRequests": 12,
+  "scope": "Own nonsensitive synthetic projects; real ChatGPT; read/write/proposal/draft tools only; no automatic provider retry, publication or user-project edits",
+  "model": "gpt-5.6-sol",
+  "projectId": "988a40a4-7bc0-4677-9337-e798df54fd26",
+  "otherProjectId": "8841d7f3-57b6-4826-9a06-878d86f1bb42",
+  "source": {
+    "id": "ebfe1ebe-4bb1-4a92-8ce5-c34a9a3026cd",
+    "hash": "9521eba14de7ce6d3abecf8d0650d481e53f08f8aab939d19ec772e43b46626d"
+  },
+  "step": "browser-delete-and-final-task",
+  "phases": [
+    {
+      "runId": "8d161561-d227-46a6-81d7-2d9146847504",
+      "calls": 5,
+      "usage": {
+        "input": 7287,
+        "output": 815,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 8102,
+        "complete": true
+      }
+    },
+    {
+      "runId": "ee1bd850-c899-459d-95df-86644ada8d39",
+      "calls": 3,
+      "usage": {
+        "input": 7217,
+        "output": 406,
+        "cacheRead": 2816,
+        "cacheWrite": 0,
+        "totalTokens": 10439,
+        "complete": true
+      }
+    },
+    {
+      "runId": "909aaa90-9854-4950-8959-f170ae895b92",
+      "calls": 3,
+      "usage": {
+        "input": 12262,
+        "output": 455,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 12717,
+        "complete": true
+      }
+    }
+  ],
+  "finalDraftId": "48caf074-0b65-49d6-8d90-348a0ee6edad",
+  "finalDraftFile": "output/dev-evidence/content-final-draft.md",
+  "calls": 11,
+  "tokens": 31258,
+  "complete": true,
+  "priorFailure": {
+    "reason": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '内容草稿', exact: true })\u001b[22m\n",
+    "preservedIn": "output/dev-evidence/content-history"
+  },
+  "observation": {
+    "file": "output/dev-evidence/content-observation.json",
+    "modelRequests": 0
+  },
+  "checks": [
+    "real source calculation and draft",
+    "original source ID/hash and report lineage",
+    "unconfirmed and other-project memory excluded",
+    "assistant proposals await confirmation",
+    "Chrome synthetic confirmation/correction/deletion",
+    "native continuation uses revised preferences",
+    "deleted preferences excluded from current context and final draft",
+    "confirmed summary injected",
+    "original native source unchanged",
+    "Markdown export references",
+    "desktop and 390 UI no errors"
+  ]
+}

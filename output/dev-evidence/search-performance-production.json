@@ -1,0 +1,65 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T13:57:09.807Z",
+  "modelRequests": 0,
+  "health": {
+    "ready": true,
+    "pid": 46532,
+    "instanceId": "ae26c419-74b6-4b2e-bd8f-fbd9e1ead481",
+    "launchId": "936a709b-5d45-4cad-b26e-d88c84767e73"
+  },
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "checking": false,
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "sessions": {
+    "count": 31,
+    "fingerprint": "d462322bba6916283d5d594aee6ef96d7809e9d8f895502d22bc3710fe984756"
+  },
+  "canonicalDraftSha256": "d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931",
+  "service": {
+    "ready": true,
+    "pid": 46532,
+    "instanceId": "ae26c419-74b6-4b2e-bd8f-fbd9e1ead481",
+    "launchId": "936a709b-5d45-4cad-b26e-d88c84767e73",
+    "creationUtc": "2026-10-06T13:56:46.8816560Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "canonicalDraftPreserved": true,
+  "callCountersUnchanged": true,
+  "sessionFingerprintPreserved": true,
+  "preservedUserSessions": 31,
+  "verification": "verification/report.json",
+  "ownLoginRetired": true,
+  "actualBrowser": {
+    "assistantReady": true,
+    "modelAutomatic": true,
+    "advancedOptional": true,
+    "backupReady": true,
+    "searchObserved": {
+      "query": "Memory",
+      "project": "腾讯 Memory 验证",
+      "matches": 7,
+      "modelRequests": 0
+    },
+    "originalEmptySearchRestored": true,
+    "observation": "Existing signed-in user tab refreshed; settings and real project search observed with cua; no new browser login or model requests. Initial reload observation captured overview, then settings explicitly opened."
+  }
+}

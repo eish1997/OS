@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-07T06:39:25.695Z",
+  "status": "passed",
+  "scope": "Real Pi on own synthetic draft only; no browser, publication, user article edit or Memory runtime",
+  "maximumRequests": 4,
+  "projectId": "b1d13285-f7b2-40fd-98da-add78a5d8beb",
+  "original": {
+    "id": "4218d11d-6676-4cc7-b528-50bf3fd22bbe",
+    "revision": 1,
+    "sha256": "39f0d4a62ddd0efd612600bbbbef3c904a1158a28e5867d20fcb7972b852f30f",
+    "sourceId": "e29e6afa-5573-4db3-ba38-9775c2cb129a",
+    "sourceHash": "c0b4604aaaaf8b214b51a9efb4d85d927a5b070fca490f6b17ccf1e9bece594b"
+  },
+  "runId": "020941c4-9713-478e-9c0f-002007e70c89",
+  "taskId": "0908268d-58b3-4bf0-bb81-dca55a909206",
+  "step": "completed",
+  "result": {
+    "draftId": "4218d11d-6676-4cc7-b528-50bf3fd22bbe",
+    "revision": 2,
+    "sourceIds": [
+      "e29e6afa-5573-4db3-ba38-9775c2cb129a"
+    ],
+    "calls": 3,
+    "usage": {
+      "input": 2844,
+      "output": 230,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 3074,
+      "complete": true
+    },
+    "taskAcceptance": "needs_review",
+    "resultDraftIds": [
+      "4218d11d-6676-4cc7-b528-50bf3fd22bbe"
+    ],
+    "operations": [
+      {
+        "name": "read_draft",
+        "state": "completed"
+      },
+      {
+        "name": "update_draft",
+        "state": "completed"
+      }
+    ],
+    "existingDraftsAndRunsUnchanged": true,
+    "exportHasSourceAndResult": true,
+    "sourceHashPreserved": true
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-10T18:11:08.486636+00:00",
+  "status": "passed",
+  "tests": 171,
+  "failed": 0,
+  "typecheck": "passed",
+  "build": "passed",
+  "sdkProbe": "passed",
+  "nativeToolsActuallyExercised": [
+    "read",
+    "write",
+    "edit",
+    "ls",
+    "find",
+    "grep",
+    "bash",
+    "powershell"
+  ],
+  "controlledSubscriptionRoundtrip": "native write then host write_asset passed",
+  "realModelRequests": 0,
+  "productionApplied": true,
+  "servicePid": 50404,
+  "health": "ready",
+  "pageStatus": 200,
+  "businessDataPreserved": true,
+  "sourceSha256": {
+    "server/pi-adapter.ts": "069f1faa63523cbf29ea97accf16853ee81776a4c118deb1b06b5588820e2187",
+    "server/app.ts": "4dcbbf1d211b25afe234069717e63bfb2c9c6e96b0f6f88d86aa767790d0f031",
+    "server/worker.ts": "ca3256d29163323bb9866ffc4948c189437e97e02614e39bf88e0b0b98a5b5ca",
+    "server/scheduler.ts": "d04a2b0dd845f4e57510da35bc62d94367a1d7007a1897a96e4bdb3431fcda40",
+    "shared/pi-tools.ts": "f4af3c364067be3b117eeaa3e4aca43017e231e941b4f74a1ad441b1f4945caa",
+    "src/main.tsx": "5ff8805512bb015894fc7744410080fbf336ebee801de1365218edc7f9799c77",
+    "src/research-panel.tsx": "c5662ad789e3ad42ae7b24e2d65009a20e2492f2dc5bf5d0f3fe556a260067dd",
+    "tests/pi-native-tools.test.ts": "52f434118039e1fe66d4dbd8d50cb0940f31bcb546d101a598c98fa7d408f4d9",
+    "tests/chatgpt.test.ts": "5ef89209f688e13c3db6137a7641df39f5a82c7ac148c1ab984f1326611e830d",
+    "tests/research.test.ts": "22b2c758354b93b78302112d5926f61d469c1a16105a97ef52972a033b241c9f",
+    "scripts/probe-pi.ts": "75a74d24dc4a57294953e6260ae6d0779a5562f0034505f27bde95a291d403b5"
+  }
+}

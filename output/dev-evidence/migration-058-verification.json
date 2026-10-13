@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-08T05:01:24.243Z",
+  "businessRecordsPreserved": 261,
+  "assetHashesVerified": 46,
+  "portableBackupFiles": 65,
+  "restoreVerified": true,
+  "completedSessionsVerified": 11,
+  "integrity": {
+    "integrity_check": "ok"
+  },
+  "modelRequests": 0
+}

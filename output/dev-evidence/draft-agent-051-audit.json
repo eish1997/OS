@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-07T06:48:08.783Z",
+  "status": "passed",
+  "scope": "Selected-draft editing, captured/read lineage, local deployment and own synthetic real Pi; no browser acceptance",
+  "engineeringTests": 145,
+  "engineeringFiles": 148,
+  "verificationAt": "2026-10-07T06:43:39.177Z",
+  "verificationSha256": "2319297f5b4a6ca8b3de977c15b3fc5c0c37d1d2754e552b93b911bea50b247f",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 33132,
+    "instanceId": "1b538e1c-8fee-4229-a9fa-44a8a59a0f0b",
+    "launchId": "93462162-96e1-4e83-ab55-f84b459a013a"
+  },
+  "supervisor": {
+    "pid": 53884,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "workerAbsent": true,
+  "counts": {
+    "projects": 17,
+    "entities": 248,
+    "assets": 45,
+    "sessions": 31
+  },
+  "preexistingEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "lineagePatchDeployed": true,
+  "realPi": {
+    "runId": "020941c4-9713-478e-9c0f-002007e70c89",
+    "calls": 3,
+    "draftId": "4218d11d-6676-4cc7-b528-50bf3fd22bbe",
+    "revision": 2,
+    "acceptance": "needs_review",
+    "validity": "Final additional capture_source dependency propagation does not alter the tested read_draft/update_draft path; captured/read-source integration separately tested"
+  },
+  "documents": 108,
+  "links": 735,
+  "browserAcceptance": "pending; protocol policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

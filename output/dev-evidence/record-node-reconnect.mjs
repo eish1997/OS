@@ -1,0 +1,11 @@
+import {readFileSync,writeFileSync,copyFileSync,readdirSync,existsSync} from 'node:fs';
+import {join,dirname,resolve} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const base='output/dev-evidence/';const sha=b=>createHash('sha256').update(b).digest('hex');
+const read=f=>readFileSync(f,'utf8').replace(/^\uFEFF/,'');const json=f=>JSON.parse(read(f));
+const engineering=json(base+'verification/report.json');for(const [file,hash] of Object.entries(engineering.baseline))assert.equal(sha(readFileSync(file)),hash,file);
+const probe=json(base+'node-reconnect.json');assert.equal(probe.status,'passed');assert.equal(probe.checks.length,3);assert.equal(probe.modelRequests,0);assert.equal(probe.nodeExit.signal,'SIGTERM');
+writeFileSync(base+'node-reconnect-verification.json',JSON.stringify({at:new Date().toISOString(),status:'passed',unchangedEngineeringFiles:Object.keys(engineering.baseline).length,unchangedTestBaseline:108,baselineAt:engineering.at,baselineReportSha256:sha(readFileSync(base+'verification/report.json')),newProbe:'scripts/probe-node-reconnect.ts',newProbeSha256:sha(readFileSync('scripts/probe-node-reconnect.ts')),typecheck:{command:'node node_modules/typescript/bin/tsc --noEmit',exitCode:0,stdout:'',evidence:'Actual tool command completed before probe exit; no subsequent engineering edit'},actualProbe:probe.status,actualProbeSha256:sha(readFileSync(base+'node-reconnect.json')),modelRequests:0},null,2));
+const source=read(base+'observe-client-recovery-production.ts').replaceAll('client-recovery-production','node-reconnect-production');writeFileSync(base+'observe-node-reconnect-production.ts',source);copyFileSync(base+'client-recovery-production-before.json',base+'node-reconnect-production-before.json');
+console.log(JSON.stringify({status:'prepared',engineeringFiles:Object.keys(engineering.baseline).length,probePid:probe.nodePid,mainReference:'Reuses earlier preflight; observer compares original automatic configuration, usage, draft, backups and expected browser session rotation'}));

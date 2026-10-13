@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-07T07:25:03.167Z",
+  "run": {
+    "id": "89cb80c9-01bf-4db6-b925-9e839f5a55a6",
+    "status": "cancelled",
+    "calls": 3,
+    "cancelRequested": true,
+    "cancelRequestedAt": "2026-10-07T07:23:35.776Z",
+    "sessionId": "01a1153e-e81a-7186-8f2b-3210484aefd8",
+    "sessionPath": "E:\\AI\\OS\\data\\sessions\\e9fd67e9-08f0-42b3-b026-10b24cb89114\\2026-10-07T07-23-26-619Z_01a1153e-e81a-7186-8f2b-3210484aefd8.jsonl"
+  },
+  "draftRevision": 2,
+  "originalTaskRevision": 1,
+  "firstMarkerPresent": true,
+  "secondMarkerPresent": false,
+  "operations": [
+    {
+      "id": "093edeb8ae93b1a2aab361a723950e60e9acdb93912af31acd28cb5666682194",
+      "name": "read_draft",
+      "state": "completed",
+      "readRevision": 1
+    },
+    {
+      "id": "951df7d5a94fb527289c3341521d83a270d60a7d518c0af8f48c0f4beeb0627f",
+      "name": "update_draft",
+      "state": "completed",
+      "updatedRevision": 2
+    }
+  ],
+  "cancelEventPresent": true,
+  "runEventTypes": [
+    "task.accepted",
+    "run.status",
+    "model.output.started",
+    "subscription.usage",
+    "operation.started",
+    "operation.completed",
+    "model.output.started",
+    "subscription.usage",
+    "operation.started",
+    "draft.updated",
+    "operation.completed",
+    "run.cancel_requested",
+    "subscription.usage",
+    "assistant.text",
+    "run.status"
+  ],
+  "changedConfigurationPaths": [
+    "data/private-model/chatgpt.json"
+  ]
+}

@@ -1,0 +1,41 @@
+[Unit]
+Description=Personal AI Workbench HTTPS Proxy
+Wants=network-online.target
+After=network-online.target workbench.service
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=workbench-proxy
+Group=workbench-proxy
+EnvironmentFile=/etc/workbench/proxy.env
+Environment=XDG_DATA_HOME=/var/lib/workbench-proxy
+Environment=XDG_CONFIG_HOME=/var/lib/workbench-proxy
+ExecStart=/opt/workbench/runtime/caddy run --config /opt/workbench/app/deployment/Caddyfile --adapter caddyfile
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=30
+KillMode=control-group
+UMask=0077
+StateDirectory=workbench-proxy
+StateDirectoryMode=0700
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryMax=512M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

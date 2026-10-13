@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-07T07:37:49.544Z",
+  "status": "reproduced",
+  "scope": "Host reservation ledger only; synthetic model binding; no model/network request",
+  "configuredPerTaskLimit": 2,
+  "taskCallsReserved": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "calls": 2
+    },
+    {
+      "attempt": 2,
+      "calls": 1
+    }
+  ],
+  "sameTask": true,
+  "modelRequests": 0
+}

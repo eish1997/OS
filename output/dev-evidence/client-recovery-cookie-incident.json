@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-06T17:04:00.660Z",
+  "cause": "Same browser profile and hostname share session cookies across ports",
+  "correctedFixtureHostname": "localhost",
+  "productHostname": "127.0.0.1",
+  "currentBrowserSessionReplaced": true,
+  "totalUserSessions": 31,
+  "preservedOtherUserSessions": 30,
+  "originalCompleteFingerprintPreserved": false,
+  "chatgptReauthorization": false,
+  "mainReloadAfterIsolatedLoginVerified": true,
+  "modelRequests": 0
+}

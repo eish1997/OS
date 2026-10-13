@@ -1,0 +1,51 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T12:38:58.600Z",
+  "modelRequests": 0,
+  "workspace": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\中文 工作台",
+  "data": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\项目 数据",
+  "restored": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\恢复 数据",
+  "backupRoot": "C:\\Users\\15128\\AI-OS-Backups\\windows-probes\\7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\备份 空间",
+  "nodeDirectory": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\电脑 节点",
+  "scope": "Full code and installed dependency copy, actual PowerShell build/start/stop/restart, fixture worker/node CLI, daily backup and manual clean restore; primary product untouched",
+  "previousGoalTurn": "no progress; revalidated current files and selected available Windows deployment gate",
+  "step": "actual-copied-local-node-cli",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 48304,
+    "instanceId": "3ee0a995-12fa-401f-84cd-4dd1bddf36c0",
+    "launchId": "40a4e813-c438-42cf-8aa9-c6f3c6eebce9"
+  },
+  "dependencyCopy": {
+    "files": 17089,
+    "bytes": 201755381,
+    "hash": "7102cd9f2cdf6cdcaae896ce4ed67ae61958ba157a56cb440bf3a58e386d9031"
+  },
+  "codeFilesCopied": [
+    "server",
+    "shared",
+    "src",
+    "scripts",
+    "tests",
+    "doc"
+  ],
+  "credentialAndDataCopyExcluded": true,
+  "copiedBuildAndOfflinePi": true,
+  "nativeSeed": {
+    "runId": "8c7d21ce-ff71-4fae-9368-4fb345ca0db0",
+    "sessionId": "01a11139-d55d-718d-8ec4-c62d050fa712",
+    "sessionHash": "3a624e20c1894c436a81b6fc6c9a5f36784522dbd8329b11f8327b61375d7e9a",
+    "projectId": "bef3e80c-2749-4cd5-b030-2b4d9c86950a"
+  },
+  "firstService": {
+    "name": "unicode",
+    "pid": 2828,
+    "instanceId": "dc486c8f-5b55-4399-8a15-24a5b571fe0e",
+    "state": "ready",
+    "url": "http://127.0.0.1:1537",
+    "manifest": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-7cdef4f9-88d2-4b5c-840c-41cc0b12f909\\中文 工作台\\.runtime\\local-service-unicode.json"
+  },
+  "projectId": "ffac2e86-89b9-4b2a-935f-9fce43f5d1b7",
+  "fixtureRun": "3d279d11-ec9b-422c-b1f4-2b8dcd8c07df",
+  "reason": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n+ Buffer(219) [Uint8Array] [\n- Buffer(220) [Uint8Array] [\n    35,\n    32,\n    231,\n    148,\n    181,\n...\n    130,\n-   10\n  ]\n"
+}

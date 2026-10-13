@@ -1,0 +1,79 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:49:25.607Z",
+  "modelRequests": 0,
+  "profile": "full",
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+  "projectId": "e36908f2-42df-4f79-b1b2-829c23a6264f",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "root": "E:\\AI\\OS\\output\\dev-evidence\\private\\bundle-diagnosis-fd485b18-0b83-402b-8ea7-f4a95d2ebc5c",
+  "bundleSha256": "23560f4ff2b03946ca3f03c1e5689712ea093cb47614a601021de0e54245fe48",
+  "samples": [
+    {
+      "index": 0,
+      "mode": "tsx",
+      "ms": 2061.7577,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    },
+    {
+      "index": 1,
+      "mode": "bundle",
+      "ms": 2005.7752999999998,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    },
+    {
+      "index": 2,
+      "mode": "tsx",
+      "ms": 2188.4070999999994,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    },
+    {
+      "index": 3,
+      "mode": "bundle",
+      "ms": 2196.198199999999,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    },
+    {
+      "index": 4,
+      "mode": "tsx",
+      "ms": 2054.5272000000004,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    },
+    {
+      "index": 5,
+      "mode": "bundle",
+      "ms": 1937.3356999999996,
+      "total": 119,
+      "items": 50,
+      "exactReceiptMatched": true,
+      "ownedChildExited": true
+    }
+  ],
+  "primaryAfter": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "primaryIdentityUnchanged": true
+}

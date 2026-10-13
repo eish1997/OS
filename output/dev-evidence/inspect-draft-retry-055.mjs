@@ -1,0 +1,14 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {DatabaseSync} from 'node:sqlite';
+const report=JSON.parse(readFileSync('output/dev-evidence/draft-retry-055-real.json','utf8'));
+const db=new DatabaseSync('data/workbench.sqlite',{readOnly:true});
+const get=(kind,id)=>JSON.parse(db.prepare('SELECT body FROM entities WHERE kind=? AND id=?').get(kind,id).body);
+const run=get('run',report.firstRunId),draft=get('draft',report.draftId),task=get('task',report.taskId);
+const operations=db.prepare("SELECT body FROM entities WHERE kind='operation' AND project_id=?").all(report.projectId).map(r=>JSON.parse(r.body));
+const events=db.prepare("SELECT sequence,body FROM events WHERE json_extract(body,'$.runId')=?").all(run.id).map(r=>({sequence:r.sequence,...JSON.parse(r.body)}));
+const before=JSON.parse(readFileSync('output/dev-evidence/private/draft-retry-054/after.json','utf8'));
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const changedConfigurationPaths=Object.entries(before.configurationHashes).filter(([p,h])=>hash(p)!==h).map(([p])=>p);
+const result={at:new Date().toISOString(),run:{id:run.id,status:run.status,calls:run.calls,cancelRequested:run.cancelRequested,cancelRequestedAt:run.cancelRequestedAt,error:run.error,sessionId:run.sessionId,sessionPath:run.sessionPath},draftRevision:draft.revision,originalTaskRevision:task.context.selectedDraft.revision,firstMarkerPresent:/STEP_ONE_[a-f0-9]+/.test(draft.body),secondMarkerPresent:/STEP_TWO_[a-f0-9]+/.test(draft.body),operations:operations.map(o=>({id:o.id,name:o.name,state:o.state,readRevision:o.name==='read_draft'?o.result?.revision:undefined,updatedRevision:o.name==='update_draft'?o.result?.draft?.revision:undefined,error:o.error})),cancelEventPresent:events.some(e=>e.type==='run.cancel_requested'),runEventTypes:events.map(e=>e.type),changedConfigurationPaths};
+db.close();writeFileSync('output/dev-evidence/draft-retry-055-observed.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));

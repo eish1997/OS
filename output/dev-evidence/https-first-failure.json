@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-06T16:09:30.206Z",
+  "status": "failed",
+  "scope": "Real isolated loopback TLS proxy, no public listener, no main configuration change",
+  "modelRequests": 0,
+  "systemTrustInstalled": false,
+  "step": "remote-origin-boundary",
+  "caddy": {
+    "version": "2.11.7",
+    "executableSha256": "5f93a9bd555f3aac9d33af2756ba14b3519d8cca4ffd55256bdaeab444c9db2a",
+    "signatureVerified": false
+  },
+  "primaryBefore": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8"
+  },
+  "configurationValidated": true,
+  "ownedBackend": {
+    "pid": 21648,
+    "instanceId": "dad3f8b1-573c-4060-bbea-c342e36a69fc"
+  },
+  "untrustedCertificateRejected": true,
+  "secureCookiesAndAuthentication": true,
+  "staticPageAndAssetViaHttps": true,
+  "lastOriginCheck": {
+    "origin": "http://127.0.0.1:4311",
+    "status": 201
+  },
+  "reason": "Remote HTTPS must reject origin http://127.0.0.1:4311\n\n201 !== 403\n",
+  "cleanupBackend": {
+    "code": 0,
+    "signal": null
+  },
+  "cleanupProxy": {
+    "code": null,
+    "signal": "SIGTERM"
+  }
+}

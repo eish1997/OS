@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-06T17:44:34.714Z",
+  "status": "passed",
+  "engineeringFiles": 120,
+  "tests": 109,
+  "checks": 4,
+  "verificationSha256": "9408a0f36abd944d3722a9c1487ac5a0415f49eaa40a9671c9cb345aec30977c",
+  "priorVerification": "verification/history/2026-10-06T17-28-25-236Z/report.json",
+  "priorVerificationSha256": "a921dc72d7f4f010cbb262a7103bbdde9022aa95bb3f1030b3f626dcfcba85f1",
+  "lockedPackageVersionsPreserved": 216,
+  "linuxTargetInstallPassed": true,
+  "linuxExecuted": false,
+  "windowsCleanBuildPassed": true,
+  "systemdExecuted": false,
+  "modelRequests": 0,
+  "mainServiceUnchanged": true,
+  "preservedUserSessions": 31,
+  "sessionFingerprintPreserved": true,
+  "localDocLinks": 595,
+  "goalStatus": "active",
+  "remaining": [
+    "Real Linux install/build/systemd and production permissions",
+    "Remote resource/HTTPS/phone and OAuth bridge",
+    "Filesystem quota/WAL and offsite restore",
+    "OS sleep/wake",
+    "Tencent isolated comparison and user feedback",
+    "M1 gate"
+  ],
+  "historicalVerification": "verification/history/2026-10-06T17-42-33-216Z/report.json"
+}

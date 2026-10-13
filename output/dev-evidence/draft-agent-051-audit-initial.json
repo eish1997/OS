@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-07T06:42:34.888Z",
+  "status": "passed",
+  "scope": "Selected-draft editing, local deployment and own synthetic real Pi; no browser acceptance",
+  "engineeringTests": 144,
+  "engineeringFiles": 148,
+  "verificationAt": "2026-10-07T06:35:40.104Z",
+  "verificationSha256": "c75a91c16e66e1622118c65c30499f294b6fcf7c552285240d23e412e392bd60",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 38064,
+    "instanceId": "3b1a0f2c-6808-4594-990e-186c8e271971",
+    "launchId": "818ddf97-cba6-4161-b4a4-a05acaf67c90"
+  },
+  "supervisor": {
+    "pid": 41328,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "workerAbsent": true,
+  "counts": {
+    "projects": 17,
+    "entities": 248,
+    "assets": 45,
+    "sessions": 31
+  },
+  "preexistingEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "realPi": {
+    "runId": "020941c4-9713-478e-9c0f-002007e70c89",
+    "calls": 3,
+    "draftId": "4218d11d-6676-4cc7-b528-50bf3fd22bbe",
+    "revision": 2,
+    "acceptance": "needs_review"
+  },
+  "documents": 108,
+  "links": 734,
+  "browserAcceptance": "pending; protocol policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}
+

@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-07T07:29:47.527Z",
+  "status": "passed",
+  "scope": "Real Pi retry of a cancelled synthetic draft task; initial cancellation 423 preserved and not fixed",
+  "engineeringTests": 154,
+  "engineeringFiles": 148,
+  "verificationSha256": "5d66859cd4f1e8f38019263e28ca7a93e93d5143ec1d7aa1538cecfb7aa811f3",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 10940,
+    "instanceId": "ecab681e-1874-477e-81f0-a2eb9450c87e",
+    "launchId": "9a2e5fee-f5ec-4a95-adf5-f698af2b703a"
+  },
+  "supervisor": {
+    "pid": 17120,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "activeRuns": 0,
+  "counts": {
+    "projects": 18,
+    "entities": 261,
+    "assets": 46,
+    "sessions": 31
+  },
+  "original248EntitiesUnchanged": true,
+  "assetHashesValid": true,
+  "sessionDigestUnchanged": true,
+  "hostAndEnvironmentUnchanged": true,
+  "sameModelConnection": true,
+  "credentialFileHashUnchanged": false,
+  "modelRequests": 6,
+  "realDraftRetry": "passed",
+  "initialCancellation": "HTTP 423; subsequent cancel succeeded",
+  "cancelContention": "reproduced; L-03b ready",
+  "documents": 114,
+  "links": 787,
+  "browserAcceptance": "pending; policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

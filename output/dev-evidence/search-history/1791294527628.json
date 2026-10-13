@@ -1,0 +1,138 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T13:47:28.338Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: mixed capacity, native archive and background startup applied",
+  "thresholds": {
+    "searchMs": 2000,
+    "snapshotMs": 500
+  },
+  "profiles": [
+    {
+      "profile": "default",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "projectId": "8ccaeb23-d9ad-4efb-8817-e16cdffe7291",
+      "base": "http://127.0.0.1:10305",
+      "assets": 661,
+      "storageSamples": [
+        {
+          "ms": 47.38560000000007,
+          "measuredBytes": 776142469,
+          "issues": 0
+        },
+        {
+          "ms": 49.13319999999976,
+          "measuredBytes": 776142469,
+          "issues": 0
+        },
+        {
+          "ms": 48.634900000000016,
+          "measuredBytes": 776142469,
+          "issues": 0
+        },
+        {
+          "ms": 49.86880000000019,
+          "measuredBytes": 776142469,
+          "issues": 0
+        },
+        {
+          "ms": 51.513000000000375,
+          "measuredBytes": 776142469,
+          "issues": 0
+        }
+      ],
+      "search": [
+        {
+          "query": "CAPACITY_SMALL_NEEDLE",
+          "samples": [
+            {
+              "ms": 626.4585999999999,
+              "requests": 10,
+              "maxSnapshotMs": 31.65769999999975,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 678.4946,
+              "requests": 11,
+              "maxSnapshotMs": 23.815399999999954,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 535.5227000000004,
+              "requests": 10,
+              "maxSnapshotMs": 22.132700000000114,
+              "total": 600,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "CAPACITY_LARGE_NEEDLE",
+          "samples": [
+            {
+              "ms": 1078.9521999999997,
+              "requests": 18,
+              "maxSnapshotMs": 23.27049999999963,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 962.9708,
+              "requests": 17,
+              "maxSnapshotMs": 22.372999999999593,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 970.2771000000002,
+              "requests": 18,
+              "maxSnapshotMs": 21.75540000000001,
+              "total": 24,
+              "items": 24
+            }
+          ]
+        },
+        {
+          "query": "大文件-",
+          "samples": [
+            {
+              "ms": 767.9431000000004,
+              "requests": 14,
+              "maxSnapshotMs": 22.951900000000023,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 781.5990000000002,
+              "requests": 15,
+              "maxSnapshotMs": 21.568699999999808,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 808.9619999999995,
+              "requests": 14,
+              "maxSnapshotMs": 22.657900000000154,
+              "total": 60,
+              "items": 50
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "primaryBefore": {
+    "ready": true,
+    "pid": 47648,
+    "instanceId": "0400b48a-aab4-4c9e-84c3-be31488e26d2",
+    "launchId": "3ad296fd-e592-47a8-b77e-c2bc0ed6baf5"
+  },
+  "activeObservation": {
+    "profile": "default",
+    "pid": 8020,
+    "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data"
+  },
+  "reason": "Expected values to be strictly equal:\n\n200 !== 201\n"
+}

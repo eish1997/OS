@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T17:07:56.211Z",
+  "previousGoalTurn": "progress",
+  "goalStatus": "active",
+  "unchangedEngineeringFiles": 107,
+  "unchangedTestBaseline": 108,
+  "newProbeVerified": true,
+  "actualNodeChecks": 3,
+  "childExitAwaited": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "mainServiceUnchanged": true,
+  "modelRequests": 0,
+  "localDocLinks": 517,
+  "remaining": [
+    "Actual remote HTTPS/phone",
+    "OS sleep/wake",
+    "Production permissions/filesystem quota/WAL",
+    "Offsite independent-machine restore",
+    "Tencent isolation/comparison and user feedback",
+    "M1 depends on full M0 acceptance"
+  ]
+}

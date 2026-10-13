@@ -1,0 +1,18 @@
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync, existsSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+const root=resolve('data');
+const db=new DatabaseSync(join(root,'workbench.sqlite'),{readOnly:true});
+const entities=db.prepare('SELECT kind,id,body FROM entities ORDER BY kind,id').all();
+const counts={};for(const e of entities)counts[e.kind]=(counts[e.kind]||0)+1;
+const hash=x=>createHash('sha256').update(x).digest('hex');
+const runs=entities.filter(e=>e.kind==='run').map(e=>JSON.parse(e.body));
+const bindings=entities.filter(e=>e.kind==='session_binding').map(e=>JSON.parse(e.body));
+const assets=entities.filter(e=>e.kind==='asset').map(e=>JSON.parse(e.body));
+const assetChecks=assets.filter(a=>!a.contentRemoved).map(a=>({id:a.id,ok:existsSync(join(root,'assets',a.locator))&&hash(readFileSync(join(root,'assets',a.locator)))===a.hash}));
+const paths=[...runs.flatMap(r=>r.sessionPath?[r.sessionPath]:[]),...bindings.flatMap(b=>[b.cwd,b.sessionPath].filter(Boolean))];
+const report={at:new Date().toISOString(),root,integrity:db.prepare('PRAGMA integrity_check').all(),counts,entityHash:hash(JSON.stringify(entities)),activeRuns:runs.filter(r=>['queued','running','waiting_user','waiting_node'].includes(r.status)).map(r=>({id:r.id,status:r.status})),assetChecks,paths:[...new Set(paths)],metadataKeys:db.prepare('SELECT key FROM metadata').all(),locks:db.prepare('SELECT name,until_ms FROM locks').all(),sessions:db.prepare('SELECT count(*) count FROM sessions').get()};
+mkdirSync('output/dev-evidence/private/migration-058',{recursive:true});
+writeFileSync('output/dev-evidence/private/migration-058/inspection-before.json',JSON.stringify(report,null,2));
+console.log(JSON.stringify(report,null,2));db.close();

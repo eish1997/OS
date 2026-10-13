@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-06T17:58:46.071Z",
+  "status": "passed",
+  "engineeringFiles": 123,
+  "tests": 113,
+  "checks": 4,
+  "verificationSha256": "c7a5b20ae02ab9640f9b92f0a6939166776ac9bd81f4579a26874947f5a1c6cb",
+  "priorVerification": "verification/history/2026-10-06T17-42-33-216Z/report.json",
+  "priorVerificationSha256": "9408a0f36abd944d3722a9c1487ac5a0415f49eaa40a9671c9cb345aec30977c",
+  "transferTests": 4,
+  "syntheticProviderOnly": true,
+  "twoAppsSameTestProcess": true,
+  "interruptionMethod": "Targeted file-write exceptions; actual process crash pending",
+  "mainServiceUnchanged": true,
+  "mainNewEndpointsLoaded": false,
+  "realAccountTransferPerformed": false,
+  "realAccountTransferRecordsAbsent": true,
+  "modelRequests": 0,
+  "preservedUserSessions": 31,
+  "sessionFingerprintPreserved": true,
+  "localDocLinks": 611,
+  "goalStatus": "active",
+  "remaining": [
+    "Actual process crashes and cross-machine credential handoff",
+    "Real-account VM refresh/inference and trusted HTTPS/SSH",
+    "Cloud resources/HTTPS/phone and production Linux",
+    "Filesystem quota/WAL and offsite restore",
+    "OS sleep/wake",
+    "Tencent isolated comparison and user feedback",
+    "M1 gate"
+  ],
+  "historicalVerification": "verification/history/2026-10-06T17-55-21-246Z/report.json"
+}

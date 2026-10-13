@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-06T18:13:48.187Z",
+  "status": "passed",
+  "engineeringFiles": 127,
+  "tests": 116,
+  "checks": 4,
+  "verificationSha256": "687e4b47ee3d236cb66427463499a10dbfc704c631ed4ede280811ebd03c0fd3",
+  "priorVerification": "verification/history/2026-10-06T18-05-07-973Z/report.json",
+  "priorVerificationSha256": "a2a6d9ffdc25a1314687f4106fe7f56fc426730477140b95dc66c3058aa9ebc8",
+  "failurePreserved": true,
+  "portableBackupTests": 2,
+  "actualBackupRestoreAndSdkReopen": true,
+  "foreignPathsSynthetic": true,
+  "linuxExecuted": false,
+  "crossMachine": false,
+  "mainServiceUnchanged": true,
+  "mainNewChangesLoaded": false,
+  "modelRequests": 0,
+  "preservedUserSessions": 31,
+  "sessionFingerprintPreserved": true,
+  "realAccountTransferRecordsAbsent": true,
+  "resourcesPurchased": false,
+  "publicDeployment": false,
+  "quoteCheckedDate": "2026-10-07",
+  "candidateBasicMonthlyUsd": {
+    "digitalOcean": 33,
+    "awsLightsail": 31
+  },
+  "quoteScope": "public prices, not account order; excludes domain/tax/overage/lab/temporary recovery",
+  "localDocLinks": 651,
+  "goalStatus": "active",
+  "remaining": [
+    "Resource selection/account access and purchase authorization",
+    "Actual Linux and filesystem quota/WAL",
+    "Real-account handoff/HTTPS/phone",
+    "Independent encrypted offsite restore",
+    "OS sleep/wake",
+    "Tencent isolated comparison and user feedback",
+    "M1 gate"
+  ],
+  "historicalVerification": "verification/history/2026-10-06T18-11-39-642Z/report.json"
+}

@@ -1,0 +1,131 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T12:55:50.218Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: Windows deployment, node original bytes and production update",
+  "scope": "Actual E/C mixed default asset bound plus isolated full 2GiB total profile; no primary data or credentials copied",
+  "thresholds": {
+    "snapshotMs": 500,
+    "searchMs": 2000,
+    "startupMs": 15000
+  },
+  "profiles": [
+    {
+      "profile": "default",
+      "base": "http://127.0.0.1:8295",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "root": "C:\\Users\\15128\\AI-OS-Backups\\mixed-probes\\27c54772-5f64-4a55-a57f-81811b3261e7",
+      "projectId": "8ccaeb23-d9ad-4efb-8817-e16cdffe7291",
+      "selectedAssetId": "00c38490-88d5-4309-883f-a6b9d779ec12",
+      "selectedHash": "202da4d9b3cb279fbe4cfaaaec53a60e8ad78d3080c62966c6c51f5b5aa665f2",
+      "draftId": "f00ea23c-6edc-4044-9546-4964207383ef",
+      "usage": {
+        "at": "2026-10-06T13:05:32.487Z",
+        "groups": {
+          "database": {
+            "bytes": 222761040,
+            "files": 3
+          },
+          "assets": {
+            "bytes": 522977325,
+            "files": 661
+          },
+          "uploads": {
+            "bytes": 4194304,
+            "files": 1
+          },
+          "sessions": {
+            "bytes": 8391784,
+            "files": 1
+          },
+          "workspaces": {
+            "bytes": 16777216,
+            "files": 1
+          },
+          "logs": {
+            "bytes": 1048639,
+            "files": 2
+          }
+        },
+        "measuredBytes": 776150489,
+        "assetQuotaBytes": 524288000,
+        "assetQuotaUsedBytes": 522977325,
+        "disk": {
+          "totalBytes": 1000116133888,
+          "availableBytes": 250190000128
+        },
+        "issues": [],
+        "scope": "whole data directory; external backups/runtime launcher logs excluded; credentials measured by size only",
+        "automaticCleanup": false,
+        "limits": {
+          "totalBytes": 2147483648,
+          "databaseBytes": 805306368,
+          "assetsBytes": 524288000,
+          "uploadsBytes": 20971520,
+          "sessionsBytes": 134217728,
+          "workspacesBytes": 67108864,
+          "logsBytes": 4194304,
+          "minFreeBytes": 67108864,
+          "controlReserveBytes": 4194304
+        },
+        "overLimits": [],
+        "totalOverLimit": false,
+        "enforcement": "controlled-write admission and SQLite main-file page limit; external filesystem changes require deployment quota"
+      },
+      "limits": {
+        "totalBytes": 2147483648,
+        "databaseBytes": 805306368,
+        "assetsBytes": 524288000,
+        "uploadsBytes": 20971520,
+        "sessionsBytes": 134217728,
+        "workspacesBytes": 67108864,
+        "logsBytes": 4194304,
+        "minFreeBytes": 67108864,
+        "controlReserveBytes": 4194304
+      },
+      "seedMs": 580263.3693,
+      "assets": 661,
+      "syntheticNativeMessages": 16,
+      "modelCalls": 0,
+      "launchWallMs": 582228.1876,
+      "maintenance": [],
+      "snapshot": [
+        9.885499999974854,
+        201.86660000006668,
+        216.65659999998752,
+        183.00300000002608,
+        219.49739999999292
+      ],
+      "search": [
+        724.6032000000123,
+        635.9041000000434,
+        567.9128999999957,
+        626.3480999999447,
+        594.3558000000194
+      ],
+      "capacityRejection": {
+        "error": "资产空间已满，请归档或调整配额"
+      },
+      "limitUnderTest": "Default 500MiB asset limit",
+      "rejectedUploadPreservedExistingBytes": true
+    }
+  ],
+  "primaryBefore": {
+    "ready": true,
+    "pid": 428,
+    "instanceId": "d0ad120e-5a31-4dee-a2d2-c1f43b582e09",
+    "launchId": "94bf8178-9d4d-4348-8a73-44719a45e548"
+  },
+  "reason": "Accepted 8MiB native session exceeds 2MiB interactive continuation guard reused by automatic backup restoration",
+  "observationFailure": "Original parent wait promise rejection was not handled inside sampling loop; parent exited 1, child disconnect shutdown must be revalidated",
+  "failureDiagnosis": {
+    "nativeBytes": 8391784,
+    "error": {
+      "status": 413,
+      "message": "原生会话超过首版恢复上限"
+    },
+    "loaderMissing": false,
+    "ownedHelperProcessAbsent": true,
+    "temporaryHealthConnectionRefused": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T13:35:34.326Z",
+  "modelRequests": 0,
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "checking": false,
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "canonicalDraftPreserved": true,
+  "canonicalDraftSha256": "d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931",
+  "callCountersUnchanged": true,
+  "service": {
+    "ready": true,
+    "pid": 47648,
+    "instanceId": "0400b48a-aab4-4c9e-84c3-be31488e26d2",
+    "launchId": "3ad296fd-e592-47a8-b77e-c2bc0ed6baf5",
+    "creationUtc": "2026-10-06T13:35:11.0659670Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "verification": "verification/report.json",
+  "preflightCorrections": [
+    "Historical interrupted run was already reconciled",
+    "Public device session identity is hash; nonexistent id was not identity evidence",
+    "Normalize optional run fields through JSON before cross-process comparison"
+  ],
+  "preservedUserSessions": 31,
+  "sessionFingerprintPreserved": true,
+  "ownLoginRetired": true,
+  "actualBrowser": {
+    "assistantReady": true,
+    "modelAutomatic": true,
+    "backupReady": true,
+    "advancedOptional": true,
+    "observation": "Existing signed-in in-app browser tab refreshed and settings inspected; no new login or model request"
+  }
+}

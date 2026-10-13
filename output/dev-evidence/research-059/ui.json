@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "controlledFixture": true,
+  "modelRequests": 0,
+  "checks": [
+    "invalid URL retains input",
+    "refresh retains input and section",
+    "submit queues one research task",
+    "saved card appears",
+    "card and source link readable"
+  ],
+  "errors": []
+}

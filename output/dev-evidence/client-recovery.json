@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-06T17:04:00.663Z",
+  "status": "passed-with-stated-limitations",
+  "browser": "Codex in-app browser",
+  "engineeringVerification": "2026-10-06T16:40:51.530Z",
+  "engineeringFiles": 107,
+  "tests": 108,
+  "modelRequests": 0,
+  "checks": {
+    "startup503ToLoginWithoutReload": true,
+    "closedStreamRecoveryWithoutReload": true,
+    "freshSnapshotDrafts": 2,
+    "unsentInputPreserved": true,
+    "mobileViewport": {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 375
+    },
+    "revocationDuringRecoveryReturnsLogin": true,
+    "hostnameIsolationMainReloadAuthenticated": true,
+    "automaticWritesDuringRecovery": 0
+  },
+  "fixture": {
+    "hostname": "localhost",
+    "lastPid": 23056,
+    "processObservedAbsent": true,
+    "exitCode": "unknown after tool transport closed",
+    "logoutCompletion": "unknown; retained database session count below",
+    "databaseCounts": {
+      "sessions": 0,
+      "runs": 0,
+      "inbox": 0
+    }
+  },
+  "screenshots": [
+    {
+      "file": "ui/client-recovery-startup.jpg",
+      "sha256": "597c180bf8c02289890a754d3bf552a4c4481c62259d395674f37e445a26959e"
+    },
+    {
+      "file": "ui/client-recovery-offline-mobile.jpg",
+      "sha256": "2d55afec815f02c65dbc3c51cbab6aec1e3a714ae2934591e58e415566163b9f"
+    },
+    {
+      "file": "ui/client-recovery-recovered-mobile.jpg",
+      "sha256": "30a2a38c044a9be805154f06f9133422c88f4587130c5b064264c699b5a81e89"
+    },
+    {
+      "file": "ui/client-recovery-product.jpg",
+      "sha256": "74b31d750857c788f6a07cf4765ba5889b733cded3cdef5f2629b49b2f9e4925"
+    }
+  ],
+  "product": "client-recovery-production.json",
+  "cookieIncident": "client-recovery-cookie-incident.json",
+  "serviceRestoration": "client-recovery-service-restoration.json",
+  "limitations": [
+    "In-app browser only; default Chrome page not verified",
+    "390px viewport is not a physical remote phone",
+    "Final fixture logout/tab close and final main reload interrupted by tool transport; no graceful-exit claim",
+    "Unknown reason main service and monitor also exited; restored only after identity status and authoritative process absence checks",
+    "Full original M0/M1 development objective remains incomplete"
+  ]
+}

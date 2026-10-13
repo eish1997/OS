@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T15:47:42.804Z",
+  "modelRequests": 0,
+  "desktopShortcut": {
+    "owned": true,
+    "arguments": "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"E:\\AI\\OS\\scripts\\open-workbench.ps1\" -Name workbench -Port 4310",
+    "target": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "path": "C:\\Users\\15128\\Desktop\\打开工作台.lnk",
+    "windowStyle": 7,
+    "kind": "open",
+    "exists": true
+  },
+  "startupShortcut": {
+    "owned": true,
+    "arguments": "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"E:\\AI\\OS\\scripts\\supervise-service.ps1\" -Action start -Name workbench -Port 4310",
+    "target": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "path": "C:\\Users\\15128\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\AIOS-43cc99262901.lnk",
+    "windowStyle": 7,
+    "kind": "startup",
+    "exists": true
+  },
+  "currentUserStartupConfigured": true,
+  "actualStoredStartupCommandExitCode": 0,
+  "actualStoredOpenCommandExitCode": 0,
+  "headlessOpen": {
+    "browserRequested": false,
+    "url": "http://127.0.0.1:4310",
+    "servicePid": 47124,
+    "state": "ready"
+  },
+  "supervisor": {
+    "instance": "7bb4d564-738b-4a45-8dab-6724dccc9dbc",
+    "name": "workbench",
+    "pid": 40816,
+    "running": true,
+    "restartCount": 0,
+    "state": "ready",
+    "lastError": null,
+    "creationUtc": "2026-10-06T15:47:38.7351930Z",
+    "intervalMs": 15000
+  },
+  "servicePidUnchanged": 47124,
+  "realWindowsLogonObserved": false,
+  "defaultBrowserObserved": false,
+  "scope": "Real current-user shortcut configuration and actual invocation of their stored commands; open command uses NoBrowser to preserve the active browser. Does not prove a physical login/reboot or default-browser UI."
+}

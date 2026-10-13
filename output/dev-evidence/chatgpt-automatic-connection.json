@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-06T10:14:25.816Z",
+  "authorization": "User requested sign-in-and-use with automatic defaults on 2026-10-06",
+  "connected": true,
+  "enabled": true,
+  "model": "gpt-5.6-sol",
+  "limitsMode": "automatic",
+  "limitScope": "task",
+  "maxCallsPerTask": 20,
+  "timeoutMs": 300000,
+  "modelConfigured": true,
+  "setupModelInference": false
+}

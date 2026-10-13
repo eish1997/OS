@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T15:35:18.024Z",
+  "previousGoalTurn": "progress: painless-use requirements saved and full regression failure inspected",
+  "modelRequests": 0,
+  "verifiedCodeFiles": 98,
+  "tests": 101,
+  "changedExistingEngineeringFiles": [
+    "scripts/local-service.ps1",
+    "scripts/run.ps1"
+  ],
+  "addedEngineeringFiles": [
+    "scripts/supervise-service.ps1",
+    "tests/supervisor.test.ts"
+  ],
+  "verificationSha256": "4feca4261424cbb0a93877b2232ac30fd9ad97cff933cb44046c16d8186e4673",
+  "historical026Sha256": "4e33c374e71f38872ced660cd77ee4f843d2d8d19d9b451f1040fbb16255b599",
+  "regressionFailure": "verification/history/2026-10-06T15-25-48-571Z/report.json",
+  "actualDefaultStartExitCode": 0,
+  "supervisor": {
+    "instance": "531933b0-4ec4-472f-bf93-f303b5f5acb7",
+    "name": "workbench",
+    "pid": 25792,
+    "running": true,
+    "restartCount": 0,
+    "state": "ready",
+    "lastError": null,
+    "creationUtc": "2026-10-06T15:32:50.1894060Z",
+    "checks": 10,
+    "intervalMs": 15000,
+    "maxRestarts": 5
+  },
+  "originalService": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8",
+    "creationUtc": "2026-10-06T15:01:42.5543450Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "serviceNotRestarted": true,
+  "productionSha256": "e139c9d1203377ff65ad0a30dcb4ceb51fe0430380e9718973e8b65d34484090",
+  "preservedUserSessions": 31,
+  "localLinksChecked": 229,
+  "remaining": [
+    "One-click opening and OS-managed startup; sleep/wake",
+    "Production permissions, physical quota/WAL, remote phone HTTPS",
+    "Offsite or independent-machine restore",
+    "Tencent isolated comparison and user feedback",
+    "M1 after complete M0 gates"
+  ]
+}

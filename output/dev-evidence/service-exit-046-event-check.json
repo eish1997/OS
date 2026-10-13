@@ -1,0 +1,14 @@
+{
+  "timeZone": "China Standard Time",
+  "systemEvents": [],
+  "applicationCrashEvents": [],
+  "applicationQueryDiagnostics": [
+    "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+  ],
+  "fromLocal": "2026-10-07T13:37:00",
+  "toLocal": "2026-10-07T13:44:00",
+  "rootCause": "unconfirmed",
+  "systemQueryDiagnostics": [
+    "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+  ]
+}

@@ -1,0 +1,22 @@
+import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {join,dirname,resolve} from 'node:path';
+import assert from 'node:assert/strict';
+const base='output/dev-evidence/',read=f=>readFileSync(f,'utf8').replace(/^\uFEFF/,''),json=f=>JSON.parse(read(f)),sha=v=>createHash('sha256').update(v).digest('hex');
+const report=json(base+'verification/report.json');assert.equal(report.status,'passed');for(const [file,hash] of Object.entries(report.baseline))assert.equal(sha(readFileSync(file)),hash,file);
+for(const check of report.checks){assert.equal(check.exitCode,0);assert.equal(sha(readFileSync(base+'verification/'+check.name+'.log')),check.outputSha256);}
+const node=json(base+'node-reconnect-verification.json');assert.equal(node.newProbeSha256,sha(readFileSync(node.newProbe)));
+const manifest=json(base+'memory-deployment-review/manifest.json');assert.equal(manifest.executedCode,false);assert.equal(manifest.files.length,8);assert.equal(Object.keys(manifest.failures).length,0);for(const file of manifest.files)assert.equal(sha(readFileSync(base+'memory-deployment-review/'+file.captureFile)),file.sha256);
+const environment=json(base+'deployment-environment.json');assert.equal(environment.changedOS,false);assert.equal(environment.changedPermissions,false);assert.equal(environment.modelRequests,0);assert.equal(environment.registeredWslDistributions,0);
+const broad=environment.acls.filter(a=>a.broadRules.some(r=>r.type==='Allow'));assert(broad.some(a=>a.path==='.env'));assert(broad.some(a=>a.path==='data'));
+const lead='033：[无现成资源的部署准备](iterations/033-deployment-preparation.md)已完成当前Windows环境实查与[具体方案](部署准备方案.md)。补齐腾讯固定版本8份启动/验证/停止文本，未执行；确认远程动态回调尚需桥接，.env/业务目录继承宽组权限需修复。用户确认无现成资源，未购买/上线。原工程108测试及新节点探针基线保持，零模型请求；完整目标active，M0/M1门槛保持。';
+function prepend(f,text){const s=read(f),p=s.indexOf('\n');writeFileSync(f,s.slice(0,p+1)+'\n'+text+'\n'+s.slice(p+1));}
+for(const f of ['doc/dev/current.md','doc/dev/backlog.md','doc/dev/acceptance.md'])prepend(f,lead);
+let backlog=read('doc/dev/backlog.md');backlog=backlog.replace('| M0-04a |', '| M0-04d | ready | 04b本机基础 | 033实查.env/data/.runtime/开发private继承宽组ACL；需保护自有路径、可恢复权限快照与实际运行/拒绝读取证据 | 不要求用户设置；先隔离验证再应用，不等于全部远程生产权限通过 |\n| M0-04a |');writeFileSync('doc/dev/backlog.md',backlog);
+prepend('doc/README.md','最新执行：[033环境与部署准备](dev/iterations/033-deployment-preparation.md)、[部署方案](dev/部署准备方案.md)、[真实环境](../output/dev-evidence/deployment-environment.json)、[腾讯入口捕获](../output/dev-evidence/memory-deployment-review/manifest.json)。用户无现成资源；未购买或运行第三方代码，现有权限缺陷和远程回调前置已进入台账。');
+prepend('doc/deployment.md','033已根据用户确认无现成资源整理[部署准备方案](dev/部署准备方案.md)，并实查家庭版Windows、无已就绪容器/VM、宽组文件ACL和远程loopback授权回调前置。没有购置或发布；规格为初始工程估算，真实远程资源及各部署门槛保持。');
+prepend('doc/dev/接入与上线解决计划.md','033新增[无资源部署方案](部署准备方案.md)：主服务/电脑节点/独立备份/腾讯实验环境，用户只需最终一次登录。远程回调须补齐桥接；本机密码/业务目录宽组权限已发现，下一步先修复。没有购买或扩大模型调用。');
+prepend('doc/dev/tencent-memory-experiment.md','033已补齐固定commit的[8份启动及相关文本](../../output/dev-evidence/memory-deployment-review/manifest.json)，包括_lib和三个服务脚本。未执行/拉镜像，文本捕获不等于完整镜像/运行审计。端口发布、latest、shell加载环境、后台提炼与清理路径已进入[部署方案](部署准备方案.md)；实际隔离环境及模型适配仍待落实。');
+const target=base+'deployment-preparation-audit.json';writeFileSync(target,JSON.stringify({status:'auditing'}));const docs=['README.md'];function walk(dir){for(const entry of readdirSync(dir,{withFileTypes:true})){const path=join(dir,entry.name);if(entry.isDirectory())walk(path);else if(path.endsWith('.md'))docs.push(path);}}walk('doc');let links=0;
+for(const file of docs)for(const match of read(file).matchAll(/\]\(([^)]+)\)/g)){let path=match[1].trim();if(/^(https?:|app:|codex:|#)/.test(path))continue;path=path.replace(/^<|>$/g,'').split('#')[0];if(!path)continue;assert(existsSync(resolve(dirname(file),path)),file+' -> '+path);links++;}
+const result={at:new Date().toISOString(),status:'passed',previousGoalTurn:'progress',goalStatus:'active',userResources:'No existing server or second machine; user requests preparation',unchangedEngineeringFiles:107,unchangedTestBaseline:108,nodeProbeStillMatches:true,capturedFiles:manifest.files.length,capturedCommit:manifest.commit,downloadedProjectCodeExecuted:false,environmentObserved:true,localPermissionDefectPaths:broad.map(a=>a.path),nextReadyTask:'M0-04d local permission protection and verification',localDocLinks:links,modelRequests:0,changedOS:false,purchasedResources:false,remoteDeployed:false};writeFileSync(target,JSON.stringify(result,null,2));console.log(JSON.stringify(result));

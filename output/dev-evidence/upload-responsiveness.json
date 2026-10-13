@@ -1,0 +1,288 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:35:16.274Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: full batch comparison and grouped preflight applied",
+  "thresholds": {
+    "snapshotMs": 500
+  },
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\batch-6260e7a2-0cad-410b-aab6-2b00d959c6f7\\data",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "beginMs": 59.24479999999994,
+      "putMs": 323.3308000000002,
+      "operationMs": 382.7022999999999,
+      "assetId": "c9540a08-915a-4320-a9e7-790db856877e",
+      "hash": "098cc8b35837099398e7913055d783e6a766d686c16c0822885da665055b1bb9",
+      "dataReads": 3,
+      "maxSnapshotMs": 300.46990000000005
+    },
+    {
+      "index": 1,
+      "beginMs": 60.63790000000017,
+      "putMs": 321.3444999999997,
+      "operationMs": 382.05790000000025,
+      "assetId": "a020335d-bf9a-4baa-b7af-a7daf5fac1a0",
+      "hash": "fdb34359da6f8c168fe1a277a7679563cb97264da1dbf8e8a9242c4157ee0095",
+      "dataReads": 3,
+      "maxSnapshotMs": 313.37429999999995
+    },
+    {
+      "index": 2,
+      "beginMs": 52.078199999999924,
+      "putMs": 299.2509,
+      "operationMs": 351.3944999999999,
+      "assetId": "bd49f2b0-cd31-4947-aa60-6d7930a62b16",
+      "hash": "d3365cc034e9f0c339fd03779855ca49c5229893c5ea47f666ab64e3e6912a97",
+      "dataReads": 3,
+      "maxSnapshotMs": 292.9852000000001
+    },
+    {
+      "index": 3,
+      "beginMs": 57.60010000000011,
+      "putMs": 299.7626000000005,
+      "operationMs": 357.4635999999996,
+      "assetId": "5e09c741-3315-4890-b06d-5b8db591ae12",
+      "hash": "1d9630823d4727dd2150fd47593cc0601b623e338b97689123e91a1cb416ceed",
+      "dataReads": 3,
+      "maxSnapshotMs": 291.6729999999998
+    },
+    {
+      "index": 4,
+      "beginMs": 57.959499999999935,
+      "putMs": 300.35679999999957,
+      "operationMs": 358.41740000000027,
+      "assetId": "c175c3b6-2f86-4c12-b243-91b727360bf1",
+      "hash": "36be552b58409d13e98bb554d713e3634bde29d2abee82d36a9582d22ad93950",
+      "dataReads": 3,
+      "maxSnapshotMs": 284.7584000000006
+    },
+    {
+      "index": 5,
+      "beginMs": 52.9357,
+      "putMs": 313.2456999999995,
+      "operationMs": 366.2610999999997,
+      "assetId": "eed8f264-6f2e-4881-9303-6aa61a824a45",
+      "hash": "471a00732bc46b685e0996977a5a0256ca8a3080542bb405dae64ea7a45ad444",
+      "dataReads": 3,
+      "maxSnapshotMs": 297.64779999999973
+    },
+    {
+      "index": 6,
+      "beginMs": 62.11570000000029,
+      "putMs": 315.02080000000024,
+      "operationMs": 377.2033000000001,
+      "assetId": "ef250e57-b22e-4272-9bad-5e337c3f76c2",
+      "hash": "0f22254641e7f3276fd8b12033722c0f3952781056f3275acc660f9b85a821ff",
+      "dataReads": 3,
+      "maxSnapshotMs": 305.0450000000001
+    },
+    {
+      "index": 7,
+      "beginMs": 51.638199999999415,
+      "putMs": 299.9875999999995,
+      "operationMs": 351.79359999999997,
+      "assetId": "b96776cc-7709-4c31-98ea-2750d4e22b32",
+      "hash": "3f12709975fa41a1670de9f5752a15622a6699fad297884ad2d0f58ce074d130",
+      "dataReads": 3,
+      "maxSnapshotMs": 286.6314999999995
+    },
+    {
+      "index": 8,
+      "beginMs": 53.73500000000058,
+      "putMs": 317.84940000000006,
+      "operationMs": 371.6890000000003,
+      "assetId": "99af5658-640f-4646-98c4-5f54cd81bf22",
+      "hash": "2d80178081adac4497319dde53a1f0f80692a22c429df89b73699935b1bd1628",
+      "dataReads": 3,
+      "maxSnapshotMs": 308.1215999999995
+    },
+    {
+      "index": 9,
+      "beginMs": 61.02689999999984,
+      "putMs": 313.7476999999999,
+      "operationMs": 374.85249999999996,
+      "assetId": "9ec10828-f9af-4ca9-a2a7-48151e052561",
+      "hash": "9e16a717c3103f8dd788f10ed4ac5006c17a8c70b59f09197a5d2b0c5694749d",
+      "dataReads": 3,
+      "maxSnapshotMs": 298.53530000000046
+    },
+    {
+      "index": 10,
+      "beginMs": 60.24399999999969,
+      "putMs": 294.66510000000017,
+      "operationMs": 354.96410000000014,
+      "assetId": "ee4a7f15-6867-4742-ba51-9145461f3729",
+      "hash": "2bbc4042e03c3fc596cdba4ccb42b564755a1c559f4e61da3ae4dc679de346e1",
+      "dataReads": 3,
+      "maxSnapshotMs": 284.7645999999995
+    },
+    {
+      "index": 11,
+      "beginMs": 57.352100000000064,
+      "putMs": 309.2496000000001,
+      "operationMs": 366.6900000000005,
+      "assetId": "8c8c36d7-dd3e-4a78-badb-4b6ef772b259",
+      "hash": "3fbd6ecb713fe61a7fe966eb62009b30e50e5f302816541dbc7b27553636b67c",
+      "dataReads": 3,
+      "maxSnapshotMs": 302.317
+    },
+    {
+      "index": 12,
+      "beginMs": 55.85320000000047,
+      "putMs": 322.53690000000006,
+      "operationMs": 378.4403999999995,
+      "assetId": "25fd7490-1f8e-4ebd-9901-48d4624ad3b9",
+      "hash": "846dd0c8aa90a45cdcf3ee74cdea266eee70f8efccdfb3f05226c36138524466",
+      "dataReads": 3,
+      "maxSnapshotMs": 315.8559000000005
+    },
+    {
+      "index": 13,
+      "beginMs": 56.28620000000046,
+      "putMs": 275.21270000000004,
+      "operationMs": 331.54779999999937,
+      "assetId": "15ebe289-6c28-4ea1-9e4a-06ea7b568ffa",
+      "hash": "3a3e6717b58ff1dc06a78255d1dbc061cbe9f6971bcced9169a3246a7fcbdaca",
+      "dataReads": 3,
+      "maxSnapshotMs": 264.6081000000004
+    },
+    {
+      "index": 14,
+      "beginMs": 53.577800000000025,
+      "putMs": 290.45850000000064,
+      "operationMs": 344.10480000000007,
+      "assetId": "ccfad926-dfbf-4cd7-a93f-b5c044028439",
+      "hash": "5a5f9af7160eb0b2d8c9fda363eec2ce228cb678a1880cb5fb750814d56e0842",
+      "dataReads": 3,
+      "maxSnapshotMs": 270.8675999999996
+    },
+    {
+      "index": 15,
+      "beginMs": 52.61399999999958,
+      "putMs": 331.54099999999926,
+      "operationMs": 384.2054999999991,
+      "assetId": "0fa5dbc8-f547-48ee-b05f-59ea69b5ee61",
+      "hash": "ac4728ce4926a855d06f480ae4ba0737dea17cd32b292f394579d4a21045da21",
+      "dataReads": 3,
+      "maxSnapshotMs": 320.3808000000008
+    },
+    {
+      "index": 16,
+      "beginMs": 60.19999999999891,
+      "putMs": 321.09350000000086,
+      "operationMs": 381.3773000000001,
+      "assetId": "fef05560-c003-4a61-ba00-98fee041825b",
+      "hash": "a7da59d379399a85b5de462fd58bcca25511fb2704a797364ecf48d56cb13d77",
+      "dataReads": 3,
+      "maxSnapshotMs": 302.46739999999954
+    },
+    {
+      "index": 17,
+      "beginMs": 52.802599999999074,
+      "putMs": 275.9179000000004,
+      "operationMs": 328.773799999999,
+      "assetId": "1a79fbf1-1bc3-4eb4-a46d-8b584c0fecee",
+      "hash": "167847902a35b83e06de456ea41b9553a6ff93be2ea945321332bf8055fc8b6d",
+      "dataReads": 3,
+      "maxSnapshotMs": 260.96440000000075
+    },
+    {
+      "index": 18,
+      "beginMs": 59.91640000000007,
+      "putMs": 337.0017000000007,
+      "operationMs": 396.9994999999999,
+      "assetId": "0be5c687-51b6-4c4f-81c0-183e0bb7efbf",
+      "hash": "f870a7c2b174d4ff820e93824484cb3197986e7adea53ab965115e7af2e981c9",
+      "dataReads": 3,
+      "maxSnapshotMs": 325.02109999999993
+    },
+    {
+      "index": 19,
+      "beginMs": 70.26800000000003,
+      "putMs": 334.6072000000004,
+      "operationMs": 404.96219999999994,
+      "assetId": "31aeaccf-eec8-4126-a579-bdc9e1cd6528",
+      "hash": "438fbff119e7bdfe60197f02be7b9d5d28b62b52a3a94a619836e57942282bea",
+      "dataReads": 3,
+      "maxSnapshotMs": 319.4871000000003
+    },
+    {
+      "index": 20,
+      "beginMs": 52.02430000000095,
+      "putMs": 289.0576000000001,
+      "operationMs": 341.1357000000007,
+      "assetId": "f1454480-9b2b-4261-a53f-74983c960db9",
+      "hash": "693894a01be30b687a129d5eb2ad491dfdb72548be55ee7506b837c400ea45b2",
+      "dataReads": 3,
+      "maxSnapshotMs": 275.8724000000002
+    },
+    {
+      "index": 21,
+      "beginMs": 55.51100000000042,
+      "putMs": 299.78300000000127,
+      "operationMs": 355.3948999999993,
+      "assetId": "d50a29f5-73fe-46c3-bfd2-1ba9637bb335",
+      "hash": "b27d03e6d76763f954ae813e77a366a8d7766f95db3b192b6dbaa5b8f6f16f4d",
+      "dataReads": 3,
+      "maxSnapshotMs": 280.28839999999946
+    },
+    {
+      "index": 22,
+      "beginMs": 59.750200000000405,
+      "putMs": 329.7993000000006,
+      "operationMs": 389.60109999999986,
+      "assetId": "b9dfec76-ee90-487c-be57-44826951396f",
+      "hash": "9478afe17f8a0957a2511c4fbfed7743b8bab6298d0c57201055b40ccc94998f",
+      "dataReads": 3,
+      "maxSnapshotMs": 323.41539999999986
+    },
+    {
+      "index": 23,
+      "beginMs": 57.85950000000048,
+      "putMs": 290.15949999999975,
+      "operationMs": 348.0681999999997,
+      "assetId": "84218643-7a99-4253-b05f-65a515d718d7",
+      "hash": "39872953ef334ff704df378fe062b7d7999c018043010ecc371dbc18e585dae1",
+      "dataReads": 3,
+      "maxSnapshotMs": 274.8168999999998
+    }
+  ],
+  "ownedPid": 34884,
+  "originalManifestMatched": true,
+  "base": "http://127.0.0.1:8506",
+  "limits": {
+    "totalBytes": 2147483648,
+    "databaseBytes": 805306368,
+    "assetsBytes": 524288000,
+    "uploadsBytes": 20971520,
+    "sessionsBytes": 134217728,
+    "workspacesBytes": 67108864,
+    "logsBytes": 4194304,
+    "minFreeBytes": 67108864,
+    "controlReserveBytes": 4194304
+  },
+  "projectId": "396123c7-feac-47d1-8eec-6d56a6fd3bc0",
+  "allAssetHashesVerified": 685,
+  "original661Preserved": true,
+  "limitRefusalStatus": 507,
+  "ownedChildExited": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 2068,
+    "instanceId": "09c6ae6e-a39e-4106-9315-08b41b02b7f7",
+    "launchId": "ba8868f8-0460-45f6-95d5-9852bc90fe36"
+  },
+  "primaryIdentityUnchanged": true,
+  "maxSnapshotMs": 325.02109999999993,
+  "maxPutMs": 337.0017000000007,
+  "maxBeginMs": 70.26800000000003,
+  "snapshotThresholdPassed": true
+}

@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T14:43:38.523Z",
+  "modelRequests": 0,
+  "runtime": "v24.19.0",
+  "priorVerification": {
+    "path": "output/dev-evidence/verification/report.json",
+    "sha256": "9560f9e79a66d14cae5d69d210c44ee3f45c774cf5dd1c10c18a104ade01b2e4",
+    "at": "2026-10-06T14:27:26.431Z",
+    "unchangedBaselineFiles": 94,
+    "checks": [
+      {
+        "name": "integration-tests",
+        "exitCode": 0
+      },
+      {
+        "name": "typecheck",
+        "exitCode": 0
+      },
+      {
+        "name": "production-build",
+        "exitCode": 0
+      },
+      {
+        "name": "pi-offline-probe",
+        "exitCode": 0
+      }
+    ]
+  },
+  "newProbeFiles": {
+    "scripts/probe-large-upload-responsiveness.ts": "38c3af50f5c97e6c9a95d61f4bffaebdf380446645f9f4ee7ff21cb609551049",
+    "scripts/probe-upload-responsiveness.ts": "6cf0c26648cb005a9dce02258e1caad31799c720fd4fcb7e7f110ca94bd425b0"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "outputSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  "actualHttpProbes": [
+    {
+      "path": "upload-responsiveness.json",
+      "sha256": "556bf7be206797bdce1bf1c10e755c5bcdd7fa326ec8569b09972e97a63b3af8",
+      "maxSnapshotMs": 325.02109999999993,
+      "ownedChildExited": true
+    },
+    {
+      "path": "large-upload-responsiveness.json",
+      "sha256": "2bc671fdfc869469249fa5290a400eed5bed027b5c3b714ecf1437678adb79e5",
+      "maxSnapshotMs": 435.0744999999988,
+      "ownedChildExited": true
+    }
+  ],
+  "scope": "Existing 98-test application baseline unchanged; only two isolated measurement scripts added, typechecked and executed. No repeated full-suite claim and no primary deployment change."
+}

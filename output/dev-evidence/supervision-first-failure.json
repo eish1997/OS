@@ -1,0 +1,13 @@
+{
+  "status": "failed-probe",
+  "modelRequests": 0,
+  "testExitCode": 1,
+  "testTimeoutMs": 90000,
+  "actualTestProcessDurationMs": 173762.1097,
+  "ownedSupervisorInstance": "fc7b274b-915d-4b35-97c9-7dc590c11849",
+  "ownedTestServiceLaunchId": "ff009959-8547-44fe-8e1d-452da279bb17",
+  "finding": "After the initial owned process really exited, the new service became ready, but the PowerShell native invocation remained waiting with the supervisor record in restarting. The manager itself was absent; authenticated shutdown of the owned test service released the wait.",
+  "repair": "Wait on a directly retained System.Diagnostics.Process for the manager and consume stdout/stderr concurrently. Preserve actual exit/receipt before updating state.",
+  "cleanup": "Identity-authenticated local-service stop returned stopped for the synthetic service; supervisor stop request then drained. Test runner actually exited 1. Main product was not supervised or stopped.",
+  "additionalCorrection": "Use Draft.body in the test instead of nonexistent Draft.content."
+}

@@ -1,0 +1,16 @@
+{
+  "fixture": {
+    "paused": false,
+    "dropRequests": false,
+    "reads": 1,
+    "writes": 0,
+    "proxyRequests": 1,
+    "backendPid": 33880
+  },
+  "status": "failed-as-expected",
+  "backendRecovered": true,
+  "at": "2026-10-06T16:22:45.5937621Z",
+  "modelRequests": 0,
+  "ui": "[ .. ] 正在连接工作台",
+  "failureId": "client-bootstrap-503"
+}

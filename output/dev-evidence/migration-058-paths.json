@@ -1,0 +1,65 @@
+{
+  "at": "2026-10-08T04:59:49.914Z",
+  "oldRoot": "E:\\AI\\OS\\data",
+  "newRoot": "F:\\AI\\OS\\data",
+  "runsUpdated": 30,
+  "bindingsUpdated": 13,
+  "nativeFilesVerified": 18,
+  "preexistingAbsentFailedSessions": [
+    "76fb03ac-34eb-4a79-9af1-65227aa076b8",
+    "c1aaeddb-8dd6-4e24-8518-3ee617111c3d"
+  ],
+  "continuations": [
+    {
+      "id": "ca8fe5f4-a7b8-458e-a051-325e03d58da3",
+      "ok": true
+    },
+    {
+      "id": "a0c8476d-170a-4b67-a1ae-92125d2177f7",
+      "ok": true
+    },
+    {
+      "id": "26632d56-284f-4fbf-99c9-9c5b7416808e",
+      "ok": true
+    },
+    {
+      "id": "61260c4f-01fc-4cfd-b93e-3734ccb6d94b",
+      "ok": true
+    },
+    {
+      "id": "e16d0617-1e82-4ca1-b9c1-bf55425d715b",
+      "ok": true
+    },
+    {
+      "id": "8d161561-d227-46a6-81d7-2d9146847504",
+      "ok": true
+    },
+    {
+      "id": "ee1bd850-c899-459d-95df-86644ada8d39",
+      "ok": true
+    },
+    {
+      "id": "909aaa90-9854-4950-8959-f170ae895b92",
+      "ok": true
+    },
+    {
+      "id": "e92b8beb-9418-4848-bb07-a3b6d7a0825e",
+      "ok": true
+    },
+    {
+      "id": "020941c4-9713-478e-9c0f-002007e70c89",
+      "ok": true
+    },
+    {
+      "id": "2fbf5024-0549-4e19-9687-41f7cf2aa83b",
+      "ok": true
+    }
+  ],
+  "retired": {
+    "sessions": 31,
+    "locks": 1
+  },
+  "credentialsPreserved": true,
+  "backupRoot": "C:\\Users\\ZYF\\AI-OS-Backups",
+  "modelRequests": 0
+}

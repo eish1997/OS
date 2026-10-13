@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-06T14:16:04.446Z",
+  "modelRequests": 0,
+  "corrections": [
+    {
+      "stage": "specialized-test",
+      "issue": "IPC drops nextOffset undefined; direct deepEqual expected kept it",
+      "resolution": "Compare expected using actual IPC JSON representation",
+      "final": "passed"
+    },
+    {
+      "stage": "typecheck",
+      "issue": "Buffer.alloc inferred a narrower ArrayBuffer than filesystem buffers",
+      "resolution": "Explicit Buffer annotation; no content/check change",
+      "final": "passed"
+    }
+  ],
+  "verification": "verification/report.json"
+}

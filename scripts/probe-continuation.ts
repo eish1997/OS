@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import { randomUUID,createHash } from 'node:crypto';
+import { readFileSync,writeFileSync,mkdirSync,existsSync,copyFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { config } from '../server/config.js';
+import type { Snapshot,Run } from '../shared/contracts.js';
+const base=`http://127.0.0.1:${config.port}`;const file='output/dev-evidence/pi-real-continuation.json';mkdirSync('output/dev-evidence',{recursive:true});
+if(existsSync(file)){mkdirSync('output/dev-evidence/continuation-history',{recursive:true});copyFileSync(file,`output/dev-evidence/continuation-history/${Date.now()}.json`);}
+const report:{status:string;at:string;[key:string]:unknown}={status:'running',at:new Date().toISOString(),scope:'Own fixed nonsensitive project, write_asset only; up to 4 ChatGPT requests; no automatic retries'};
+const save=()=>writeFileSync(file,JSON.stringify(report,null,2));save();let cookie='';const owned:string[]=[];
+async function login(){const r=await fetch(base+'/api/login',{method:'POST',body:JSON.stringify({password:config.password})});if(!r.ok)throw new Error('本机登录失败');cookie=r.headers.get('set-cookie')!.split(';')[0];}
+async function api<T>(path:string,data?:unknown):Promise<T>{const r=await fetch(base+'/api'+path,{headers:{Cookie:cookie,Origin:config.origin,'Content-Type':'application/json'},...(data===undefined?{}:{method:'POST',body:JSON.stringify(data)})});if(!r.ok)throw new Error(`接续接口HTTP ${r.status}`);return r.json();}
+async function wait(id:string){const begin=Date.now();let snapshot=await api<Snapshot>('/snapshot');let run=snapshot.runs.find(r=>r.id===id)!;while(['queued','running','waiting_user'].includes(run.status)&&Date.now()-begin<90000){await new Promise(r=>setTimeout(r,500));snapshot=await api('/snapshot');run=snapshot.runs.find(r=>r.id===id)!;}assert.equal(run.status,'completed',run.error||'接续任务未完成');const deadline=Date.now()+7000;while(Date.now()<deadline){try{process.kill(run.workerPid!,0);}catch(e){if(e instanceof Error&&'code'in e&&e.code==='ESRCH')return {snapshot,run};throw e;}await new Promise(r=>setTimeout(r,100));}throw new Error('所属执行进程仍存在');}
+const hash=(path:string)=>createHash('sha256').update(readFileSync(path)).digest('hex');
+try {
+  await login();const before=await api<Snapshot>('/snapshot');assert(before.config.modelConfigured);assert(before.config.callsRemaining>=4);assert(!before.runs.some(r=>['running','queued'].includes(r.status)));assert(!before.memories.some(m=>!m.projectId&&m.confirmed&&m.active&&!m.deleted&&m.kind!=='temporary'),'固定探针不注入个人记忆');
+  const project=await api<{id:string}>('/projects',{name:'Pi 会话接续验证',description:'固定无敏感随机标记；验证服务重启后原生会话接续与写入不重放。'});report.projectId=project.id;report.model=before.config.model;const token='NATIVE_'+randomUUID().replaceAll('-','');
+  const first=await api<{run:Run}>('/tasks',{projectId:project.id,mode:'pi',continueFromRunId:null,commandId:randomUUID(),requestedTools:['write_asset'],maxCalls:2,timeoutMs:60000,goal:`请记住这段固定测试代码：${token}。用write_asset保存session-first.md，内容严格为该代码。只写一次，然后结束，不调用其他工具。`});owned.push(first.run.id);const one=await wait(first.run.id);const originalHash=hash(one.run.sessionPath!);report.firstRunId=one.run.id;report.firstUsage=one.run.usage;assert(one.run.usage?.complete);save();
+  const current=await api<Snapshot>('/snapshot');assert(!current.runs.some(r=>['running','queued'].includes(r.status)),'出现用户任务，不重启服务');
+  for(const action of ['stop','start']){const r=spawnSync('powershell',['-ExecutionPolicy','Bypass','-File','scripts/local-service.ps1','-Action',action],{encoding:'utf8',windowsHide:true,timeout:25000});if(r.status!==0)throw new Error('按归属管理服务未完成：'+action);}
+  await login();report.serviceRestarted=true;assert.equal(hash(one.run.sessionPath!),originalHash);
+  const second=await api<{run:Run}>('/tasks',{projectId:project.id,mode:'pi',commandId:randomUUID(),requestedTools:['write_asset'],maxCalls:2,timeoutMs:60000,goal:'根据上一轮谈话，把那段固定测试代码原样保存到session-next.md。不要读取文件、检索记忆或重新创建session-first.md。只写session-next.md一次，然后结束。'});owned.push(second.run.id);assert.equal(second.run.continuation?.runId,one.run.id);const two=await wait(second.run.id);
+  const asset=two.snapshot.assets.find(a=>a.runId===two.run.id&&a.name==='session-next.md');assert(asset);const result=await fetch(base+`/api/assets/${asset.id}`,{headers:{Cookie:cookie}});assert.equal(await result.text(),token);
+  assert.equal(two.snapshot.assets.filter(a=>a.projectId===project.id&&a.name==='session-first.md').length,1);assert.equal(hash(one.run.sessionPath!),originalHash);assert.notEqual(two.run.sessionId,one.run.sessionId);assert(two.run.usage?.complete);
+  const diagnostics=await api<{runs:{id:string;sessionBound:boolean}[]}>('/diagnostics');assert(diagnostics.runs.find(r=>r.id===one.run.id)?.sessionBound);assert(diagnostics.runs.find(r=>r.id===two.run.id)?.sessionBound);
+  report.status='passed';report.at=new Date().toISOString();report.secondRunId=two.run.id;report.secondUsage=two.run.usage;report.calls=one.run.calls+two.run.calls;report.proven=['real native history recall without asset read','service restart with existing ChatGPT connection','independent durable SessionBinding','source session unchanged','new session fork identity','first write not repeated'];save();console.log(JSON.stringify(report));
+}catch(e){report.status='failed';report.reason=e instanceof Error?e.message:'接续验证失败';save();throw e;}
+finally {for(const id of owned)try{const s=await api<Snapshot>('/snapshot');const run=s.runs.find(r=>r.id===id);if(run&&['running','queued','waiting_user'].includes(run.status))await api(`/runs/${id}/cancel`,{});}catch{}if(cookie)try{await api('/logout',{});}catch{}}

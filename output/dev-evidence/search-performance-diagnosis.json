@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-06T13:39:42.921Z",
+  "status": "diagnosed",
+  "modelRequests": 0,
+  "profiles": [
+    {
+      "profile": "default",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "countMs": 353.93969999999996,
+      "pageSecondScanMs": 344.19870000000003,
+      "singleMatchScanMs": 290.7812,
+      "resultCount": 600,
+      "storageUsageMs": 180.2727,
+      "measuredBytes": 776142406,
+      "plan": [
+        {
+          "id": 6,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH e USING INDEX entity_scope (kind=? AND project_id=?)"
+        },
+        {
+          "id": 17,
+          "parent": 0,
+          "notused": 46,
+          "detail": "SEARCH x USING INDEX sqlite_autoindex_asset_search_1 (asset_id=?)"
+        }
+      ]
+    },
+    {
+      "profile": "full",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+      "countMs": 1332.9916000000003,
+      "pageSecondScanMs": 1315.1742,
+      "singleMatchScanMs": 1356.7855000000004,
+      "resultCount": 128,
+      "storageUsageMs": 77.27449999999953,
+      "measuredBytes": 2142240894,
+      "plan": [
+        {
+          "id": 6,
+          "parent": 0,
+          "notused": 61,
+          "detail": "SEARCH e USING INDEX entity_scope (kind=? AND project_id=?)"
+        },
+        {
+          "id": 17,
+          "parent": 0,
+          "notused": 46,
+          "detail": "SEARCH x USING INDEX sqlite_autoindex_asset_search_1 (asset_id=?)"
+        }
+      ]
+    }
+  ],
+  "rejectedCandidate": {
+    "type": "SQL instr exact fast path before LIKE fallback",
+    "fullLarge": {
+      "originalMs": 1305.1535,
+      "candidateMs": 1534.8577,
+      "count": 119
+    },
+    "fullSmall": {
+      "originalMs": 1359.0738,
+      "candidateMs": 2152.8006,
+      "count": 128
+    },
+    "applied": false,
+    "reason": "Measured slower on both full queries; exact and case-insensitive semantics would be preserved but performance worsens"
+  }
+}

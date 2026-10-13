@@ -1,0 +1,36 @@
+import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
+import {resolve,dirname,join} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const auditPath='output/dev-evidence/plan-update-050-audit.json';
+writeFileSync(auditPath,JSON.stringify({at:new Date().toISOString(),status:'pending'})+'\n');
+const read=p=>readFileSync(p,'utf8').replace(/^\uFEFF/,'');
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const reportPath='output/dev-evidence/verification/report.json';
+const report=JSON.parse(read(reportPath));
+assert.equal(report.status,'passed');
+for(const [p,h] of Object.entries(report.baseline))assert.equal(hash(p),h,p);
+const documents=['doc/主开发文档.md','doc/开发执行文档.md','doc/dev/本地电脑版执行范围.md','doc/dev/current.md','doc/README.md','doc/dev/iterations/050-local-plan-refresh.md'];
+const main=read(documents[0]),execution=read(documents[1]);
+assert(main.includes('版本：0.9'));assert(execution.includes('版本：0.9'));
+assert(main.includes('不作为当前交付前置'));
+assert(execution.includes('M1 仍依赖本地 M0 通过'));
+assert(execution.includes('R-01至04为用户延期'));
+for(const id of ['L-01a','L-01b','L-01c'])assert(execution.includes(id)&&read('doc/dev/backlog.md').includes(id),id);
+for(const term of ['当前草稿','版本冲突','来源'])assert(main.includes(term)&&execution.includes(term),term);
+assert(read('doc/dev/current.md').includes('同步为0.9'));
+assert(execution.includes('实际浏览器交互仍待验收'));
+const walk=p=>readdirSync(p,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(join(p,e.name)):e.name.endsWith('.md')?[join(p,e.name)]:[]);
+const files=walk(resolve('doc'));let links=0;const failures=[];
+for(const file of files)for(const match of read(file).matchAll(/!?\[[^\]\n]*\]\(([^)\n]+)\)/g)){
+  let target=match[1].trim();
+  if(target.startsWith('<'))target=target.slice(1,target.indexOf('>'));
+  else target=target.replace(/\s+["'][\s\S]*$/,'');
+  if(/^[a-z][a-z0-9+.-]*:/i.test(target)||target.startsWith('#'))continue;
+  target=decodeURIComponent(target.split('#')[0].split('?')[0]);if(!target)continue;
+  links++;if(!existsSync(resolve(dirname(file),target)))failures.push({file,target});
+}
+assert.deepEqual(failures,[],'Broken local documentation links');
+const result={at:new Date().toISOString(),status:'passed',scope:'Documentation only; local desktop first',changedDocuments:Object.fromEntries(documents.map(p=>[p,hash(p)])),documentsScanned:files.length,localDocumentLinks:links,engineeringFiles:Object.keys(report.baseline).length,engineeringBaselineUnchanged:true,verificationSha256:hash(reportPath),freshEngineeringTestsRun:false,sourceEditedByThisUpdate:false,serviceRestartedByThisUpdate:false,modelRequestsByThisUpdate:0,m0Accepted:false,m1Started:false,remoteStage:'Deferred by user'};
+writeFileSync(auditPath,JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({status:result.status,documents:files.length,links,engineeringFiles:result.engineeringFiles}));

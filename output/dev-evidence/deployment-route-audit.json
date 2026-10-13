@@ -1,0 +1,61 @@
+{
+  "at": "2026-10-07T04:52:01.171Z",
+  "status": "passed",
+  "scope": "Deployment route and verified pinned Linux runtime download",
+  "documents": {
+    "doc/dev/无现成资源落地路线.md": "417e3a7cc69da1dca1db23f4d08abe2dee0b0222ed2a57b3d09244904491b922",
+    "doc/dev/iterations/044-deployment-route.md": "e1d0bf20575fc52a2ed118626421b09c87cb0d0bdf945f5b0be5df2c79b9dd35",
+    "doc/dev/部署准备方案.md": "f7c211e81e08cf22e093b83a6496c8e360ab5bc901fe243b887f919189816283",
+    "doc/dev/云资源候选与费用.md": "68b292bde85ed078a8f86ba980c47a5e7909ab719279a9106c4c2595b1890ebf",
+    "doc/dev/current.md": "c6ddc3346632e7ee26c3c9d4a4d3cfb12393e13370cfa7aed32171261543bc54",
+    "doc/dev/backlog.md": "1931443caab89752c0f2e2a44e687663e6f65abf049208a5095c5b2e56e6d71b",
+    "doc/dev/acceptance.md": "f2fb5f1ed663a64e585c0605c8721802cfb1cb9dd4fe9a421bf5a3d7e15dec63",
+    "doc/README.md": "b94533925ae9af750723d80267697dcbc76c065a733273bb49684cb66be75c3d",
+    "doc/deployment.md": "75b4d3604a9bf1c155ef54085cac4df23353a7801249f06e35ead8886209dba5",
+    "doc/存储与多设备架构.md": "6eb247d2cdc734f5048cd626cf1ef0091ae4b506e9c9f59e4ba668de87e63a17",
+    "deployment/linux/README.md": "0d91cd6b3c231cdea690bd4fc32affb37c4e360aa85d04ebf67f7d3cdd93e4a4",
+    "deployment/linux/runtime-lock.json": "b02b82522e3f19540dd985a0fb0876c0de481eb5a3040d6a35cec12350e2d543"
+  },
+  "environmentSha256": "819c15a2d9d6708933c3caad0b251499a3b242b60233410e6ad5ec486d9132c1",
+  "runtimeDownloadSha256": "97ef99cb9d6ed76e194dc79b439b391e7d744a46485ef8b143b9b15cddeaafac",
+  "archiveSha256": "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647",
+  "archiveBytes": 31633904,
+  "archiveSignatureVerified": false,
+  "engineeringFiles": 143,
+  "codeChanged": false,
+  "engineeringMetadataChanges": [
+    "deployment/linux/README.md",
+    "deployment/linux/runtime-lock.json"
+  ],
+  "tests": 128,
+  "checks": 4,
+  "verificationSha256": "43ed46d3bac24f9817320cac265b0232e4d7ede1879f6a47c9797307d0830ea7",
+  "priorVerification": "output/dev-evidence/verification/history/2026-10-06T19-22-02-003Z/report.json",
+  "freshFullVerification": true,
+  "localDocumentLinks": 804,
+  "productionService": {
+    "ready": true,
+    "pid": 52144,
+    "instanceId": "975f5a08-dbd3-44a0-b088-179895604ffa",
+    "launchId": "05233f80-59f9-40c2-a5b3-ac827a9d0699"
+  },
+  "supervisor": {
+    "pid": 39296,
+    "state": "ready",
+    "servicePid": 52144
+  },
+  "productionRestarted": false,
+  "networkConfigured": false,
+  "clientInstalled": false,
+  "vmBooted": false,
+  "cloudPurchased": false,
+  "modelRequestsByThisTurn": 0,
+  "goalComplete": false,
+  "remaining": [
+    "Actual Linux runtime and deployment",
+    "Private network client/account and real phone",
+    "Cloud resources/authorization/migration/offsite restore",
+    "Tencent isolated comparison and model budget",
+    "Existing M0/M1 acceptance and user feedback"
+  ]
+}

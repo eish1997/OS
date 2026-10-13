@@ -1,0 +1,38 @@
+{
+  "repository": "TencentCloud/TencentDB-Agent-Memory",
+  "commit": "8b86874a2daea49e3ff0fb53d699203146c5c77d",
+  "capturedAt": "2026-10-05T16:11:33.133938+00:00",
+  "executedCode": false,
+  "sources": [
+    {
+      "path": "README_CN.md",
+      "file": "README_CN.md",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/README_CN.md",
+      "sha256": "fc24a3686a5494181ffa65e6f043ebe360690e20f8c585793a2d95e9d5f342ac"
+    },
+    {
+      "path": "INSTALL_CN.md",
+      "file": "INSTALL_CN.md",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/INSTALL_CN.md",
+      "sha256": "0fe35827a90f9ed1818c25844e5e05ce1903efc746ee9de98d6d2b89e470ac7b"
+    },
+    {
+      "path": "LICENSE",
+      "file": "LICENSE",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/LICENSE",
+      "sha256": "bcaf06dea1a63d27aab5633035b620e0127295583456c2a9402565ef63ecb0b0"
+    },
+    {
+      "path": "deploy/global-images/.env.example",
+      "file": "deploy__global-images__.env.example",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/.env.example",
+      "sha256": "eb9f4d52cb3b0414fa069f65cd539ec144cbd6a08ac90b753d3d9099e82fe0cd"
+    },
+    {
+      "path": "deploy/global-images/start-all.sh",
+      "file": "deploy__global-images__start-all.sh",
+      "url": "https://raw.githubusercontent.com/TencentCloud/TencentDB-Agent-Memory/8b86874a2daea49e3ff0fb53d699203146c5c77d/deploy/global-images/start-all.sh",
+      "sha256": "f586edda5901eda28ef3788fe97f64724434be2e554c285750086d4f3d57c98e"
+    }
+  ]
+}

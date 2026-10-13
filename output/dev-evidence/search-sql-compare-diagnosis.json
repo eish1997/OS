@@ -1,0 +1,74 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T14:51:26.383Z",
+  "modelRequests": 0,
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+  "samples": [
+    {
+      "run": 0,
+      "mode": "blob-js",
+      "totalMs": 1772.577,
+      "matchMs": 1035.3695,
+      "indexCompareMs": 177.86630000000014,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1150964
+    },
+    {
+      "run": 1,
+      "mode": "sql-compare",
+      "totalMs": 1937.2967999999998,
+      "matchMs": 1100.1699999999998,
+      "indexCompareMs": 192.3126000000002,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1159328
+    },
+    {
+      "run": 2,
+      "mode": "blob-js",
+      "totalMs": 1829.5074000000004,
+      "matchMs": 1109.6100999999999,
+      "indexCompareMs": 170.25530000000163,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1159328
+    },
+    {
+      "run": 3,
+      "mode": "sql-compare",
+      "totalMs": 1798.1952,
+      "matchMs": 1094.0178999999998,
+      "indexCompareMs": 173.60049999999865,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1159488
+    },
+    {
+      "run": 4,
+      "mode": "blob-js",
+      "totalMs": 1719.8424000000005,
+      "matchMs": 1020.4731999999995,
+      "indexCompareMs": 164.44709999999577,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1159488
+    },
+    {
+      "run": 5,
+      "mode": "sql-compare",
+      "totalMs": 1807.1010999999999,
+      "matchMs": 1075.5776000000005,
+      "indexCompareMs": 181.94350000000304,
+      "items": 50,
+      "hashesVerified": 50,
+      "exactIndexedBytesVerified": true,
+      "maxRssKiB": 1159488
+    }
+  ]
+}

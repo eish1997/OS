@@ -1,0 +1,14 @@
+{
+  "status": "failed",
+  "failureId": "desktop-entry-console-encoding",
+  "attempt": 1,
+  "exitCode": 1,
+  "tests": 2,
+  "passed": 1,
+  "failed": 1,
+  "cause": "PowerShell 5 emitted JSON using its native console code page; Node decoded bytes as UTF-8, corrupting Chinese shortcut/data path values. Source BOM already protected script literals but did not control stdout.",
+  "evidence": "ENOENT opening the second test's Chinese shortcut path from the decoded management receipt. First test lacked an assertion that the real requested Chinese data directory was used.",
+  "repair": "Set per-process UTF-8 Console.OutputEncoding/OutputEncoding in both new entry scripts, and assert the original Chinese data path in the receipt plus the actual SQLite file in that directory.",
+  "scope": "Own temporary shortcut folders and isolated disabled-model test service; no real current-user startup registration or primary service change",
+  "modelRequests": 0
+}

@@ -1,0 +1,9 @@
+{
+  "status": "failed-probe",
+  "modelRequests": 0,
+  "testExitCode": 1,
+  "actualTestDurationMs": 13117.065,
+  "finding": "The receipt/exit fix allowed actual restart and original file/draft/browser-session checks to complete. The fixture then parsed a PowerShell 5 UTF-8 manifest without removing its BOM.",
+  "repair": "Normalize the BOM before the fixture's deliberate identity mutation. Add a live-but-unreachable health probe and distinguish exit commitment from externally observed actual supervisor termination.",
+  "cleanup": "The fixture's finally stopped its own supervisor and authenticated its own service shutdown; the test runner actually exited 1. No primary product change or model request."
+}

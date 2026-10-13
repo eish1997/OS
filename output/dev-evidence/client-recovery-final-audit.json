@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-06T17:04:03.345Z",
+  "status": "passed",
+  "engineeringFiles": 107,
+  "tests": 108,
+  "checks": 4,
+  "verificationSha256": "a878dbf0ca2370df0b97eaca2dc0165b3ddf696b33f4b1bfd2d6c6744f6fcbd9",
+  "historical104Sha256": "75981efd4bbda7f73ad27b611c4d5798b8989849ac8d54cff4b6f274e6d7f88a",
+  "localDocLinks": 503,
+  "screenshots": 4,
+  "service": {
+    "name": "workbench",
+    "workspace": "E:\\AI\\OS",
+    "pid": 7872,
+    "instanceId": "b62fbfb6-f7b4-411b-b8ac-7dc7feed6986",
+    "state": "ready",
+    "url": "http://127.0.0.1:4310",
+    "creationUtc": "2026-10-06T16:59:36.4758360Z"
+  },
+  "supervisor": {
+    "instance": "cc9b79a7-40a5-482b-bf84-a6e618c43b74",
+    "name": "workbench",
+    "pid": 35620,
+    "running": true,
+    "restartCount": 0,
+    "state": "ready",
+    "lastError": null
+  },
+  "modelRequests": 0,
+  "totalUserSessions": 31,
+  "preservedOtherUserSessions": 30,
+  "currentBrowserSessionReplaced": true,
+  "fixturePidAbsent": true,
+  "remaining": [
+    "In-app browser only; default Chrome page not verified",
+    "390px viewport is not a physical remote phone",
+    "Final fixture logout/tab close and final main reload interrupted by tool transport; no graceful-exit claim",
+    "Unknown reason main service and monitor also exited; restored only after identity status and authoritative process absence checks",
+    "Full original M0/M1 development objective remains incomplete"
+  ]
+}

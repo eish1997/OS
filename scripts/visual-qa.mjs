@@ -1,0 +1,35 @@
+import { createRequire } from 'node:module';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+const runtimePackage = process.env.PLAYWRIGHT_PACKAGE;
+if (!runtimePackage) throw new Error('Set PLAYWRIGHT_PACKAGE to the installed local Playwright package');
+const require = createRequire(import.meta.url); const { chromium } = require(runtimePackage);
+const config = Object.fromEntries(readFileSync('.env', 'utf8').split(/\r?\n/).filter(s => /^[A-Z_]+=/.test(s)).map(s => { const at = s.indexOf('='); return [s.slice(0, at), s.slice(at + 1)]; }));
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+const page = await context.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+mkdirSync('output/dev-evidence/ui', { recursive: true });
+writeFileSync('output/dev-evidence/ui/report.json', JSON.stringify({ status: 'running', at: new Date().toISOString() }));
+const marker = '桌面视觉验收编辑：四组数据合计60，平均15。 / ' + new Date().toISOString();
+let ownedProject;
+try {
+  await page.goto('http://127.0.0.1:4310'); await page.getByLabel('工作台密码').fill(config.WORKBENCH_PASSWORD);
+  await page.getByRole('button', { name: /进入工作台/ }).click(); await page.getByRole('heading', { name: '你的工作室' }).waitFor();
+  await page.screenshot({ path: 'output/dev-evidence/ui/home-desktop.png', fullPage: true });
+  ownedProject = await page.evaluate(async () => { const response = await fetch('/api/projects', { method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'工程界面验证 · '+new Date().toISOString(),description:'由视觉验证脚本创建的固定样例，结束后归档；不使用模型。'}) }); if(!response.ok) throw new Error('QA project creation failed'); return response.json(); });
+  await page.reload(); await page.locator('.project-card').filter({ hasText: ownedProject.name }).click();
+  await page.getByLabel('执行方式').selectOption('fixture'); await page.getByLabel('输入目标').fill('运行固定资料计算，保存报告、图表和文章草稿'); const before = await page.evaluate(async () => (await (await fetch('/api/snapshot')).json()).runs.length); await page.getByRole('button', { name: '提交目标' }).click(); await page.waitForFunction(async (n) => (await (await fetch('/api/snapshot')).json()).runs.length > n, before);
+  await page.getByRole('button', { name: /任务与过程/ }).click(); await page.locator('.task').first().getByText('执行结束', { exact: true }).waitFor({ timeout: 20000 });
+  await page.getByRole('button', { name: /内容草稿/ }).click(); await page.getByRole('textbox', { name: '文章标题' }).first().waitFor();
+  await page.screenshot({ path: 'output/dev-evidence/ui/draft-desktop.png', fullPage: true });
+  await page.getByRole('textbox', { name: '文章内容' }).first().fill(marker); await page.getByRole('button', { name: '保存', exact: true }).first().click(); await page.getByText('已同步', { exact: true }).first().waitFor();
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); await phone.addCookies(await context.cookies());
+  const mobile = await phone.newPage(); mobile.on('pageerror', e => errors.push(e.message)); await mobile.goto('http://127.0.0.1:4310'); await mobile.getByRole('heading', { name: '你的工作室' }).waitFor();
+  await mobile.screenshot({ path: 'output/dev-evidence/ui/home-mobile.png', fullPage: true });
+  await mobile.locator('.project-card').filter({ hasText: ownedProject.name }).click(); await mobile.getByRole('button', { name: /内容草稿/ }).click(); await mobile.getByRole('textbox', { name: '文章内容' }).first().waitFor();
+  const mobileDraft = await mobile.getByRole('textbox', { name: '文章内容' }).first().inputValue(); if (mobileDraft !== marker) throw new Error('Second client did not see shared draft');
+  await mobile.screenshot({ path: 'output/dev-evidence/ui/draft-mobile.png', fullPage: true });
+  const overflow = await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1); if (overflow) throw new Error('Mobile layout overflow');
+  await page.locator('.sidebar').getByRole('button',{name:/设置/}).click(); await page.getByRole('heading',{name:'存储',exact:true}).waitFor(); await page.getByText('数据库与搜索索引',{exact:true}).waitFor(); await page.screenshot({path:'output/dev-evidence/ui/storage-desktop.png',fullPage:true});
+  const report = { status:'passed', at: new Date().toISOString(), browser: await browser.version(), viewportDesktop: [1440, 1000], viewportMobile: [390, 844], screenshots: 5, browserErrors: errors, deterministicWorker: true, sharedDraftAcrossClients: true, storageVisible:true, realPhoneCrossNetwork: false, engineeringBaseline: JSON.parse(readFileSync('output/dev-evidence/verification/report.json','utf8')).baseline };
+  writeFileSync('output/dev-evidence/ui/report.json', JSON.stringify(report, null, 2)); console.log(JSON.stringify(report)); if (errors.length) process.exitCode = 1; await phone.close();
+} catch (error) { writeFileSync('output/dev-evidence/ui/report.json', JSON.stringify({ status: 'failed', at: new Date().toISOString(), error: error.message })); throw error; } finally { if(ownedProject) { await page.evaluate(async p => { await fetch('/api/projects/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:p.id,revision:p.revision,archived:true})}); },ownedProject).catch(()=>{}); } await browser.close(); }

@@ -1,0 +1,87 @@
+{
+  "at": "2026-10-07T05:13:06.898938+00:00",
+  "owner": "root",
+  "userDirection": "本地电脑版优先，多端连接后续",
+  "changes": [
+    {
+      "path": "doc/dev/本地电脑版执行范围.md",
+      "before": null,
+      "after": "148be26224603dadc0da787b9b7068c5ec7a7ec36b9816291e166fc57a638a94"
+    },
+    {
+      "path": "doc/adr/026-local-desktop-first.md",
+      "before": null,
+      "after": "4f7527b74629b3a8093f41bff9e81906a30bcc25b8908612a8b6bcc9322e56a9"
+    },
+    {
+      "path": "doc/主开发文档.md",
+      "before": "afe2b8dedfa0ef631bc1f6ac22de3efde2474f46decc01a31dd5ed17c5e08807",
+      "after": "7df93f0b35838c19328007ee15bfd4dc849fd58edd2a64acfc28eb524f9ed1eb"
+    },
+    {
+      "path": "doc/开发执行文档.md",
+      "before": "3f4659b09bcc536da61e7d6e8ca6b6a6e020ab3313ffea2eed68134a90476449",
+      "after": "85d4559fab8d58453ad23b333019fb1211c673d0f368a20591fd5c48a4457cc1"
+    },
+    {
+      "path": "doc/存储与多设备架构.md",
+      "before": "6eb247d2cdc734f5048cd626cf1ef0091ae4b506e9c9f59e4ba668de87e63a17",
+      "after": "83e1c89eda01f6ff380eaf0f15cb8fb408d627b58b5e4f9ac1ac32f4efeee7fb"
+    },
+    {
+      "path": "doc/deployment.md",
+      "before": "75b4d3604a9bf1c155ef54085cac4df23353a7801249f06e35ead8886209dba5",
+      "after": "2c0d635319c779f626532f5103dabdb97551c36889316636d52b728dbb8d5d94"
+    },
+    {
+      "path": "doc/dev/部署准备方案.md",
+      "before": "f7c211e81e08cf22e093b83a6496c8e360ab5bc901fe243b887f919189816283",
+      "after": "a58070063bb432d3a606b84eedbc96eab0f490d798d885e0775350ff0752ae36"
+    },
+    {
+      "path": "doc/dev/云资源候选与费用.md",
+      "before": "68b292bde85ed078a8f86ba980c47a5e7909ab719279a9106c4c2595b1890ebf",
+      "after": "1fcdbdc7a4cf18636010751bc57bce896f4f47a1307954dc62b5ea5eb3427f10"
+    },
+    {
+      "path": "doc/dev/接入与上线解决计划.md",
+      "before": "e10511d5f6e1c077605c96a00405184363296494ba2f8b39748676125c68fcf5",
+      "after": "2bbf8ba45ee084e47d529f8e8179d2e3db99ef105d6e23ee9ce1d145e46378af"
+    },
+    {
+      "path": "doc/dev/无现成资源落地路线.md",
+      "before": "417e3a7cc69da1dca1db23f4d08abe2dee0b0222ed2a57b3d09244904491b922",
+      "after": "7d93e33d19a8120ab3a88d039c663cdcb58ba8f08e84a7de6ed636919582d955"
+    },
+    {
+      "path": "README.md",
+      "before": "0a259ee7b5b3d18e903578d3d598cb2e86cb46c00a7a2f71d3170e81112efbeb",
+      "after": "9cac9bc45dd8acb27f60268cbb3093ff4f8c59504febfb11b2f35ea33e0ca75c"
+    },
+    {
+      "path": "doc/dev/backlog.md",
+      "before": "1931443caab89752c0f2e2a44e687663e6f65abf049208a5095c5b2e56e6d71b",
+      "after": "7d278f41e25c995869a370e8596642c0b7cdbef8e50b8358865c3e4c4756a3bd"
+    },
+    {
+      "path": "doc/dev/acceptance.md",
+      "before": "f2fb5f1ed663a64e585c0605c8721802cfb1cb9dd4fe9a421bf5a3d7e15dec63",
+      "after": "4a26f5a07317da8588141467f31142839c99ea7894fc7b0f535de0ec87b87631"
+    },
+    {
+      "path": "doc/dev/current.md",
+      "before": "c6ddc3346632e7ee26c3c9d4a4d3cfb12393e13370cfa7aed32171261543bc54",
+      "after": "5bedbc1ab5382bd0d75902275f1a4c0d44e187d382451f5a0091e280f26e2aeb"
+    },
+    {
+      "path": "doc/README.md",
+      "before": "b94533925ae9af750723d80267697dcbc76c065a733273bb49684cb66be75c3d",
+      "after": "88764773dcf662a451c6a8ba1117b39ce27c1af5fd6521ffcaff7eeef8d8bf5f"
+    },
+    {
+      "path": "doc/dev/iterations/045-local-desktop-first.md",
+      "before": null,
+      "after": "80f8188cbcac431354f40b096771dc4827933fecc154da39d6cd031514e536a9"
+    }
+  ]
+}

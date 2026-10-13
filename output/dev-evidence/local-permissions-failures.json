@@ -1,0 +1,25 @@
+{
+  "modelRequests": 0,
+  "scope": "Independent synthetic fixtures only",
+  "failures": [
+    {
+      "failureId": "winps-security-module-autoload",
+      "attempt": 1,
+      "result": "failed",
+      "fix": "Use fixed Windows PowerShell and .NET ACL APIs"
+    },
+    {
+      "failureId": "sid-string-account-translation",
+      "attempt": 1,
+      "result": "failed",
+      "fix": "Construct explicit SecurityIdentifier"
+    },
+    {
+      "failureId": "acl-sort-parser-extra-parenthesis",
+      "attempt": 1,
+      "result": "failed",
+      "fix": "Repair syntax; parse/test rerun"
+    }
+  ],
+  "final": "Full verified baseline passed; production data ACLs not reverted"
+}

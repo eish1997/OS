@@ -1,0 +1,15 @@
+{
+  "status": "failed",
+  "failureId": "desktop-entry-supervisor-exit-race",
+  "attempt": 1,
+  "exitCode": 1,
+  "tests": 2,
+  "passed": 1,
+  "failed": 1,
+  "cause": "The shortcut test's stop cleanup observed a terminating supervisor through CIM and reported identity mismatch. That rejected cleanup prevented the following service-stop call, leaving the isolated service alive and inherited pipes open.",
+  "evidence": "Owned supervisor committed stopped-by-request; subsequent actual CIM read proved its PID absent. Owned service PID20160 still matched original creation, executable, command and launch instance.",
+  "actualRecovery": "Authenticated identity-checked local-service stop of own entry-02094da587a54841a8354d0fbfe4d24e released the remaining test process pipes; the original test handle exited1. No saved-PID kill or test restart.",
+  "repair": "Recheck actual CIM after a supervisor identity mismatch, as for the service process. Nest fixture cleanup finally blocks so rejected monitor cleanup still attempts authenticated own-service shutdown and owned-shortcut removal.",
+  "scope": "Own temporary shortcut/data folders only; primary service and actual current-user startup remained untouched",
+  "modelRequests": 0
+}

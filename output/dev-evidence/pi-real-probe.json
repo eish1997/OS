@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-06T10:19:53.994Z",
+  "status": "passed-basic-tool-roundtrip",
+  "realModelCall": true,
+  "authKind": "chatgpt",
+  "provider": "openai",
+  "model": "gpt-5.6-sol",
+  "projectId": "6d679c58-4f34-4567-8ef5-c6c673d627ab",
+  "runId": "ca8fe5f4-a7b8-458e-a051-325e03d58da3",
+  "runtime": "v24.19.0",
+  "calls": 2,
+  "subscriptionUsage": {
+    "input": 587,
+    "output": 33,
+    "cacheRead": 0,
+    "cacheWrite": 0,
+    "totalTokens": 620,
+    "complete": true
+  },
+  "assetVerified": true,
+  "sessionBound": true,
+  "elapsedMs": 9940,
+  "remaining": [
+    "real cancellation",
+    "native-session restoration with model",
+    "timeout and provider failures"
+  ]
+}

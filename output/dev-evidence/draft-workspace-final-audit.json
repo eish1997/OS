@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-07T05:46:52.145Z",
+  "status": "passed",
+  "verificationSha256": "7251a935bd4b9aef30c9a2113f9293026790e63424af2a77ab526be887f762c5",
+  "engineeringFiles": 144,
+  "tests": 128,
+  "uiObservationSha256": "75bbaac4c1dad26ce44471d9ba34aacf824703f2dd0f3a506e0ebc1f39dfb8d3",
+  "uiChecks": {
+    "singleVisibleEditor": true,
+    "latestDraftDefault": true,
+    "selectionSurvivesReload": true,
+    "newDraftSelected": true,
+    "saveContinuesAfterSelection": true,
+    "hiddenConflictVisibleInList": true,
+    "localEditSurvivesConflictAndReload": true,
+    "serverVersionCanBeLoaded": true,
+    "selectionScopedByProject": true,
+    "serverExportWithSources": true,
+    "localConflictDownload": true
+  },
+  "fixtureRowsVerified": true,
+  "downloads": {
+    "serverExport": "6b70a585a2d5b0c37231249f4bddc7f083e747c0db0b364ed0a4c1071e3982ef",
+    "localCopy": "dc6728f96ecebee6f7f4457d54f64d138357cfc23efb6d1a558040741258f7f1"
+  },
+  "production": {
+    "health": {
+      "ready": true,
+      "pid": 25176,
+      "instanceId": "8f48fecd-89f0-4b30-a239-41837f386677",
+      "launchId": "9c709757-ddde-4660-88a8-b2f2d5f72f30"
+    },
+    "counts": {
+      "entities": 235,
+      "projects": 16,
+      "readyAssets": 44,
+      "sessions": 31
+    },
+    "readyAssetHashesValid": true,
+    "canonicalRecordPresent": true,
+    "canonicalExportFileUnchanged": true
+  },
+  "serviceOutage": {
+    "oldMainPid": 52144,
+    "oldSupervisorPid": 39296,
+    "bothConfirmedMissing": true,
+    "portConfirmedUnbound": true,
+    "cause": "unconfirmed",
+    "recoveredThroughExistingEntry": true,
+    "notIntentionalProductionCrashTest": true
+  },
+  "modelRequestsByThisWork": 0,
+  "goalComplete": false,
+  "remaining": [
+    "Same-name draft distinction and document reading experience",
+    "Other L-01 user path checks",
+    "Windows login/default browser/sleep wake",
+    "Local disk/WAL/pressure and actual user feedback",
+    "M1 controlled subagents/plugin",
+    "Separate blocked MEM-01 experiment"
+  ],
+  "remoteStage": "User deferred"
+}

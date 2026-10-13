@@ -1,0 +1,78 @@
+{
+  "at": "2026-10-06T10:38:47.836Z",
+  "status": "passed",
+  "cases": [
+    {
+      "kind": "cancel",
+      "passed": true,
+      "runId": "0d7a6f4b-06f8-4d10-bce8-33bc164e2eb4",
+      "status": "cancelled",
+      "calls": 2,
+      "settled": 2,
+      "reported": 1,
+      "usage": {
+        "input": 275,
+        "output": 30,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 305,
+        "complete": false
+      },
+      "realStreamObserved": true,
+      "observedRequests": [
+        1,
+        2
+      ],
+      "checkpointVerified": true,
+      "existingAssetRetained": true,
+      "workerExited": true,
+      "callsStableAfterStop": true,
+      "elapsedMs": 13130,
+      "cancelToTerminalMs": 1011,
+      "timeoutPolicyMs": 60000
+    },
+    {
+      "kind": "timeout",
+      "passed": true,
+      "runId": "6a72bee8-8bb8-4333-8ecf-c646c22dc110",
+      "status": "failed",
+      "error": "任务超过运行时间，已停止；已有成果保留",
+      "calls": 2,
+      "settled": 2,
+      "reported": 1,
+      "usage": {
+        "input": 275,
+        "output": 30,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 305,
+        "complete": false
+      },
+      "realStreamObserved": true,
+      "observedRequests": [
+        1,
+        2
+      ],
+      "checkpointVerified": true,
+      "existingAssetRetained": true,
+      "workerExited": true,
+      "callsStableAfterStop": true,
+      "elapsedMs": 18421,
+      "timeoutPolicyMs": 15000
+    }
+  ],
+  "limits": {
+    "requestsPerTask": 2,
+    "timeoutProbeMs": 15000,
+    "cancelGraceMs": 5000
+  },
+  "scope": "New non-sensitive project; write_asset only; no automatic retry",
+  "model": "gpt-5.6-sol",
+  "authKind": "chatgpt",
+  "projectId": "e20ef36e-e374-4cda-8c86-62b931c56894",
+  "remaining": [
+    "native session continuation with model",
+    "provider failure/recovery",
+    "complete M0/M1 acceptance"
+  ]
+}

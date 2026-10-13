@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T15:06:50.040Z",
+  "previousGoalTurn": "progress: 025 real HTTP upload response validated and recorded",
+  "modelRequests": 0,
+  "verifiedCodeFiles": 96,
+  "changedApplicationAndTestFiles": [
+    "server/search.ts",
+    "tests/search.test.ts"
+  ],
+  "tests": 99,
+  "verificationSha256": "4e33c374e71f38872ced660cd77ee4f843d2d8d19d9b451f1040fbb16255b599",
+  "performanceSha256": "8feb97109dc0a8d553ada5a447f440abd0b9160e48c20a2de745fa0a67c13a68",
+  "finalFullLargeMs": 1898.880900000002,
+  "allMeasuredQueriesUnder2000Ms": true,
+  "allDuringDataUnder500Ms": true,
+  "ownedProbeProcessesExited": true,
+  "productionSha256": "7a42892d302d4b0279e6dc35d412674a8611415051fbb9bd310418ecf0e40ddf",
+  "service": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8",
+    "creationUtc": "2026-10-06T15:01:42.5543450Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "preservedUserSessions": 31,
+  "readOnlyActualProductQueries": 4,
+  "documentsChecked": 10,
+  "localLinksChecked": 215,
+  "goal": "active",
+  "remaining": [
+    "Production permissions, filesystem quota/WAL, supervision and sleep/wake",
+    "Real phone on another network with HTTPS",
+    "Offsite or independent-machine restore",
+    "Tencent isolated runtime and model comparison, actual user feedback",
+    "M1 parallel delegation and plugin evolution after M0 gates"
+  ]
+}

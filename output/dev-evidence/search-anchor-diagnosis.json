@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-06T14:05:22.581Z",
+  "modelRequests": 0,
+  "status": "measured",
+  "results": [
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1365.2597,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1286.5077,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1380.5675,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 1157.0453000000002,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 1182.8877000000002,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "anchor",
+      "ms": 1057.3745,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1268.517100000001,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1324.4634999999998,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1350.8197,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 1168.1602999999996,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 1153.291299999999,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "anchor",
+      "ms": 1134.1471999999994,
+      "items": 119
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1294.586800000001,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1318.8122999999978,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "like",
+      "ms": 1233.8102,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 1004.7801,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 1005.9098000000013,
+      "items": 129
+    },
+    {
+      "query": "中文",
+      "mode": "anchor",
+      "ms": 1018.3852999999981,
+      "items": 129
+    }
+  ]
+}

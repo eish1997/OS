@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-07T07:51:57.127Z",
+  "status": "passed",
+  "scope": "Same-task cumulative calls and API costs across retries; no provider request",
+  "engineeringTests": 165,
+  "engineeringFiles": 152,
+  "verificationAt": "2026-10-07T07:47:05.678Z",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 19780,
+    "instanceId": "79467642-b651-49e9-9808-07d20ffbaa7b",
+    "launchId": "1146421d-aecf-4d27-a980-7dbbc90338ec"
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "counts": {
+    "projects": 18,
+    "entities": 261,
+    "assets": 46,
+    "sessions": 31
+  },
+  "allEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "modelRequests": 0,
+  "documents": 117,
+  "links": 819,
+  "planVersion": "0.11",
+  "taskBudgetScope": "fixed; L-03c done",
+  "browserAcceptance": "pending; policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

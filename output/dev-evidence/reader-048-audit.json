@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-07T06:02:59.204Z",
+  "status": "passed",
+  "scope": "Engineering and read-only local data checks; browser acceptance pending",
+  "verificationAt": "2026-10-07T06:00:01.494Z",
+  "verificationSha256": "1db350c553d19c258b5237c78cad80f4a6ceffbb58b6df226cc2a373e8e732c4",
+  "engineeringFiles": 146,
+  "tests": 134,
+  "checks": [
+    {
+      "name": "integration-tests",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0
+    },
+    {
+      "name": "pi-offline-probe",
+      "exitCode": 0
+    }
+  ],
+  "canonicalSourceUnchanged": true,
+  "sourceSha256": "d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931",
+  "serverRender": {
+    "inputKind": "Historical real-Pi result from synthetic four-week data; not a user business outcome",
+    "bytes": 1044,
+    "htmlSha256": "168733cfa3199032227beae12ab4ccb53c018db76dd149b7a082ee73b3109f06",
+    "headings": 2,
+    "automaticRemoteImages": 0,
+    "executedBrowser": false,
+    "researchDraft": {
+      "id": "42acff4e-7f40-406c-b156-abee6bd13572",
+      "title": "腾讯 Memory：资料审阅与验证计划",
+      "bodySha256": "4ed726f4b7597f58fe53a9a791471be519e0782174426a1319a81414fca9ec2d",
+      "htmlBytes": 2500,
+      "rendered": true
+    }
+  },
+  "production": {
+    "health": {
+      "ready": true,
+      "pid": 25176,
+      "instanceId": "8f48fecd-89f0-4b30-a239-41837f386677",
+      "launchId": "9c709757-ddde-4660-88a8-b2f2d5f72f30"
+    },
+    "counts": {
+      "projects": 16,
+      "readyAssets": 44,
+      "entities": 235,
+      "sessions": 31
+    },
+    "allReadyAssetHashesValid": true
+  },
+  "modelRequestsByThisWork": 0,
+  "serviceRestartedByThisWork": false,
+  "browserAcceptance": {
+    "status": "pending",
+    "reason": "Browser tool rejected current tab access: URL protocol not allowed; no workaround attempted",
+    "sourceNavigationAndUnsavedEditsVerified": false
+  },
+  "m0Accepted": false,
+  "m1Started": false,
+  "userFeedback": "Awaiting optional user reply",
+  "remoteStage": "Deferred by user"
+}

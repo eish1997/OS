@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T06:51:30.349Z",
+  "phase": "after",
+  "root": "C:\\Users\\15128\\AppData\\Local\\Temp\\授权释放 真实竞争 6Hkmsd",
+  "status": "passed",
+  "callbacks": 1,
+  "callbackResult": "completed-once",
+  "callbackSideEffectPersisted": true,
+  "recovered": true,
+  "authLockRemaining": false,
+  "childPid": 55280,
+  "childExit": [
+    0,
+    null
+  ],
+  "modelRequests": 0
+}

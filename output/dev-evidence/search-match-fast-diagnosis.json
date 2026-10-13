@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-06T14:04:25.754Z",
+  "modelRequests": 0,
+  "status": "measured",
+  "results": [
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1374.4327,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1283.418,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "like",
+      "ms": 1358.5782,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2279.6320000000005,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2130.361100000001,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_SMALL_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2152.3001000000004,
+      "items": 128
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1289.1072999999997,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1334.714,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "like",
+      "ms": 1324.110700000001,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2170.171400000001,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2161.3335000000006,
+      "items": 119
+    },
+    {
+      "query": "CAPACITY_LARGE_NEEDLE",
+      "mode": "blob-regex",
+      "ms": 2170.460500000001,
+      "items": 119
+    }
+  ]
+}

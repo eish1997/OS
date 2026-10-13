@@ -1,0 +1,12 @@
+{
+  "status": "failed-probe",
+  "modelRequests": 0,
+  "testExitCode": 1,
+  "testTimeoutMs": 90000,
+  "actualTestProcessDurationMs": 135765.0108,
+  "ownedSupervisorInstance": "6ecd8e55-e7d7-480c-baed-1d56e0ebd2df",
+  "ownedTestServiceLaunchId": "37755948-88d0-4588-84ae-c7fa79f953eb",
+  "finding": "Retaining the manager Process handle was necessary but insufficient: ReadToEndAsync still waited for EOF held by the detached service. The manager process was actually absent while the service stayed ready and the supervisor remained in restarting.",
+  "repair": "Consume the defined single-line JSON receipt, wait for the manager's actual exit, and do not require descendant-held pipe EOF. Error handling reads a bounded diagnostic line; no PID kill or repeated launch on observation timeout.",
+  "cleanup": "Identity-authenticated stop of the synthetic service returned stopped, the prior supervisor stop request drained, and the test runner actually exited 1. Main service remained untouched."
+}

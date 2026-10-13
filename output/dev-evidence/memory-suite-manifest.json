@@ -1,0 +1,6 @@
+{
+  "path": "tests/fixtures/memory-suite.json",
+  "sha256": "82ac9aa3c4eafa0a19da1be07a0fcc977b84a45b9ff075ffc4c59faab16b20be",
+  "cases": 21,
+  "evaluated": false
+}

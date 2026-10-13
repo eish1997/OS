@@ -1,0 +1,195 @@
+{
+  "at": "2026-10-06T18:37:26.075Z",
+  "status": "passed",
+  "modelRequests": 0,
+  "automaticOffsiteScheduling": true,
+  "localCryptBackend": true,
+  "cloudUploaded": false,
+  "crossMachine": false,
+  "linuxExecuted": false,
+  "failedTransportPreservedLocalSuccess": true,
+  "restartCompletedSameId": true,
+  "lostReceiptReconciledWithoutCiphertextChanges": true,
+  "conflictingIdRejected": true,
+  "nativeSessionReopened": true,
+  "credentialsExcluded": true,
+  "sourceBytesPreserved": true,
+  "automaticScratchCleaned": true,
+  "offsiteWorkers": [
+    {
+      "pid": 22964,
+      "code": 1
+    },
+    {
+      "pid": 8304,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 23236,
+          "code": 3,
+          "signal": null
+        },
+        {
+          "pid": 40564,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 46736,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 48868,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 49332,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    },
+    {
+      "pid": 51620,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 48428,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 24136,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 16176,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    },
+    {
+      "pid": 20164,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 27824,
+          "code": 3,
+          "signal": null
+        },
+        {
+          "pid": 31672,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 50856,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 19692,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 50420,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    }
+  ],
+  "transportProcesses": [
+    {
+      "pid": 23236,
+      "code": 3,
+      "signal": null
+    },
+    {
+      "pid": 40564,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 46736,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 48868,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 49332,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 48428,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 24136,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 16176,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 27824,
+      "code": 3,
+      "signal": null
+    },
+    {
+      "pid": 31672,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 50856,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 19692,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 50420,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 46516,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 23588,
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "helperEvents": [
+    {
+      "pid": 51540,
+      "code": 0
+    },
+    {
+      "pid": 51644,
+      "code": 0
+    }
+  ],
+  "allRecordedProcessesTerminal": true
+}

@@ -1,0 +1,102 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T12:42:17.217Z",
+  "modelRequests": 0,
+  "workspace": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-31671884-432e-4c9b-9c15-51bdf42df99b\\中文 工作台",
+  "data": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-31671884-432e-4c9b-9c15-51bdf42df99b\\项目 数据",
+  "restored": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-31671884-432e-4c9b-9c15-51bdf42df99b\\恢复 数据",
+  "backupRoot": "C:\\Users\\15128\\AI-OS-Backups\\windows-probes\\31671884-432e-4c9b-9c15-51bdf42df99b\\备份 空间",
+  "nodeDirectory": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-31671884-432e-4c9b-9c15-51bdf42df99b\\电脑 节点",
+  "scope": "Full code and installed dependency copy, actual PowerShell build/start/stop/restart, fixture worker/node CLI, daily backup and manual clean restore; primary product untouched",
+  "previousGoalTurn": "no progress; revalidated current files and selected available Windows deployment gate",
+  "step": "restored-managed-service-and-all-http-bytes",
+  "primaryBefore": {
+    "ready": true,
+    "pid": 48304,
+    "instanceId": "3ee0a995-12fa-401f-84cd-4dd1bddf36c0",
+    "launchId": "40a4e813-c438-42cf-8aa9-c6f3c6eebce9"
+  },
+  "dependencyCopy": {
+    "files": 17089,
+    "bytes": 201755381,
+    "hash": "7102cd9f2cdf6cdcaae896ce4ed67ae61958ba157a56cb440bf3a58e386d9031"
+  },
+  "codeFilesCopied": [
+    "server",
+    "shared",
+    "src",
+    "scripts",
+    "tests",
+    "doc"
+  ],
+  "credentialAndDataCopyExcluded": true,
+  "copiedBuildAndOfflinePi": true,
+  "nativeSeed": {
+    "runId": "3d734002-4e76-4446-b1ba-2af90a302301",
+    "sessionId": "01a1113b-e4d5-72df-9da5-2bbfeae7bb05",
+    "sessionHash": "b1bf6d823a6855db773fac9d1727165791415066c66d52308e6273eea24957b8",
+    "projectId": "e6be6ec8-8cf3-4493-8580-af6ff735d2f0"
+  },
+  "firstService": {
+    "name": "unicode",
+    "pid": 10924,
+    "instanceId": "2884ec2a-4d2e-48d0-9a25-f85f7178faf2",
+    "state": "ready",
+    "url": "http://127.0.0.1:12961",
+    "manifest": "E:\\AI\\OS\\output\\dev-evidence\\private\\win-31671884-432e-4c9b-9c15-51bdf42df99b\\中文 工作台\\.runtime\\local-service-unicode.json"
+  },
+  "projectId": "0535699e-5cd5-414f-ae59-f22ce197c475",
+  "fixtureRun": "73f7f36e-35bb-48dc-bc6a-dc9a24cb05d3",
+  "localNode": {
+    "runId": "fbf75731-dade-43af-9fb1-99945913641c",
+    "resultMatchedBytes": true,
+    "ownedProcessExited": true
+  },
+  "chromeDesktopAnd390Mobile": {
+    "pageErrors": 0,
+    "noHorizontalOverflow": true
+  },
+  "restartPreservedOwnLoginAndDraft": true,
+  "fixtureAfterRestart": "8e934e9c-fdee-4df9-8722-fe897bbd95e4",
+  "scheduledBackup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T12:41:46.799Z",
+    "restoreCheckedAt": "2026-10-06T12:41:46.799Z",
+    "nextDueAt": "2026-10-07T12:41:46.799Z"
+  },
+  "scheduledBackupIncludesCompletedNative": true,
+  "nativeRestoreAndCredentialExclusion": true,
+  "restoredHttp": {
+    "assetsCompared": 7,
+    "draftsCompared": 3,
+    "versionsPreserved": true,
+    "newLoginRequired": true,
+    "exactBusinessMetadataRowsCompared": 12,
+    "assetMetadataAndDraftEntitiesExact": true,
+    "nodesResetAndRevoked": true
+  },
+  "ownedServicesStopped": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 48304,
+    "instanceId": "3ee0a995-12fa-401f-84cd-4dd1bddf36c0",
+    "launchId": "40a4e813-c438-42cf-8aa9-c6f3c6eebce9"
+  },
+  "primaryIdentityUnchanged": true,
+  "remaining": [
+    "Actual different-network phone",
+    "Production supervised startup and sleep/wake",
+    "Full mixed capacity and startup scanning",
+    "Filesystem hard quota and WAL growth",
+    "Offsite/independent-machine restore",
+    "Tencent real comparison and user feedback",
+    "M1 parallel agents and upgrades"
+  ],
+  "supplementalReadOnlyAuditAt": "2026-10-06T12:44:25.167Z",
+  "supplementalAuditCorrection": "Complete node equality check was too broad: restore intentionally clears lastSeen and revokes nodes, increments revision; now checked against explicit restore contract. Project/asset/draft/summary/memory bodies compared exactly."
+}

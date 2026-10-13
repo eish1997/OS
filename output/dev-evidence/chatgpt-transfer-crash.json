@@ -1,0 +1,97 @@
+{
+  "at": "2026-10-06T18:02:46.423Z",
+  "status": "passed",
+  "host": "win32",
+  "ownedProcesses": 5,
+  "allOwnedProcessesTerminal": true,
+  "actualForcedExits": 3,
+  "checks": [
+    {
+      "stage": "source-freeze",
+      "sameOfferRecovered": true,
+      "sourceBlocked": true
+    },
+    {
+      "stage": "target-commit",
+      "bothBlockedBeforeCommit": true,
+      "receiptReplayStable": true,
+      "recipientHostPreserved": true
+    },
+    {
+      "stage": "source-retirement",
+      "sourceSecretRemoved": true,
+      "retirementReplayStable": true,
+      "targetOnlyRefresh": true,
+      "noApiFallback": true,
+      "noRemoteRevocation": true
+    }
+  ],
+  "events": [
+    {
+      "pid": 352,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "checkpoint": "source-frozen",
+      "pid": 352,
+      "ownedHandleKilled": true,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "pid": 36976,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "checkpoint": "target-active",
+      "pid": 36976,
+      "ownedHandleKilled": true,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "pid": 1928,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "checkpoint": "source-retired",
+      "pid": 1928,
+      "ownedHandleKilled": true,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      }
+    },
+    {
+      "pid": 28660,
+      "exit": {
+        "code": 0,
+        "signal": null
+      }
+    },
+    {
+      "pid": 39464,
+      "exit": {
+        "code": 0,
+        "signal": null
+      }
+    }
+  ],
+  "syntheticProviderOnly": true,
+  "modelRequests": 0,
+  "crossMachine": false,
+  "powerFailure": false
+}

@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-07T07:26:14.478Z",
+  "status": "passed",
+  "scope": "Resume existing cancelled synthetic Pi Task after inspecting actual terminal state; preserve initial 423 failure",
+  "firstRunId": "89cb80c9-01bf-4db6-b925-9e839f5a55a6",
+  "projectId": "e9fd67e9-08f0-42b3-b026-10b24cb89114",
+  "draftId": "9fcd0655-706e-4969-8581-0e45dd154bdf",
+  "maximumTotalCalls": 8,
+  "retryRunId": "2fbf5024-0549-4e19-9687-41f7cf2aa83b",
+  "step": "completed",
+  "result": {
+    "firstStatus": "cancelled",
+    "retryStatus": "completed",
+    "firstCalls": 3,
+    "retryCalls": 3,
+    "totalCalls": 6,
+    "draftRevision": 3,
+    "retryReadRevision": 2,
+    "originalTaskRevision": 1,
+    "sourceIds": [
+      "6717b825-5ab9-4012-b834-7f39898ed30e"
+    ],
+    "markersAppearOnce": true,
+    "updateReceipts": 2,
+    "originalNativeHashPreserved": true,
+    "nativeSessionForked": true,
+    "existingEntitiesUnchanged": true,
+    "assetHashesValid": true,
+    "hostAndEnvUnchanged": true,
+    "sameModelConnection": true,
+    "taskAcceptance": "needs_review",
+    "counts": {
+      "projects": 18,
+      "assets": 46,
+      "entities": 261
+    },
+    "sessionsBeforeLogout": 32
+  },
+  "loginSessionsPreserved": true
+}

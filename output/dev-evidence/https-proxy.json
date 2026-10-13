@@ -1,0 +1,71 @@
+{
+  "at": "2026-10-06T16:11:08.542Z",
+  "status": "passed",
+  "scope": "Real isolated loopback TLS proxy, no public listener, no main configuration change",
+  "modelRequests": 0,
+  "systemTrustInstalled": false,
+  "step": "owned-graceful-shutdown-and-primary-preservation",
+  "caddy": {
+    "version": "2.11.7",
+    "executableSha256": "5f93a9bd555f3aac9d33af2756ba14b3519d8cca4ffd55256bdaeab444c9db2a",
+    "signatureVerified": false
+  },
+  "primaryBefore": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8"
+  },
+  "configurationValidated": true,
+  "ownedBackend": {
+    "pid": 19668,
+    "instanceId": "e129d0d3-e605-4619-90d8-39aad6aa1552"
+  },
+  "untrustedCertificateRejected": true,
+  "secureCookiesAndAuthentication": true,
+  "staticPageAndAssetViaHttps": true,
+  "lastOriginCheck": {
+    "origin": "http://127.0.0.1:4311",
+    "status": 403
+  },
+  "remoteRejectsDevelopmentOrigin": true,
+  "upload": {
+    "acceptedBytes": 10485760,
+    "sha256": "b5eec3f68ef64d15e82dad91ff908582c5f081e61a62e22427af9bec2cd35f8d",
+    "oversizedStatus": 413
+  },
+  "draftConflictAndExport": true,
+  "sse": {
+    "http2": true,
+    "firstHeartbeatMs": 116,
+    "durationMs": 65018,
+    "heartbeatCount": 65,
+    "events": 17,
+    "strictlyOrdered": true,
+    "runId": "e424eda7-dde2-4e8f-a50f-0b87278378c1",
+    "modelCalls": 0
+  },
+  "revocation": {
+    "streamEndedMs": 707,
+    "newRequestStatus": 401
+  },
+  "backendGracefulExit": true,
+  "proxyExit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "ownedProxyStopped": true,
+  "primaryIdentityUnchanged": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "launchId": "5de0dc2c-53c0-475f-af99-2fc662f40bf8"
+  },
+  "remaining": [
+    "Public DNS/certificate and actual remote host",
+    "Real different-network phone",
+    "Remote subscription authorization/migration",
+    "Production quota/WAL and offsite restoration"
+  ]
+}

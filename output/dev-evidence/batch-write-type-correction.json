@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-06T14:25:20.915Z",
+  "compiler": "installed esbuild; ts/node24/esm",
+  "beforeSourceSha256": "fce33f1906d9df362f7a6e13ed14d8c600fb28188c57c6e3d44194cb4dfe3318",
+  "beforeRuntimeSha256": "dfeedaec0adaa645bf701788d057a7b499b3770f1e18ff227790abcf537ac2a3",
+  "issue": "Array.isArray narrows readonly checks to any[] during type checking",
+  "afterSourceSha256": "1248394bc35e7d1e28cb305c1d9cb8548dfb0b5fc1e2f21bda001217e0eda711",
+  "afterRuntimeSha256": "dfeedaec0adaa645bf701788d057a7b499b3770f1e18ff227790abcf537ac2a3",
+  "runtimeIdentical": true
+}

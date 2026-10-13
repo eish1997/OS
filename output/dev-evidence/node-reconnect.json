@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-06T17:05:45.732Z",
+  "status": "passed",
+  "modelRequests": 0,
+  "scope": "Independent local loopback backend and actual outbound CLI; no real remote host or OS sleep",
+  "checks": [
+    {
+      "name": "offline-before-dispatch",
+      "status": "passed",
+      "failedPolls": 2,
+      "runStatus": "waiting_node",
+      "nodePid": 2504
+    },
+    {
+      "name": "committed-receipt-lost-ack",
+      "status": "passed",
+      "assetCount": 1,
+      "deliveryRequests": 2,
+      "fileSha256": "e8eaf9bcb011690329ca8b28eb3b2e15c0d9b13af89de9c0c9d05addbfc48c1c",
+      "nodePidUnchanged": true
+    },
+    {
+      "name": "uncommitted-outage-lease-expiry-and-queued-release",
+      "status": "passed",
+      "interruptedMs": 12753,
+      "finalInterruptedStatus": "interrupted",
+      "finalInterruptedError": "节点回执与资产已对账；允许新尝试",
+      "queuedCompleted": true,
+      "assets": 3,
+      "runs": 3,
+      "allAttemptOne": true,
+      "bytesPreserved": true,
+      "nodePid": 2504
+    }
+  ],
+  "nodePid": 2504,
+  "forwardedResults": 4,
+  "droppedAck": 1,
+  "droppedBefore": 1,
+  "nodeExit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "nodeLogSha256": "b72498dc171285f5a6b1f19b6f26c0435f6ea2d942d380b9494765bdfb8bac73",
+  "cleanup": "Owned child handle exit awaited, proxy connections closed, isolated backend closed"
+}

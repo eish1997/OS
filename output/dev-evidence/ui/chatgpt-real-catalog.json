@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-06T09:25:31.666Z",
+  "status": "passed",
+  "realAccountCatalog": true,
+  "models": [
+    {
+      "id": "gpt-6-astra",
+      "name": "GPT-6-Astra"
+    },
+    {
+      "id": "gpt-5.6-sol",
+      "name": "GPT-5.6-Sol"
+    },
+    {
+      "id": "gpt-5.6-terra",
+      "name": "GPT-5.6-Terra"
+    },
+    {
+      "id": "gpt-5.6-luna",
+      "name": "GPT-5.6-Luna"
+    }
+  ],
+  "loginPreservedAfterRestart": true,
+  "unconfirmedSaveDisabled": true,
+  "mobileNoHorizontalOverflow": true,
+  "browserErrors": [],
+  "realModelInference": false
+}

@@ -1,0 +1,13 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T11:10:06.678Z",
+  "modelRequests": 0,
+  "scope": "Own private backup directory on another physical internal disk; no original data replacement or credential migration",
+  "physicalDisks": {
+    "sourceDrive": "E",
+    "sourceDisk": 0,
+    "targetDrive": "C",
+    "targetDisk": 1
+  },
+  "reason": "fetch failed"
+}

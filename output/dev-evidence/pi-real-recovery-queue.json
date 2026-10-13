@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-06T11:04:47.318Z",
+  "status": "passed",
+  "cases": [
+    {
+      "kind": "interrupted",
+      "passed": true,
+      "projectId": "ef8b748e-3b43-4f04-9b10-894884f14f92",
+      "sourceRunId": "39857b71-185f-4551-b1ed-606c5f88c0cd",
+      "sourceStatus": "interrupted",
+      "sourceUsage": {
+        "input": 289,
+        "output": 48,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 337,
+        "complete": false
+      },
+      "followupRunId": "61260c4f-01fc-4cfd-b93e-3734ccb6d94b",
+      "followupStatus": "completed",
+      "followupUsage": {
+        "input": 1161,
+        "output": 53,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 1214,
+        "complete": true
+      },
+      "calls": 4,
+      "realSecondStreamObserved": true,
+      "sourceHashUnchanged": true,
+      "checkpointNotRepeated": true,
+      "randomMarkerRecalled": true,
+      "workersExited": true,
+      "independentBindings": true
+    },
+    {
+      "kind": "queued",
+      "passed": true,
+      "projectId": "3fc9ff9c-ef5b-4f71-b0c2-016a47e11ac3",
+      "sourceRunId": "423c4b3f-c11a-413e-acfd-ee54ace09755",
+      "sourceStatus": "cancelled",
+      "sourceUsage": {
+        "input": 294,
+        "output": 49,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 343,
+        "complete": false
+      },
+      "followupRunId": "e16d0617-1e82-4ca1-b9c1-bf55425d715b",
+      "followupStatus": "completed",
+      "followupUsage": {
+        "input": 1155,
+        "output": 54,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 1209,
+        "complete": true
+      },
+      "calls": 4,
+      "realSecondStreamObserved": true,
+      "sourceHashUnchanged": true,
+      "checkpointNotRepeated": true,
+      "randomMarkerRecalled": true,
+      "workersExited": true,
+      "independentBindings": true,
+      "otherProjectId": "24cea20c-2d48-4b93-bb76-06254c090ebf",
+      "fixtureCalls": 0
+    }
+  ],
+  "scope": "Own fixed nonsensitive projects; Pi write_asset only; maximum 8 ChatGPT requests, no automatic retry; separate fixture project uses no model",
+  "model": "gpt-5.6-sol",
+  "finalSourceRevalidated": {
+    "at": "2026-10-06T11:20:59.871Z",
+    "verificationAt": "2026-10-06T11:16:59.515Z",
+    "sourceAndIndependentBindings": true
+  }
+}

@@ -1,0 +1,45 @@
+[Unit]
+Description=Personal AI Workbench
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/srv/workbench-backup-volume
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=workbench
+Group=workbench
+WorkingDirectory=/opt/workbench/app
+EnvironmentFile=/etc/workbench/workbench.env
+Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=1024
+ExecStartPre=/opt/workbench/runtime/node-v24.19.0-linux-x64/bin/node /opt/workbench/app/deployment/linux/preflight.mjs
+ExecStart=/opt/workbench/runtime/node-v24.19.0-linux-x64/bin/node --import tsx server/index.ts
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=210
+KillMode=control-group
+UMask=0077
+StateDirectory=workbench workbench-offsite
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/workbench /var/lib/workbench-offsite /srv/workbench-backup-volume
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryMax=3G
+TasksMax=256
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

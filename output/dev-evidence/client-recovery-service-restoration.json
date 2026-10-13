@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-06T16:59:44.098Z",
+  "status": "passed",
+  "reason": "Actual owned service and monitor absent after browser/tool transport ended; no live handle or listener",
+  "before": {
+    "service": {
+      "state": "stopped",
+      "name": "workbench"
+    },
+    "supervisor": {
+      "instance": null,
+      "name": "workbench",
+      "pid": null,
+      "running": false,
+      "restartCount": 0,
+      "state": "stopped",
+      "lastError": null
+    }
+  },
+  "start": {
+    "instance": "cc9b79a7-40a5-482b-bf84-a6e618c43b74",
+    "pid": 35620,
+    "name": "workbench",
+    "servicePid": 7872,
+    "state": "ready"
+  },
+  "after": {
+    "name": "workbench",
+    "workspace": "E:\\AI\\OS",
+    "pid": 7872,
+    "instanceId": "b62fbfb6-f7b4-411b-b8ac-7dc7feed6986",
+    "state": "ready",
+    "url": "http://127.0.0.1:4310",
+    "creationUtc": "2026-10-06T16:59:36.4758360Z"
+  },
+  "modelRequests": 0
+}

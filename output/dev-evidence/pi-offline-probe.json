@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-10T18:05:53.186Z",
+  "node": "v24.19.0",
+  "pi": "1.0.3",
+  "test": "offline-sdk-contract",
+  "passed": [
+    "explicit-model",
+    "native-tools-plus-workbench",
+    "abort-api",
+    "subscribe-api",
+    "native-session-write-reopen",
+    "no-discovered-extensions"
+  ],
+  "realModelCall": false,
+  "limitations": [
+    "prompt/stream/cancel/retry require real API configuration"
+  ],
+  "sessionTemporary": true
+}

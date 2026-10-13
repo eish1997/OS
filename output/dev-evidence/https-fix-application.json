@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-06T16:13:47.319Z",
+  "status": "passed",
+  "modelRequests": 0,
+  "supervisorBefore": {
+    "instance": "7bb4d564-738b-4a45-8dab-6724dccc9dbc",
+    "name": "workbench",
+    "pid": 40816,
+    "running": true,
+    "restartCount": 0,
+    "state": "ready",
+    "lastError": null
+  },
+  "serviceBefore": {
+    "name": "workbench",
+    "workspace": "E:\\AI\\OS",
+    "pid": 47124,
+    "instanceId": "d1f56aea-1ec3-4f85-818c-df33558c72c1",
+    "state": "ready",
+    "url": "http://127.0.0.1:4310",
+    "creationUtc": "2026-10-06T15:01:42.5543450Z"
+  },
+  "supervisorStop": {
+    "serviceLeftRunning": true,
+    "name": "workbench",
+    "state": "stopped"
+  },
+  "serviceStop": {
+    "pid": 47124,
+    "name": "workbench",
+    "state": "stopped"
+  },
+  "supervisorStart": {
+    "instance": "339bd16d-fd11-4c16-98ff-03ebcd7662c5",
+    "pid": 50748,
+    "name": "workbench",
+    "servicePid": 36672,
+    "state": "ready"
+  },
+  "serviceAfter": {
+    "name": "workbench",
+    "workspace": "E:\\AI\\OS",
+    "pid": 36672,
+    "instanceId": "2d9265a6-f8eb-4e78-b19e-e34282bd257c",
+    "state": "ready",
+    "url": "http://127.0.0.1:4310",
+    "creationUtc": "2026-10-06T16:13:40.6383890Z"
+  },
+  "mainEnvUnchanged": true
+}

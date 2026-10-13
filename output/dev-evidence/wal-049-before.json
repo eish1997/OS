@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-07T06:09:04.537Z",
+  "directory": "C:\\Users\\15128\\AppData\\Local\\Temp\\工作台 WAL049 Lwxx0l",
+  "writes": 29,
+  "blocked": "存储已达数据库写入上限；导出/归档后按保留规则清理或调整配额",
+  "readerPinned": {
+    "databaseBytes": 440656,
+    "diskAvailableBytes": 20442423296
+  },
+  "afterRelease": "存储已达数据库写入上限；导出/归档后按保留规则清理或调整配额",
+  "checkpoint": {
+    "busy": 0,
+    "log": 0,
+    "checkpointed": 0
+  },
+  "afterCheckpoint": {
+    "databaseBytes": 126976
+  },
+  "finalBody": "显式checkpoint后继续写入",
+  "scope": "Synthetic bounded local WAL pressure; not host disk exhaustion",
+  "modelRequests": 0
+}

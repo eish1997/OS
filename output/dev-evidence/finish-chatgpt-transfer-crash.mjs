@@ -1,0 +1,32 @@
+import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {join,resolve,dirname} from 'node:path';
+import assert from 'node:assert/strict';
+import {config} from '../../server/config.ts';
+const base='output/dev-evidence/',read=f=>readFileSync(f,'utf8').replace(/^\uFEFF/,''),json=f=>JSON.parse(read(f)),sha=b=>createHash('sha256').update(b).digest('hex');
+const target=base+'chatgpt-transfer-crash-final-audit.json';assert(!existsSync(target),'Do not duplicate documentation updates');
+const report=json(base+'verification/report.json');assert.equal(report.status,'passed');assert.equal(Object.keys(report.baseline).length,126);
+for(const [file,hash] of Object.entries(report.baseline))assert.equal(sha(readFileSync(file)),hash,file);
+for(const check of report.checks){assert.equal(check.exitCode,0);assert.equal(sha(readFileSync(base+'verification/'+check.name+'.log')),check.outputSha256);}
+const log=read(base+'verification/integration-tests.log');for(const re of [/tests 114\b/,/pass 114\b/,/fail 0\b/,/cancelled 0\b/,/skipped 0\b/])assert(re.test(log));
+assert(log.includes('actual source/target process kills recover all three ChatGPT handoff commits with only one refresh owner'));
+const probe=json(base+'chatgpt-transfer-crash.json');assert.equal(probe.status,'passed');assert.equal(probe.ownedProcesses,5);assert.equal(probe.actualForcedExits,3);assert.equal(probe.allOwnedProcessesTerminal,true);assert.equal(probe.checks.length,3);assert.equal(probe.modelRequests,0);assert.equal(probe.syntheticProviderOnly,true);assert.equal(probe.crossMachine,false);assert.equal(probe.powerFailure,false);
+const product=json(base+'chatgpt-transfer-crash-production.json');assert.equal(product.status,'passed');assert.equal(product.preservedUserSessions,31);assert.equal(product.sessionFingerprintPreserved,true);assert.equal(product.currentBrowserSessionReplaced,false);assert.equal(product.callCountersUnchanged,true);assert.equal(product.canonicalDraftPreserved,true);assert.equal(product.ownLoginRetired,true);
+for(const name of ['transfer-recipient.json','transfer-outgoing.json','transfer-incoming.json','transfer-offer.json'])assert(!existsSync(join(config.dataDir,'private-model',name)),'No real-account transfer records expected');
+const prior=json(base+'chatgpt-transfer-final-audit.json');const historical='verification/history/2026-10-06T17-55-21-246Z/report.json';const priorSha=sha(readFileSync(base+historical));assert.equal(priorSha,'c7a5b20ae02ab9640f9b92f0a6939166776ac9bd81f4579a26874947f5a1c6cb');assert.equal(priorSha,prior.verificationSha256);
+const oldProduct=json(base+'chatgpt-transfer-production.json');for(const key of ['instanceId','pid','creationUtc'])assert.equal(product.service[key],oldProduct.service[key]);
+oldProduct.verification=historical;writeFileSync(base+'chatgpt-transfer-production.json',JSON.stringify(oldProduct,null,2));prior.historicalVerification=historical;writeFileSync(base+'chatgpt-transfer-final-audit.json',JSON.stringify(prior,null,2));
+const lead='037：[会话交接的实际进程崩溃恢复](iterations/037-chatgpt-transfer-process-crash.md)已完成同机独立Node进程三处SIGKILL与新进程恢复，5个自有进程均终态，合成目标单独刷新、来源持续拒绝，无API回退或远端撤销。114项完整工程、126文件通过。部署清单与回退步骤已补齐；原实例/自动ChatGPT/文章/31登录/用量/备份保持，零模型请求。未迁移真实账户、未加载新接口到原主服务；跨机器/断电及原M0/M1门槛保持。';
+function prepend(f,s){const value=read(f),p=value.indexOf('\n');writeFileSync(f,value.slice(0,p+1)+'\n'+s+'\n'+value.slice(p+1));}
+for(const f of ['doc/dev/current.md','doc/dev/backlog.md','doc/dev/acceptance.md'])prepend(f,lead);
+let current=read('doc/dev/current.md').replace('- 113项测试、类型检查','- 114项测试、类型检查');writeFileSync('doc/dev/current.md',current);
+let backlog=read('doc/dev/backlog.md').replace('| M0-07 | verifying | 01a至06 | 113项集成','| M0-07 | verifying | 01a至06 | 114项集成');writeFileSync('doc/dev/backlog.md',backlog);
+let acceptance=read('doc/dev/acceptance.md').replace('更新：2026-10-07。113项测试通过','更新：2026-10-07。114项测试通过');writeFileSync('doc/dev/acceptance.md',acceptance);
+prepend('doc/README.md','最新执行：[037实际进程崩溃恢复](dev/iterations/037-chatgpt-transfer-process-crash.md)、[部署执行清单](dev/部署准备方案.md)、[收尾审计](../output/dev-evidence/chatgpt-transfer-crash-final-audit.json)。本地准备通过；真实资源、账户迁移、手机与完整M0/M1仍待验收。');
+prepend('doc/deployment.md','037补齐[独立进程实际崩溃恢复](dev/iterations/037-chatgpt-transfer-process-crash.md)和[七步部署/切换/回退清单](dev/部署准备方案.md)。114项工程通过；同机合成凭据SIGKILL不证明Linux、跨机器、断电、真实账户或公开部署已通过。');
+prepend('doc/dev/接入与上线解决计划.md','037已完成[授权交接实际杀进程与恢复](iterations/037-chatgpt-transfer-process-crash.md)，补齐[资源落实后的部署顺序与回退](部署准备方案.md)。114项工程通过；当前已连接的主产品保持，真实资源/账户/不同网络手机与完整生产门槛仍待验收。');
+prepend('doc/dev/部署准备方案.md','037补齐[授权交接实际进程崩溃恢复](iterations/037-chatgpt-transfer-process-crash.md)：三处强制退出后新进程恢复，只有合成目标刷新；114项工程通过。这里的本机验证不等于真实Linux/跨机器、账户迁移或云端上线。');
+writeFileSync(target,JSON.stringify({status:'auditing'}));
+const docs=['README.md'];function walk(dir){for(const entry of readdirSync(dir,{withFileTypes:true})){const file=join(dir,entry.name);if(entry.isDirectory())walk(file);else if(file.endsWith('.md'))docs.push(file);}}walk('doc');walk('deployment');let links=0;
+for(const file of docs)for(const match of read(file).matchAll(/\]\(([^)]+)\)/g)){let p=match[1].trim();if(/^(https?:|app:|codex:|#)/.test(p))continue;p=p.replace(/^<|>$/g,'').split('#')[0];if(!p)continue;assert(existsSync(resolve(dirname(file),p)),file+' -> '+p);links++;}
+const result={at:new Date().toISOString(),status:'passed',engineeringFiles:126,tests:114,checks:report.checks.length,verificationSha256:sha(readFileSync(base+'verification/report.json')),priorVerification:historical,priorVerificationSha256:priorSha,probeSha256:sha(readFileSync(base+'chatgpt-transfer-crash.json')),actualForcedExits:3,ownedProcesses:5,allOwnedProcessesTerminal:true,syntheticProviderOnly:true,twoAppsSameTestProcess:false,sameWindowsComputer:true,crossMachine:false,powerFailure:false,mainServiceUnchanged:true,mainNewEndpointsLoaded:false,realAccountTransferPerformed:false,realAccountTransferRecordsAbsent:true,modelRequests:0,preservedUserSessions:31,sessionFingerprintPreserved:true,localDocLinks:links,goalStatus:'active',remaining:['Real-account VM refresh/inference and trusted HTTPS/SSH','Cloud resources/HTTPS/phone and production Linux','Filesystem quota/WAL and offsite restore','OS sleep/wake','Tencent isolated comparison and user feedback','M1 gate']};writeFileSync(target,JSON.stringify(result,null,2));console.log(JSON.stringify(result));

@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-06T18:53:35.456Z",
+  "status": "preflight-passed",
+  "service": {
+    "ready": true,
+    "pid": 7872,
+    "instanceId": "b62fbfb6-f7b4-411b-b8ac-7dc7feed6986",
+    "launchId": "3d6188ad-1653-464d-bb0d-85d34bcee649"
+  },
+  "supervisor": {
+    "pid": 35620,
+    "instance": "cc9b79a7-40a5-482b-bf84-a6e618c43b74",
+    "state": "ready",
+    "servicePid": 7872
+  },
+  "projects": 16,
+  "assets": 44,
+  "nativeSessions": 14,
+  "entityCount": 235,
+  "sessions": 31,
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "checking": false,
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "modelRequests": 0,
+  "ownLoginRetired": true
+}

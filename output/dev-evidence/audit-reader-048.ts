@@ -1,0 +1,36 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {MarkdownBody} from '../../src/document-reader';
+import type {Asset,Draft} from '../../shared/contracts';
+const base='output/dev-evidence/';
+const hash=(p:string)=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const json=(p:string)=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
+const report=json(base+'verification/report.json');assert.equal(report.status,'passed');
+for(const [p,h] of Object.entries(report.baseline))assert.equal(hash(p),h,p);
+for(const check of report.checks){assert.equal(check.exitCode,0);assert.equal(hash(base+'verification/'+check.name+'.log'),check.outputSha256);}
+const log=readFileSync(base+'verification/integration-tests.log','utf8');
+const tests=Number(log.match(/ℹ tests (\d+)/)?.[1]);assert.equal(tests,134);
+const source=base+'content-final-draft.md';const originalHash=hash(source);
+assert.equal(originalHash,'d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931');
+const text=readFileSync(source,'utf8');const html=renderToStaticMarkup(createElement(MarkdownBody,{text}));
+assert(html.includes('<h1>从固定资料到最终短文</h1>'));assert(html.includes('平均值15'));
+assert(!/<(script|iframe|img)\b/i.test(html));assert.equal(hash(source),originalHash);
+writeFileSync(base+'reader-048-render.html',html);
+const prod=new DatabaseSync('data/workbench.sqlite',{readOnly:true});
+const rows=prod.prepare('SELECT kind,body FROM entities').all() as {kind:string;body:string}[];
+const assets=rows.filter(r=>r.kind==='asset').map(r=>JSON.parse(r.body) as Asset).filter(a=>a.status==='ready');
+const research=rows.filter(r=>r.kind==='draft').map(r=>JSON.parse(r.body) as Draft).find(d=>d.id==='42acff4e-7f40-406c-b156-abee6bd13572');assert(research);
+const researchHtml=renderToStaticMarkup(createElement(MarkdownBody,{text:research.body}));
+assert(researchHtml.includes('Memory'));assert(!/<(script|iframe|img)\b/i.test(researchHtml));
+for(const a of assets){assert(/^[a-zA-Z0-9-]+$/.test(a.locator));assert.equal(hash(join('data','assets',a.locator)),a.hash,a.id);}
+const counts={projects:rows.filter(r=>r.kind==='project').length,readyAssets:assets.length,entities:rows.length,sessions:(prod.prepare('SELECT COUNT(*) n FROM sessions WHERE expires>?').get(Date.now()) as {n:number}).n};prod.close();
+const healthResponse=await fetch('http://127.0.0.1:4310/api/health');assert(healthResponse.ok);const health=await healthResponse.json() as {ready:boolean;pid:number;instanceId:string};assert(health.ready);assert.equal(health.instanceId,'8f48fecd-89f0-4b30-a239-41837f386677');
+const packageJson=json('package.json');assert.equal(packageJson.dependencies['react-markdown'],'10.1.0');assert.equal(packageJson.dependencies['remark-gfm'],'4.0.1');assert.equal(packageJson.dependencies['@earendil-works/pi-coding-agent'],'1.0.3');
+const result={at:new Date().toISOString(),status:'passed',scope:'Engineering and read-only local data checks; browser acceptance pending',verificationAt:report.at,verificationSha256:hash(base+'verification/report.json'),engineeringFiles:Object.keys(report.baseline).length,tests,checks:report.checks.map((c:{name:string;exitCode:number})=>({name:c.name,exitCode:c.exitCode})),canonicalSourceUnchanged:true,sourceSha256:originalHash,serverRender:{inputKind:'Historical real-Pi result from synthetic four-week data; not a user business outcome',bytes:Buffer.byteLength(html),htmlSha256:hash(base+'reader-048-render.html'),headings:(html.match(/<h[1-6]>/g)||[]).length,automaticRemoteImages:0,executedBrowser:false,researchDraft:{id:research.id,title:research.title,bodySha256:createHash('sha256').update(research.body).digest('hex'),htmlBytes:Buffer.byteLength(researchHtml),rendered:true}},production:{health,counts,allReadyAssetHashesValid:true},modelRequestsByThisWork:0,serviceRestartedByThisWork:false,browserAcceptance:{status:'pending',reason:'Browser tool rejected current tab access: URL protocol not allowed; no workaround attempted',sourceNavigationAndUnsavedEditsVerified:false},m0Accepted:false,m1Started:false,userFeedback:'Awaiting optional user reply',remoteStage:'Deferred by user'};
+writeFileSync(base+'reader-048-audit.json',JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({status:result.status,tests,engineeringFiles:result.engineeringFiles,readyAssets:assets.length,servicePid:health.pid,browser:'pending'}));

@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-06T19:06:44.256Z",
+  "status": "passed",
+  "service": {
+    "ready": true,
+    "pid": 16356,
+    "instanceId": "9018853d-efdc-428c-b86e-74042ab01fd1",
+    "launchId": "e0c02b8b-6818-4374-aef0-7d18386bcd66"
+  },
+  "supervisor": {
+    "pid": 31924,
+    "instance": "345d383f-d66f-4156-9a2d-120271bc9e64",
+    "state": "ready",
+    "servicePid": 16356
+  },
+  "projects": 16,
+  "assets": 44,
+  "nativeSessions": 14,
+  "entityCount": 235,
+  "sessions": 31,
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "offsite": {
+      "enabled": false,
+      "pending": 0,
+      "running": false
+    },
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "checking": false,
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "modelRequests": 0,
+  "beforeService": {
+    "ready": true,
+    "pid": 7872,
+    "instanceId": "b62fbfb6-f7b4-411b-b8ac-7dc7feed6986",
+    "launchId": "3d6188ad-1653-464d-bb0d-85d34bcee649"
+  },
+  "beforeSupervisorPid": 35620,
+  "allEntityRevisionsPreserved": true,
+  "allReadyAssetBytesPreserved": true,
+  "allNativeSessionBytesPreserved": true,
+  "modelCredentialsPreserved": true,
+  "envPreserved": true,
+  "sessionsPreserved": true,
+  "automaticBackupSchedulePreserved": true,
+  "currentAutomaticOffsiteStatusLoaded": true,
+  "cloudConfigured": false,
+  "ownLoginRetired": true
+}

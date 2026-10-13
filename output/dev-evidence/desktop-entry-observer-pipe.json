@@ -1,0 +1,11 @@
+{
+  "status": "repaired",
+  "failureId": "desktop-entry-observer-inherited-pipe",
+  "attempt": 1,
+  "observation": "The first corrected observer wrote valid receipts after all management commands actually exited0, but its own Node process remained live because a detached supervisor inherited additional stdout pipe handles.",
+  "actualRecovery": "Authenticated supervisor stop left the original service running and released the inherited pipes; both retained tool handles 82700 and45423 actually exited0. No saved-PID kill or implicit observation-timeout restart.",
+  "repair": "Dispose observer stdout/stderr streams after the retained management child emits actual exit, then repeat the stored startup/open commands. Corrected observer actually exited0 in about5.3 seconds, leaving the final owned supervisor running.",
+  "engineeringChange": false,
+  "primaryServiceRestarted": false,
+  "modelRequests": 0
+}

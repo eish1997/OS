@@ -1,0 +1,10 @@
+{
+  "status": "failed",
+  "failureId": "desktop-entry-observer-shell-flag",
+  "attempt": 1,
+  "exitCode": 1,
+  "cause": "Read-only observer omitted the dash on -ExecutionPolicy, so PowerShell treated the flag as a command and never ran the shortcut status script.",
+  "repair": "Correct the observer argument and repeat the observer only; product scripts and shortcuts did not change.",
+  "sideEffects": "No shortcut command or model request executed in the failed observer. Desktop/startup shortcuts already existed, original workbench remained running; monitor replacement completed by the corrected observer.",
+  "modelRequests": 0
+}

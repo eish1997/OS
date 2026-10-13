@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-07T07:27:24.607Z",
+  "status": "reproduced",
+  "scope": "Isolated cancellation under a real child storage writer; no model request",
+  "firstStatus": 423,
+  "firstMessage": "其他进程正在写入，稍后重试",
+  "firstDurationMs": 1,
+  "lockHeldMs": 300,
+  "firstCancelRecorded": false,
+  "cancelAfterWriterExit": true,
+  "cancelEvents": 1,
+  "childPid": 28064,
+  "childExit": 0,
+  "modelRequests": 0
+}

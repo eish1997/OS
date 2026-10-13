@@ -1,0 +1,334 @@
+{
+  "at": "2026-10-06T18:46:36.048Z",
+  "status": "passed",
+  "actualForcedExits": 3,
+  "allRecordedProcessesTerminal": true,
+  "checks": [
+    {
+      "phase": "stage",
+      "sameId": true,
+      "pendingPinPreservedAtCrash": true,
+      "deadScratchReclaimed": true,
+      "existingCiphertextPreserved": true,
+      "nativeSessionReopened": true,
+      "sourceBytesPreserved": true
+    },
+    {
+      "phase": "data",
+      "sameId": true,
+      "pendingPinPreservedAtCrash": true,
+      "deadScratchReclaimed": true,
+      "existingCiphertextPreserved": true,
+      "nativeSessionReopened": true,
+      "sourceBytesPreserved": true
+    },
+    {
+      "phase": "commit",
+      "sameId": true,
+      "pendingPinPreservedAtCrash": true,
+      "deadScratchReclaimed": true,
+      "existingCiphertextPreserved": true,
+      "nativeSessionReopened": true,
+      "sourceBytesPreserved": true
+    }
+  ],
+  "forced": [
+    {
+      "phase": "stage",
+      "pid": 27884,
+      "code": null,
+      "signal": "SIGKILL",
+      "ownedHandleKilled": true
+    },
+    {
+      "phase": "data",
+      "pid": 2704,
+      "code": null,
+      "signal": "SIGKILL",
+      "ownedHandleKilled": true
+    },
+    {
+      "phase": "commit",
+      "pid": 14076,
+      "code": null,
+      "signal": "SIGKILL",
+      "ownedHandleKilled": true
+    }
+  ],
+  "offsiteWorkers": [
+    {
+      "phase": "stage",
+      "pid": 34548,
+      "code": 1
+    },
+    {
+      "phase": "stage",
+      "pid": 11896,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 36532,
+          "code": 3,
+          "signal": null
+        },
+        {
+          "pid": 46272,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 33356,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 29384,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 30812,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    },
+    {
+      "phase": "data",
+      "pid": 48736,
+      "code": 1
+    },
+    {
+      "phase": "data",
+      "pid": 40688,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 52056,
+          "code": 3,
+          "signal": null
+        },
+        {
+          "pid": 45960,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 21440,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 6612,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 51692,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    },
+    {
+      "phase": "commit",
+      "pid": 52088,
+      "code": 1
+    },
+    {
+      "phase": "commit",
+      "pid": 16512,
+      "code": 0,
+      "transport": [
+        {
+          "pid": 49656,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 21876,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "pid": 17744,
+          "code": 0,
+          "signal": null
+        }
+      ]
+    }
+  ],
+  "transport": [
+    {
+      "phase": "stage",
+      "pid": 6876,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "data",
+      "kind": "transport-exit",
+      "pid": 51896,
+      "code": 3,
+      "signal": null
+    },
+    {
+      "phase": "data",
+      "kind": "transport-exit",
+      "pid": 37204,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "data",
+      "pid": 37680,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "commit",
+      "kind": "transport-exit",
+      "pid": 51908,
+      "code": 3,
+      "signal": null
+    },
+    {
+      "phase": "commit",
+      "kind": "transport-exit",
+      "pid": 23312,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "commit",
+      "kind": "transport-exit",
+      "pid": 6060,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "commit",
+      "kind": "transport-exit",
+      "pid": 41364,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "phase": "commit",
+      "pid": 40148,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "pid": 36532,
+      "code": 3,
+      "signal": null,
+      "phase": "stage"
+    },
+    {
+      "pid": 46272,
+      "code": 0,
+      "signal": null,
+      "phase": "stage"
+    },
+    {
+      "pid": 33356,
+      "code": 0,
+      "signal": null,
+      "phase": "stage"
+    },
+    {
+      "pid": 29384,
+      "code": 0,
+      "signal": null,
+      "phase": "stage"
+    },
+    {
+      "pid": 30812,
+      "code": 0,
+      "signal": null,
+      "phase": "stage"
+    },
+    {
+      "pid": 52056,
+      "code": 3,
+      "signal": null,
+      "phase": "data"
+    },
+    {
+      "pid": 45960,
+      "code": 0,
+      "signal": null,
+      "phase": "data"
+    },
+    {
+      "pid": 21440,
+      "code": 0,
+      "signal": null,
+      "phase": "data"
+    },
+    {
+      "pid": 6612,
+      "code": 0,
+      "signal": null,
+      "phase": "data"
+    },
+    {
+      "pid": 51692,
+      "code": 0,
+      "signal": null,
+      "phase": "data"
+    },
+    {
+      "pid": 49656,
+      "code": 0,
+      "signal": null,
+      "phase": "commit"
+    },
+    {
+      "pid": 21876,
+      "code": 0,
+      "signal": null,
+      "phase": "commit"
+    },
+    {
+      "pid": 17744,
+      "code": 0,
+      "signal": null,
+      "phase": "commit"
+    }
+  ],
+  "helperEvents": [
+    {
+      "pid": 17744,
+      "code": 0
+    },
+    {
+      "pid": 51932,
+      "code": 0
+    },
+    {
+      "pid": 3020,
+      "code": 0
+    },
+    {
+      "pid": 22328,
+      "code": 0
+    },
+    {
+      "pid": 21332,
+      "code": 0
+    },
+    {
+      "pid": 51920,
+      "code": 0
+    }
+  ],
+  "modelRequests": 0,
+  "cloudUploaded": false,
+  "crossMachine": false,
+  "linuxExecuted": false,
+  "powerFailure": false,
+  "inFlightTransportHardKill": false,
+  "ambiguousLaunchPreserved": true
+}

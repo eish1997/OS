@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-07T07:21:50.016Z",
+  "status": "passed",
+  "scope": "Selected draft retry host receipts and clean restore; synthetic fixtures; no browser or model request",
+  "engineeringTests": 154,
+  "engineeringFiles": 148,
+  "verificationAt": "2026-10-07T07:16:00.937Z",
+  "verificationSha256": "5d66859cd4f1e8f38019263e28ca7a93e93d5143ec1d7aa1538cecfb7aa811f3",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 10940,
+    "instanceId": "ecab681e-1874-477e-81f0-a2eb9450c87e",
+    "launchId": "9a2e5fee-f5ec-4a95-adf5-f698af2b703a"
+  },
+  "supervisor": {
+    "pid": 17120,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "counts": {
+    "projects": 17,
+    "entities": 248,
+    "assets": 45,
+    "sessions": 31
+  },
+  "allEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "modelRequests": 0,
+  "documents": 113,
+  "links": 775,
+  "browserAcceptance": "pending; policy rejection not bypassed",
+  "realModelRetry": "pending",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

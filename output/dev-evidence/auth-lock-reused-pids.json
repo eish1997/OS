@@ -1,0 +1,87 @@
+{
+  "at": "2026-10-06T19:27:36.163Z",
+  "status": "observed",
+  "distinctFixturePids": 9,
+  "laterChurnRecords": 13,
+  "pairs": [
+    {
+      "attempt": 1,
+      "pid": 52376,
+      "fixtureClosedAt": "2026-10-06T19:11:48.235Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:12.558Z"
+    },
+    {
+      "attempt": 1,
+      "pid": 41660,
+      "fixtureClosedAt": "2026-10-06T19:11:53.996Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:34.257Z"
+    },
+    {
+      "attempt": 1,
+      "pid": 14284,
+      "fixtureClosedAt": "2026-10-06T19:11:56.846Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:41.598Z"
+    },
+    {
+      "attempt": 1,
+      "pid": 14284,
+      "fixtureClosedAt": "2026-10-06T19:11:56.846Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:43.949Z"
+    },
+    {
+      "attempt": 2,
+      "pid": 52016,
+      "fixtureClosedAt": "2026-10-06T19:12:02.130Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:15.608Z"
+    },
+    {
+      "attempt": 2,
+      "pid": 52016,
+      "fixtureClosedAt": "2026-10-06T19:12:02.130Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:33.168Z"
+    },
+    {
+      "attempt": 2,
+      "pid": 17128,
+      "fixtureClosedAt": "2026-10-06T19:12:10.732Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:21.856Z"
+    },
+    {
+      "attempt": 2,
+      "pid": 17128,
+      "fixtureClosedAt": "2026-10-06T19:12:10.732Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:39.833Z"
+    },
+    {
+      "attempt": 2,
+      "pid": 45004,
+      "fixtureClosedAt": "2026-10-06T19:12:10.755Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:50.131Z"
+    },
+    {
+      "attempt": 3,
+      "pid": 208,
+      "fixtureClosedAt": "2026-10-06T19:12:15.908Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:49.130Z"
+    },
+    {
+      "attempt": 4,
+      "pid": 36976,
+      "fixtureClosedAt": "2026-10-06T19:12:32.479Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:48.445Z"
+    },
+    {
+      "attempt": 4,
+      "pid": 22036,
+      "fixtureClosedAt": "2026-10-06T19:12:35.337Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:40.125Z"
+    },
+    {
+      "attempt": 4,
+      "pid": 22036,
+      "fixtureClosedAt": "2026-10-06T19:12:35.337Z",
+      "laterChurnClosedAt": "2026-10-06T19:12:51.249Z"
+    }
+  ],
+  "doesNotProveOriginal423Cause": true
+}

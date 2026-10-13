@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-06T17:36:14.833Z",
+  "status": "passed",
+  "host": "win32",
+  "target": {
+    "os": "linux",
+    "cpu": "x64",
+    "libc": "glibc"
+  },
+  "npmVersion": "11.21.0",
+  "npmIntegrity": "sha512-Zov8KhamNneiLdELtj5YALtNmJW4L4fCLTzjfpzXG2w6MSHcf0UxgdlK5uloCuksWT+7mGUU7wi79cO6RqivPg==",
+  "fixture": "E:\\AI\\OS\\output\\dev-evidence\\private\\linux-install-VNhJfe",
+  "bootstrap": "D:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+  "modelRequests": 0,
+  "linuxExecuted": false,
+  "checks": [
+    {
+      "name": "npm-bootstrap",
+      "exitCode": 0,
+      "outputSha256": "ed720e189f936a4bd4c203a7b54fd9994ac41d023fb57cfce941cfa53f51ff0c"
+    },
+    {
+      "name": "old-linux-resolution",
+      "exitCode": 0,
+      "outputSha256": "0dd6a8e977a39990ad4ce8cb11f00bab616bd3ca476b10d986839e0db64a5971"
+    },
+    {
+      "name": "linux-install",
+      "exitCode": 0,
+      "outputSha256": "3982f13770483c69f490b2267b07bd2d09a4646d77290f1c4c884b106dda0346"
+    },
+    {
+      "name": "windows-clean-install",
+      "exitCode": 0,
+      "outputSha256": "5ec6a2c50b4a94de18ba1fb1439b0996ed0e34f68d3b155625b92d9427cd07e2"
+    },
+    {
+      "name": "windows-clean-build",
+      "exitCode": 0,
+      "outputSha256": "5f02c3d505ad8b288ecbce06c51732ab9de5c45e78658cffe33302909c3b629f"
+    }
+  ],
+  "beforeHashes": {
+    "package.json": "94a19416c5ca43d1c3e03b027446804ba5b56c0663996d12fdc0bb0963861ddf",
+    "package-lock.json": "365f11145829d8b817d5a729eb7a60e2b4c7034f9ed07508b28e778542d6c5ac"
+  },
+  "oldHostInstallExitCode": 0,
+  "oldWindowsBindingPresent": true,
+  "oldRequiredBindingLinuxCheck": "EBADPLATFORM",
+  "afterHashes": {
+    "package.json": "0f9a29f2cea0dade909d07b12b5b15ebcf2ae9f255d453c6db222acd7d7cd6a9",
+    "package-lock.json": "7b52208e8259be5cacfdcf7cf243c7160ca2a98d922b68ef3bc6de2252e723b0"
+  },
+  "installedLinuxBindingSha256": "4ec43c7f54c8db7cced09004bc57f482c5cea9c61fef1267c025c53b79fb21cc",
+  "windowsBindingAbsent": true,
+  "lockPreserved": true,
+  "windowsCleanBuildPassed": true,
+  "completedAt": "2026-10-06T17:40:31.928Z"
+}

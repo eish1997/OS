@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
+import {join,relative} from 'node:path';
+import {spawnSync} from 'node:child_process';
+const sha=value=>createHash('sha256').update(value).digest('hex');
+const verificationPath='output/dev-evidence/verification/report.json',verificationBytes=readFileSync(verificationPath),prior=JSON.parse(verificationBytes);
+assert.equal(prior.status,'passed');assert(prior.checks.every(c=>c.exitCode===0));
+for(const [path,hash] of Object.entries(prior.baseline))assert.equal(sha(readFileSync(path)),hash,'Previously verified file changed: '+path);
+const added={};const walk=path=>{for(const entry of readdirSync(path,{withFileTypes:true})){const full=join(path,entry.name);if(entry.isDirectory())walk(full);else{const name=relative('.',full).replaceAll('\\','/');if(!(name in prior.baseline))added[name]=sha(readFileSync(full));}}};
+for(const folder of ['server','src','shared','scripts','tests'])walk(folder);
+assert.deepEqual(Object.keys(added).sort(),['scripts/probe-large-upload-responsiveness.ts','scripts/probe-upload-responsiveness.ts']);
+const result=spawnSync(process.execPath,['node_modules/typescript/bin/tsc','--noEmit'],{encoding:'utf8',windowsHide:true,timeout:60000});
+writeFileSync('output/dev-evidence/upload-probe-typecheck.log',`${result.stdout||''}\n${result.stderr||''}`);assert.equal(result.status,0);
+const evidence=['upload-responsiveness.json','large-upload-responsiveness.json'].map(name=>{const bytes=readFileSync('output/dev-evidence/'+name),r=JSON.parse(bytes);assert(r.status==='measured'&&r.ownedChildExited&&r.snapshotThresholdPassed&&r.primaryIdentityUnchanged);assert.equal(r.modelRequests,0);return{path:name,sha256:sha(bytes),maxSnapshotMs:r.maxSnapshotMs,ownedChildExited:true};});
+const report={status:'passed',at:new Date().toISOString(),modelRequests:0,runtime:process.version,priorVerification:{path:verificationPath,sha256:sha(verificationBytes),at:prior.at,unchangedBaselineFiles:Object.keys(prior.baseline).length,checks:prior.checks.map(c=>({name:c.name,exitCode:c.exitCode}))},newProbeFiles:added,typecheck:{exitCode:result.status,outputSha256:sha(readFileSync('output/dev-evidence/upload-probe-typecheck.log'))},actualHttpProbes:evidence,scope:'Existing 98-test application baseline unchanged; only two isolated measurement scripts added, typechecked and executed. No repeated full-suite claim and no primary deployment change.'};
+writeFileSync('output/dev-evidence/upload-probe-verification.json',JSON.stringify(report,null,2));console.log(JSON.stringify({status:report.status,unchangedBaselineFiles:report.priorVerification.unchangedBaselineFiles,newProbeFiles:Object.keys(added),httpThresholdsPassed:true}));

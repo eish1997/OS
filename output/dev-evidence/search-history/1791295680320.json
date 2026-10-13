@@ -1,0 +1,320 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T13:49:31.680Z",
+  "modelRequests": 0,
+  "previousGoalTurn": "progress: mixed capacity, native archive and background startup applied",
+  "thresholds": {
+    "searchMs": 2000,
+    "snapshotMs": 500
+  },
+  "profiles": [
+    {
+      "profile": "default",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-27c54772-5f64-4a55-a57f-81811b3261e7\\data",
+      "projectId": "8ccaeb23-d9ad-4efb-8817-e16cdffe7291",
+      "base": "http://127.0.0.1:3940",
+      "assets": 662,
+      "storageSamples": [
+        {
+          "ms": 58.76269999999977,
+          "measuredBytes": 776212164,
+          "issues": 0
+        },
+        {
+          "ms": 66.70340000000033,
+          "measuredBytes": 776212164,
+          "issues": 0
+        },
+        {
+          "ms": 55.1261999999997,
+          "measuredBytes": 776212164,
+          "issues": 0
+        },
+        {
+          "ms": 51.00530000000026,
+          "measuredBytes": 776212164,
+          "issues": 0
+        },
+        {
+          "ms": 46.440599999999904,
+          "measuredBytes": 776212164,
+          "issues": 0
+        }
+      ],
+      "writeProject": {
+        "name": "单次遍历写入测量 · ec28555f-b875-4a0c-afd9-018e77113c88",
+        "description": "",
+        "archived": false,
+        "id": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "revision": 1,
+        "createdAt": "2026-10-06T13:47:38.307Z",
+        "updatedAt": "2026-10-06T13:47:38.307Z"
+      },
+      "previousWrites": 1,
+      "search": [
+        {
+          "query": "CAPACITY_SMALL_NEEDLE",
+          "samples": [
+            {
+              "ms": 571.5243,
+              "requests": 9,
+              "maxSnapshotMs": 30.18399999999974,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 575.0921999999996,
+              "requests": 9,
+              "maxSnapshotMs": 23.9362000000001,
+              "total": 600,
+              "items": 50
+            },
+            {
+              "ms": 538.5354000000002,
+              "requests": 9,
+              "maxSnapshotMs": 24.43040000000019,
+              "total": 600,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "CAPACITY_LARGE_NEEDLE",
+          "samples": [
+            {
+              "ms": 1087.8877999999995,
+              "requests": 18,
+              "maxSnapshotMs": 22.35440000000017,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 982.9817999999996,
+              "requests": 18,
+              "maxSnapshotMs": 24.287500000000364,
+              "total": 24,
+              "items": 24
+            },
+            {
+              "ms": 941.9751999999999,
+              "requests": 18,
+              "maxSnapshotMs": 23.24200000000019,
+              "total": 24,
+              "items": 24
+            }
+          ]
+        },
+        {
+          "query": "大文件-",
+          "samples": [
+            {
+              "ms": 780.9830999999995,
+              "requests": 14,
+              "maxSnapshotMs": 23.140199999999822,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 797.3650999999991,
+              "requests": 14,
+              "maxSnapshotMs": 26.038399999999456,
+              "total": 60,
+              "items": 50
+            },
+            {
+              "ms": 810.2469999999994,
+              "requests": 14,
+              "maxSnapshotMs": 22.91939999999886,
+              "total": 60,
+              "items": 50
+            }
+          ]
+        }
+      ],
+      "writeProgress": {
+        "projectId": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "previousFiles": 1,
+        "completed": 30
+      },
+      "controlledWrites": {
+        "projectId": "3b5e5e87-6130-46f3-a7c2-5bcdafbdd5e3",
+        "files": 30,
+        "previousFiles": 1,
+        "measuredNewFiles": 29,
+        "bytesPerFile": 32768,
+        "ms": [
+          515.3137999999999,
+          466.45679999999993,
+          517.7384999999995,
+          520.3094000000001,
+          530.3004999999994,
+          489.33980000000156,
+          507.59059999999954,
+          512.1458000000002,
+          499.4402000000009,
+          516.756800000001,
+          469.91150000000016,
+          501.47339999999895,
+          503.4868000000024,
+          474.97239999999874,
+          526.3388999999988,
+          487.1310999999987,
+          552.9053000000022,
+          483.91679999999906,
+          513.5433000000012,
+          513.0996999999988,
+          497.5457000000024,
+          526.1340000000018,
+          475.15100000000166,
+          548.2137000000002,
+          504.66219999999885,
+          495.35169999999925,
+          516.9209999999985,
+          567.6931999999979,
+          541.6013999999996
+        ],
+        "totalMs": 14775.445300000001,
+        "note": "Appended only new synthetic assets in a separate owned project; same default storage boundaries. Prior successful file is preserved; its lost wall time is not invented."
+      },
+      "ownedChildExited": true
+    },
+    {
+      "profile": "full",
+      "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data",
+      "projectId": "e36908f2-42df-4f79-b1b2-829c23a6264f",
+      "base": "http://127.0.0.1:5630",
+      "assets": 256,
+      "storageSamples": [
+        {
+          "ms": 18.909200000000055,
+          "measuredBytes": 2142240957,
+          "issues": 0
+        },
+        {
+          "ms": 17.928200000000288,
+          "measuredBytes": 2142240957,
+          "issues": 0
+        },
+        {
+          "ms": 21.457400000000234,
+          "measuredBytes": 2142240957,
+          "issues": 0
+        },
+        {
+          "ms": 17.7184000000002,
+          "measuredBytes": 2142240957,
+          "issues": 0
+        },
+        {
+          "ms": 17.53020000000015,
+          "measuredBytes": 2142240957,
+          "issues": 0
+        }
+      ],
+      "previousWrites": 0,
+      "search": [
+        {
+          "query": "CAPACITY_SMALL_NEEDLE",
+          "samples": [
+            {
+              "ms": 1607.2553000000007,
+              "requests": 34,
+              "maxSnapshotMs": 21.42189999999755,
+              "total": 128,
+              "items": 50
+            },
+            {
+              "ms": 1633.1957000000002,
+              "requests": 34,
+              "maxSnapshotMs": 22.6820000000007,
+              "total": 128,
+              "items": 50
+            },
+            {
+              "ms": 1570.473399999999,
+              "requests": 33,
+              "maxSnapshotMs": 18.57589999999982,
+              "total": 128,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "CAPACITY_LARGE_NEEDLE",
+          "samples": [
+            {
+              "ms": 2688.9076000000023,
+              "requests": 57,
+              "maxSnapshotMs": 21.575700000001234,
+              "total": 119,
+              "items": 50
+            },
+            {
+              "ms": 2643.0771999999997,
+              "requests": 56,
+              "maxSnapshotMs": 22.611699999994016,
+              "total": 119,
+              "items": 50
+            },
+            {
+              "ms": 2756.9510999999984,
+              "requests": 57,
+              "maxSnapshotMs": 18.34820000000036,
+              "total": 119,
+              "items": 50
+            }
+          ]
+        },
+        {
+          "query": "大文件-",
+          "samples": [
+            {
+              "ms": 1184.020399999994,
+              "requests": 25,
+              "maxSnapshotMs": 19.328800000002957,
+              "total": 127,
+              "items": 50
+            },
+            {
+              "ms": 1310.6765999999989,
+              "requests": 27,
+              "maxSnapshotMs": 21.56590000000142,
+              "total": 127,
+              "items": 50
+            },
+            {
+              "ms": 1129.909599999999,
+              "requests": 24,
+              "maxSnapshotMs": 22.56640000000334,
+              "total": 127,
+              "items": 50
+            }
+          ]
+        }
+      ],
+      "ownedChildExited": true
+    }
+  ],
+  "primaryBefore": {
+    "ready": true,
+    "pid": 47648,
+    "instanceId": "0400b48a-aab4-4c9e-84c3-be31488e26d2",
+    "launchId": "3ad296fd-e592-47a8-b77e-c2bc0ed6baf5"
+  },
+  "activeObservation": {
+    "profile": "full",
+    "pid": 49716,
+    "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\mixed-e5364e66-9222-4e31-b358-c8f9e7eb3606\\data"
+  },
+  "primaryIdentityUnchanged": true,
+  "primaryAfter": {
+    "ready": true,
+    "pid": 47648,
+    "instanceId": "0400b48a-aab4-4c9e-84c3-be31488e26d2",
+    "launchId": "3ad296fd-e592-47a8-b77e-c2bc0ed6baf5"
+  },
+  "remaining": [
+    "Results cover local measured queries, not all queries or production OS quotas",
+    "Physical quota/WAL, remote phone, offsite restore, Tencent and M1 remain"
+  ]
+}

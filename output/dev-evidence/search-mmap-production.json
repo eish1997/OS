@@ -1,0 +1,65 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T14:14:08.861Z",
+  "modelRequests": 0,
+  "health": {
+    "ready": true,
+    "pid": 31672,
+    "instanceId": "9b934e4f-4291-4fec-a6d1-3e3fd220eb29",
+    "launchId": "6d522236-88e9-4699-bd6e-2f5e730ba1c7"
+  },
+  "connection": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic",
+    "welcomePending": false
+  },
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z",
+    "checking": false,
+    "nextDueAt": "2026-10-07T11:32:51.567Z"
+  },
+  "sessions": {
+    "count": 31,
+    "fingerprint": "d462322bba6916283d5d594aee6ef96d7809e9d8f895502d22bc3710fe984756"
+  },
+  "canonicalDraftSha256": "d63f072522426c0baebc713aa69a6f9aca4b3ea58e1e3e0205e14085cd6df931",
+  "service": {
+    "ready": true,
+    "pid": 31672,
+    "instanceId": "9b934e4f-4291-4fec-a6d1-3e3fd220eb29",
+    "launchId": "6d522236-88e9-4699-bd6e-2f5e730ba1c7",
+    "creationUtc": "2026-10-06T14:13:55.6783560Z",
+    "owner": "local-service.ps1",
+    "url": "http://127.0.0.1:4310",
+    "workspace": "E:\\AI\\OS"
+  },
+  "canonicalDraftPreserved": true,
+  "callCountersUnchanged": true,
+  "sessionFingerprintPreserved": true,
+  "preservedUserSessions": 31,
+  "verification": "verification/report.json",
+  "ownLoginRetired": true,
+  "actualBrowser": {
+    "assistantReady": true,
+    "modelAutomatic": true,
+    "advancedOptional": true,
+    "backupReady": true,
+    "searchObserved": {
+      "query": "Memory",
+      "project": "腾讯 Memory 验证",
+      "matches": 7
+    },
+    "originalEmptySearchRestored": true,
+    "modelRequests": 0,
+    "observation": "Existing signed-in user tab refreshed; automatic settings and seven real project search results observed through cua; original empty query restored."
+  }
+}

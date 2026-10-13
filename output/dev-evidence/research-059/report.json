@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-10T16:40:26.794427+00:00",
+  "status": "passed",
+  "tests": 169,
+  "failed": 0,
+  "testConcurrency": 2,
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "piOfflineProbe": "passed",
+  "browserUI": "passed-controlled-fixture",
+  "realModelRequests": 0,
+  "productionApplied": false,
+  "standardRunnerFirstAttempt": "timeout-120s-record-retained",
+  "sourceSha256": {
+    "server/research.ts": "7bd43e87a9bdf412f833485644083296218fcabf170c8d8c1c959e3cce6c7a26",
+    "server/app.ts": "18d4cb02b64aa4f390a2a4bf91c951cece94ef6dddf78997a9f2b6ae723fc7ca",
+    "server/service.ts": "1f3f9a3c072950d453504773c796ee101c75d22095d35c9bc03e47f79654f5bb",
+    "server/worker.ts": "4451243d072d506197047281489dfc52864264eb371c187220afa7e2c32f7459",
+    "shared/contracts.ts": "01e2418679ed7469c73031fcd3cff907ca30100ea0cee57ec1f977bf8876562c",
+    "src/research-panel.tsx": "44ab0a8f6e40ae1b5da55fc63261d6014a38fbdba30dce9e0730b28d87ed3b1c",
+    "src/main.tsx": "24ee3a40488efa168f414aad63d64b3c09632d6e6554a4a8fb68d24f67e5e977",
+    "src/view-state.ts": "8da1ef8ad3fb8884bb73536c7356ffd5b52d65a6926ad8599cafcfa9948113ac",
+    "src/document-reader.tsx": "6e8f00e8ab5fc82c70448fdce0466df01acfba25b17a9e64b236cbeb9e8ed932",
+    "src/style.css": "d477e728e300ce9c289a7b4cfc2dc2c769f96fad0e8145bb51751c513ecbb897",
+    "tests/research.test.ts": "e55b9c97743f85bba3645dd2da252507bd3f7945f9fd07aa560f278693662217",
+    "tests/document-reader.test.ts": "b2b7701f4d2c2825b233edf827092153b4d12bd3ec7c7e95f5103644dcd3d445",
+    "scripts/research-ui-qa.ts": "67309862e8a4de2f130ed9ccc894868819983869c1f27425a6f33a728718adda"
+  }
+}

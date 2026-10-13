@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-06T11:34:10.210Z",
+  "status": "passed",
+  "modelRequests": 0,
+  "backup": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 7,
+    "retained": 1,
+    "pruned": 0,
+    "nextDueAt": "2026-10-07T11:32:51.569Z",
+    "lastSuccessAt": "2026-10-06T11:32:51.567Z",
+    "restoreCheckedAt": "2026-10-06T11:32:51.567Z"
+  },
+  "chatgpt": {
+    "connected": true,
+    "enabled": true,
+    "model": "gpt-5.6-sol",
+    "limitsMode": "automatic"
+  },
+  "scope": "Production default timer created and restore-checked its first independent-disk snapshot; no accelerated clock, account changes or model requests"
+}

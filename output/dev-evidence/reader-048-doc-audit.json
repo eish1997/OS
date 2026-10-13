@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-07T06:06:12.120Z",
+  "status": "passed",
+  "documents": 103,
+  "localLinks": 696,
+  "engineeringFiles": 146,
+  "baselineVerified": true,
+  "backendFilesUnchanged": 36,
+  "readerAuditSha256": "a0b544a5af86b6c9006b4befe2041096ff6198001ceb90ee3eade7f60ee706b7",
+  "browserAcceptance": "pending",
+  "userFeedback": "pending",
+  "goalComplete": false
+}

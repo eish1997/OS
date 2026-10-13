@@ -1,0 +1,16 @@
+{
+  "failureId": "auth-lock-file-link-fixture-permission",
+  "attempt": 1,
+  "status": "fixture-corrected",
+  "tests": 10,
+  "passed": 9,
+  "failed": 1,
+  "errorCode": "EPERM",
+  "source": "exec session 87508 tool output",
+  "reason": "Windows file symlink creation needs permission unavailable in this process",
+  "fix": "Use actual directory junction on Windows and directory symlink on Linux to test rejection without elevation or skipped tests",
+  "doesNotProveWindowsFileSymlinkCreation": true,
+  "subsequentRelatedTests": 10,
+  "subsequentPassed": 10,
+  "modelRequests": 0
+}

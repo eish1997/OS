@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-07T06:56:52.703Z",
+  "status": "confirmed",
+  "verificationAt": "2026-10-07T06:53:19.339Z",
+  "scope": "Only test-owned temporary folders with the known fixture prefix; no credential contents read or printed",
+  "results": [
+    {
+      "syntheticRoot": "C:\\Users\\15128\\AppData\\Local\\Temp\\订阅迁移 QA nDUj9M",
+      "firstCharacter": "A",
+      "oldMutationUnchanged": true,
+      "matchingDestinationActive": true
+    }
+  ],
+  "conclusion": "Fixed A replacement did not change actual failing ciphertext; legitimate unchanged bundle was accepted",
+  "modelRequests": 0
+}

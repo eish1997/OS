@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "at": "2026-10-06T10:48:33.948Z",
+  "scope": "Own fixed nonsensitive project, write_asset only; up to 4 ChatGPT requests; no automatic retries",
+  "projectId": "011512e0-7974-4a37-bb48-2348ef43a9c8",
+  "model": "gpt-5.6-sol",
+  "firstRunId": "a0c8476d-170a-4b67-a1ae-92125d2177f7",
+  "firstUsage": {
+    "input": 660,
+    "output": 53,
+    "cacheRead": 0,
+    "cacheWrite": 0,
+    "totalTokens": 713,
+    "complete": true
+  },
+  "serviceRestarted": true,
+  "secondRunId": "26632d56-284f-4fbf-99c9-9c5b7416808e",
+  "secondUsage": {
+    "input": 1116,
+    "output": 53,
+    "cacheRead": 0,
+    "cacheWrite": 0,
+    "totalTokens": 1169,
+    "complete": true
+  },
+  "calls": 4,
+  "proven": [
+    "real native history recall without asset read",
+    "service restart with existing ChatGPT connection",
+    "independent durable SessionBinding",
+    "source session unchanged",
+    "new session fork identity",
+    "first write not repeated"
+  ],
+  "finalSourceRevalidated": {
+    "at": "2026-10-06T10:58:19.963Z",
+    "readOnly": true,
+    "sourceBindingAndHash": true,
+    "currentGuard": true
+  }
+}

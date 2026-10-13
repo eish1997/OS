@@ -1,0 +1,33 @@
+{
+  "status": "measured",
+  "at": "2026-10-06T11:51:38.475Z",
+  "modelRequests": 0,
+  "scope": "Own 384 MiB binary assets on E, actual independent C backup, actual child HTTP; production unchanged",
+  "interpretation": "A measured workload, not full capacity/production acceptance",
+  "base": "http://127.0.0.1:9320",
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\performance-be36c4d8-8a33-4321-a2da-caf519031267",
+  "root": "C:\\Users\\15128\\AI-OS-Backups\\performance-probes\\be36c4d8-8a33-4321-a2da-caf519031267",
+  "assets": 48,
+  "assetBytes": 402653184,
+  "baselineHttpMs": [
+    20.159299999999348,
+    3.350699999999051,
+    2.356100000000879,
+    2.275100000000748,
+    2.113199999999779,
+    1.7809999999990396,
+    2.9844999999986612,
+    2.3483999999989464,
+    2.0916999999990367,
+    2.207300000000032
+  ],
+  "maintenanceHttpMs": [
+    3412.7142000000003
+  ],
+  "maxBaselineMs": 20.159299999999348,
+  "maxMaintenanceMs": 3412.7142000000003,
+  "backupMs": 3409.374099999999,
+  "maxRssKiB": 306924,
+  "httpStallObserved": true,
+  "ownedChildExited": true
+}

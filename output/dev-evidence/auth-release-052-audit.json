@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-07T07:03:29.057Z",
+  "status": "passed",
+  "scope": "Local authorization-release contention; synthetic real processes only; no vendor requests",
+  "engineeringTests": 148,
+  "engineeringFiles": 148,
+  "verificationAt": "2026-10-07T06:58:22.960Z",
+  "verificationSha256": "3077ec33c07b0c69d01ec75834eb635aaecca615ee5023b7f469097ae8699821",
+  "engineeringBaselineUnchanged": true,
+  "health": {
+    "ready": true,
+    "pid": 48200,
+    "instanceId": "2f34c366-850c-478a-8125-00a185207025",
+    "launchId": "5fe38fce-785a-4770-9186-3cb71881ee20"
+  },
+  "supervisor": {
+    "pid": 2552,
+    "state": "ready",
+    "restartCount": 0
+  },
+  "identityMatched": true,
+  "activeRuns": 0,
+  "counts": {
+    "projects": 17,
+    "entities": 248,
+    "assets": 45,
+    "sessions": 31
+  },
+  "allEntitiesUnchanged": true,
+  "configurationHashesUnchanged": true,
+  "sessionDigestUnchanged": true,
+  "assetHashesValid": true,
+  "productionAuthLockAbsent": true,
+  "modelRequests": 0,
+  "original042RootCause": "unproven",
+  "documents": 110,
+  "links": 753,
+  "browserAcceptance": "pending; policy rejection not bypassed",
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "deferred"
+}

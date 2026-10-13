@@ -1,0 +1,25 @@
+{
+  "status": "failed",
+  "at": "2026-10-06T11:29:50.907Z",
+  "modelRequests": 0,
+  "scope": "Isolated synthetic source on E and owned backup root on C; real timer; controlled clock advances daily due times for retention; production data unchanged",
+  "realWorkerNotInterrupted": true,
+  "firstScheduledRecoveryCheck": true,
+  "root": "C:\\Users\\15128\\AI-OS-Backups\\automation-probes\\bdce321d-dd1c-4060-a364-34261d9f4ca7",
+  "source": "E:\\AI\\OS\\output\\dev-evidence\\private\\automatic-bdce321d-dd1c-4060-a364-34261d9f4ca7",
+  "statusAfterScheduledPruning": {
+    "enabled": true,
+    "waitingForIdle": false,
+    "intervalHours": 24,
+    "retainCount": 2,
+    "retained": 2,
+    "pruned": 1,
+    "nextDueAt": "2026-10-09T11:29:50.909Z",
+    "lastSuccessAt": "2026-10-08T11:29:50.909Z",
+    "restoreCheckedAt": "2026-10-08T11:29:50.909Z"
+  },
+  "verifiedRecoveryPoints": 2,
+  "manualBackupPreserved": true,
+  "extraCleanRestore": true,
+  "reason": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.nav-item').filter({ hasText: '设置' })\u001b[22m\n"
+}

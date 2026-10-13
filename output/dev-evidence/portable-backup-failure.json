@@ -1,0 +1,16 @@
+{
+  "failureId": "038-foreign-backup-path",
+  "attempt": 1,
+  "status": "reproduced-before-fix",
+  "command": "Node24 --import tsx --test tests/backup-portable.test.ts",
+  "exitCode": 1,
+  "tests": 1,
+  "passed": 0,
+  "failed": 1,
+  "assertion": "restored Run.sessionPath was undefined instead of the restored native JSONL address",
+  "fixtureSourceRoot": "Z:\\旧 工作台",
+  "fixtureSavedPathForm": "z:/旧 工作台/sessions/<project>/<native-session>.jsonl",
+  "cause": "String prefix comparison discards equivalent Windows case/separator forms; host-native relative also misinterprets Windows paths on POSIX",
+  "scope": "actual local backup, SQLite metadata and SDK session fixture; synthetic foreign addresses, not Linux execution",
+  "modelRequests": 0
+}

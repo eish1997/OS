@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-07T05:51:56.022Z",
+  "status": "passed",
+  "scope": "Documentation update only; local desktop first",
+  "changedDocuments": {
+    "doc/主开发文档.md": "d2534b7e7d1de363d4dfde6f37dbe00440b183fa36ac42462ca57bf475f0b231",
+    "doc/开发执行文档.md": "328db896fe9cc6e7601a5bddd00b1b7dc88c5770983d37d0c326bb84cada2264",
+    "doc/dev/current.md": "63635815c3a022d4b0657d18e681037c288860fba4ad8e7e95dd0c4fab7d84bd",
+    "doc/dev/backlog.md": "036f1f97ca4c91ac9b3a2faa6076eeb8926be5cea656364ce28796d9787786d1",
+    "doc/dev/acceptance.md": "8b80c63df5ce2b89f5b44ba1aca71856a4a229a846aadf28339aa63a5ee4b237",
+    "doc/README.md": "7c15f9f0a20259d5d4c3048851b8ee634d7ae9d54e807bd8346e2baf539a4018",
+    "doc/dev/iterations/046-draft-workspace.md": "82a9e7b4fa60c543413b5e002cc4d48bd6303a6823d912a627b75860a6fbe1c6",
+    "doc/dev/iterations/047-local-plan-update.md": "959c174c196009337cc321d7902e6fa179897f31258d0ba0fc8d9f2e62d1ad2d"
+  },
+  "documentsScanned": 101,
+  "localDocumentLinks": 686,
+  "engineeringBaselineUnchanged": true,
+  "engineeringFiles": 144,
+  "verificationSha256": "7251a935bd4b9aef30c9a2113f9293026790e63424af2a77ab526be887f762c5",
+  "freshEngineeringTestsRun": false,
+  "sourceEditedByThisUpdate": false,
+  "serviceRestartedByThisUpdate": false,
+  "modelRequestsByThisUpdate": 0,
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "Deferred by user"
+}

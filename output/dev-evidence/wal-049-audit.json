@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-07T06:20:37.567Z",
+  "status": "passed",
+  "scope": "Local WAL quota recovery; not complete milestone acceptance",
+  "verificationAt": "2026-10-07T06:10:51.560Z",
+  "verificationSha256": "be17fcfcd8fa7c567de272168ff03014a3701f0c24d37e9d2b0e04bdb0b69931",
+  "tests": 137,
+  "engineeringFiles": 147,
+  "reproducer": {
+    "before": "存储已达数据库写入上限；导出/归档后按保留规则清理或调整配额",
+    "after": "saved",
+    "activeReaderStillRejects": true,
+    "failedEvidenceSha256": "f97091b8070cdb2cb8a6aad0d5348960c08802156a13209f36c87f98045d8651",
+    "fixedEvidenceSha256": "134aaa543807ab88abe13b2a6e479e514acca1a3946be82f457000c9b43cd46d"
+  },
+  "production": {
+    "health": {
+      "ready": true,
+      "pid": 54336,
+      "instanceId": "e6188d9b-ad18-4f2c-9b19-cf8cc4df73bc",
+      "launchId": "711fa002-862d-4643-9ad5-9071e17479ce"
+    },
+    "counts": {
+      "projects": 16,
+      "entities": 239,
+      "readyAssets": 44,
+      "sessions": 31
+    },
+    "entitiesUnchangedAcrossRestart": true,
+    "readyAssetHashesValid": true,
+    "sessionsUnchanged": true,
+    "configurationAndCredentialFilesUnchanged": true,
+    "modelCallsUnchanged": true
+  },
+  "supervisor": {
+    "pid": 24220,
+    "instance": "716194ab-1fb1-4508-b197-ac1345c940a0",
+    "state": "ready",
+    "restartCount": 0,
+    "lastError": null
+  },
+  "modelRequestsByThisWork": 0,
+  "serviceRestartedNormally": true,
+  "hostDiskExhausted": false,
+  "syntheticWindowsSqliteBoundary": true,
+  "browser": "New reading/source interactions pending",
+  "userFeedback": "Pending",
+  "m0Accepted": false,
+  "m1Started": false,
+  "goalComplete": false,
+  "remoteStage": "Deferred by user"
+}

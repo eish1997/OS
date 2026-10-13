@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-07T06:29:23.005Z",
+  "status": "passed",
+  "scope": "Documentation only; local desktop first",
+  "changedDocuments": {
+    "doc/主开发文档.md": "8d8b995e5b52f248c036cf2035bbb3f1a2a9d12e4ca489e53150f70c0e38000d",
+    "doc/开发执行文档.md": "cd2fa5fa0164e5c77d79444678f0f3c10ee574218a8c79077ef0afc38739a773",
+    "doc/dev/本地电脑版执行范围.md": "ac9aee591f720d5ced40f94e04d8264ef4e2e2f3a69996275860e86921cfd693",
+    "doc/dev/current.md": "f9557012410754f6e89a9c987ce34ea44d155218eed4e7ad91b4ff32b3998719",
+    "doc/README.md": "7ce2b428c8410e3e13144f1f19f6a418e5e1b5e05853289be29266a920281190",
+    "doc/dev/iterations/050-local-plan-refresh.md": "8201db41850c762e117e4ae402ce6a584c4c7a355f8d16937425adf8898a5c6d"
+  },
+  "documentsScanned": 106,
+  "localDocumentLinks": 719,
+  "engineeringFiles": 147,
+  "engineeringBaselineUnchanged": true,
+  "verificationSha256": "be17fcfcd8fa7c567de272168ff03014a3701f0c24d37e9d2b0e04bdb0b69931",
+  "freshEngineeringTestsRun": false,
+  "sourceEditedByThisUpdate": false,
+  "serviceRestartedByThisUpdate": false,
+  "modelRequestsByThisUpdate": 0,
+  "m0Accepted": false,
+  "m1Started": false,
+  "remoteStage": "Deferred by user"
+}

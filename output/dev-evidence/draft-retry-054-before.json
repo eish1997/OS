@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-07T07:13:21.308Z",
+  "phase": "before",
+  "status": "reproduced",
+  "scope": "Isolated synthetic service fixture; no browser or model request",
+  "readRevision": 1,
+  "liveRevision": 2,
+  "updateErrorStatus": 409,
+  "originalTaskRevision": 1,
+  "sourcesPreserved": true,
+  "modelRequests": 0
+}

@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-07T05:39:08.176Z",
+  "scope": "Independent synthetic desktop drafts; zero model requests",
+  "checks": {
+    "singleVisibleEditor": true,
+    "latestDraftDefault": true,
+    "selectionSurvivesReload": true,
+    "newDraftSelected": true,
+    "saveContinuesAfterSelection": true,
+    "hiddenConflictVisibleInList": true,
+    "localEditSurvivesConflictAndReload": true,
+    "serverVersionCanBeLoaded": true,
+    "selectionScopedByProject": true,
+    "serverExportWithSources": true,
+    "localConflictDownload": true
+  },
+  "observedFailures": [
+    "Conflict status wait used mismatched wording; actual API status was 内容已被另一设备修改，请重新加载并合并; inspected and retargeted",
+    "Blob download event wait timed out after actual file download; file checked separately, no repeated download"
+  ],
+  "fixture": {
+    "horizontalOverflow": false,
+    "visibleEditorCount": 1,
+    "visibleTitle": "第一篇046"
+  },
+  "production": {
+    "chatgptConnected": true,
+    "horizontalOverflow": false,
+    "visibleEditorCount": 1,
+    "visibleTitle": "腾讯 Memory：资料审阅与验证计划"
+  },
+  "consoleErrors": []
+}

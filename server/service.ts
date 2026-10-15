@@ -5,6 +5,7 @@ import { canTransition } from '../shared/contracts.js';
 import { Store, AppError } from './store.js';
 import { Assets } from './assets.js';
 import { continuationFor,pendingContinuation } from './native-session.js';
+import type { Conversation } from '../shared/contracts.js';
 export const fingerprint = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export const text = (v: unknown, name: string, max = 30_000): string => { if (typeof v !== 'string' || !v.trim() || v.length > max) throw new AppError(400, `${name}不能为空或过长`); return v.trim(); };
 export class Service {
@@ -26,30 +27,46 @@ export class Service {
       this.store.event('summary.updated', { id: next.id, confirmed }, { projectId, revision: next.revision }); return next;
     });
   }
-  conversation(projectId: string, before?: number, limit = 50): ConversationPage {
+  createConversation(projectId:string,title:string,commandId:string):Conversation {
+    this.project(projectId);text(title,'对话标题',120);text(commandId,'命令ID',120);
+    return this.store.command(`conversation:${commandId}`,fingerprint({projectId,title}),()=>{
+      const conversation=this.store.create<Conversation>('conversation',{projectId,title});
+      this.store.event('conversation.created',{id:conversation.id},{projectId});return conversation;
+    });
+  }
+  conversation(projectId: string, before?: number, limit = 50, conversationId?:string): ConversationPage {
     this.project(projectId);
-    const rows = this.store.db.prepare("SELECT sequence,body FROM events WHERE json_extract(body,'$.projectId')=? AND sequence<? AND json_extract(body,'$.type') IN ('task.accepted','assistant.text') ORDER BY sequence DESC LIMIT ?").all(projectId, before ?? Number.MAX_SAFE_INTEGER, limit + 1);
+    if(conversationId)this.scope(this.store.get<Conversation>('conversation',conversationId),projectId);
+    const filter=conversationId?" AND json_extract(body,'$.runId') IN (SELECT id FROM entities WHERE kind='run' AND json_extract(body,'$.conversationId')=?)":"";
+    const params: (string|number)[]=[projectId,before??Number.MAX_SAFE_INTEGER];if(conversationId)params.push(conversationId);params.push(limit+1);
+    const rows = this.store.db.prepare("SELECT sequence,body FROM events WHERE json_extract(body,'$.projectId')=? AND sequence<? AND json_extract(body,'$.type') IN ('task.accepted','assistant.text')"+filter+" ORDER BY sequence DESC LIMIT ?").all(...params);
     const more = rows.length > limit; const messages: ConversationMessage[] = rows.slice(0, limit).reverse().map(row => {
       const e = JSON.parse(String(row.body)) as WorkbenchEvent; const data = e.data as { text?: string; task?: Task };
       return { id: e.eventId, sequence: Number(row.sequence), role: e.type === 'task.accepted' ? 'user' : 'assistant', text: e.type === 'task.accepted' ? data.task?.goal ?? '' : data.text ?? '', at: e.at, runId: e.runId };
     });
     return { messages, olderThan: more ? messages[0]?.sequence : undefined };
   }
-  submit(projectId: string, goal: string, commandId: string, mode: Run['mode'], policy: Policy, assetIds: string[] = [], nodeId?: string, context: { research?: Task['context']['research']; view: string; selectedAssetId?: string; selectedDraftId?: string; selectedDraftRevision?: number } = { view: 'project' },continueFromRunId?:string|null) {
+  submit(projectId: string, goal: string, commandId: string, mode: Run['mode'], policy: Policy, assetIds: string[] = [], nodeId?: string, context: { research?: Task['context']['research']; view: string; selectedAssetId?: string; selectedDraftId?: string; selectedDraftRevision?: number } = { view: 'project' },continueFromRunId?:string|null,conversationId?:string) {
     this.project(projectId); text(goal, '目标'); text(commandId, '命令 ID', 120);
     if (policy.projectId !== projectId) throw new AppError(403, '策略项目不匹配');
     if (!['project', 'summary', 'results', 'tasks', 'drafts', 'research'].includes(context.view)) throw new AppError(400, '当前视图无效');
     if (context.selectedAssetId && !assetIds.includes(context.selectedAssetId)) throw new AppError(400, '选中对象必须包含在固定输入中');
     if ((context.selectedDraftId !== undefined || context.selectedDraftRevision !== undefined) && (context.view !== 'drafts' || !context.selectedDraftId || !Number.isSafeInteger(context.selectedDraftRevision) || Number(context.selectedDraftRevision) < 1)) throw new AppError(400, '当前草稿与版本无效');
     for (const id of assetIds) { const asset = this.scope(this.store.get<Asset>('asset', id), projectId); if (asset.status !== 'ready') throw new AppError(410, '输入资产已删除'); }
-    return this.store.command(`task:${commandId}`, fingerprint({ projectId, goal, mode, assetIds, nodeId, policy, context,continueFromRunId }), () => {
+    if(conversationId)this.scope(this.store.get<Conversation>('conversation',conversationId),projectId);
+    return this.store.command(`task:${commandId}`, fingerprint({ projectId, goal, mode, assetIds, nodeId, policy, context,continueFromRunId,conversationId }), () => {
       const selectedDraft = context.selectedDraftId ? this.scope(this.store.get<Draft>('draft', context.selectedDraftId), projectId) : undefined;
       if (selectedDraft && selectedDraft.revision !== context.selectedDraftRevision) throw new AppError(409, '当前草稿已有新版本，请保留修改并重新查看后发送');
-      const continueAfterRunId=mode==='pi'?pendingContinuation(this.store,projectId,policy,continueFromRunId):undefined;
-      const continuation=mode==='pi'&&!continueAfterRunId?continuationFor(this.store,projectId,policy,continueFromRunId):undefined;
+      let source=continueFromRunId;
+      if(conversationId){
+        if(source===undefined)source=[...this.store.list<Run>('run',projectId)].reverse().find(r=>r.conversationId===conversationId&&r.mode===mode)?.id??null;
+        if(source&&this.store.get<Run>('run',source).conversationId!==conversationId)throw new AppError(403,'不能接续其他对话的执行');
+      }else if(source&&this.store.get<Run>('run',source).conversationId)throw new AppError(403,'独立对话须通过所属会话继续');
+      const continueAfterRunId=mode==='pi'?pendingContinuation(this.store,projectId,policy,source):undefined;
+      const continuation=mode==='pi'&&!continueAfterRunId?continuationFor(this.store,projectId,policy,source):undefined;
       const summary = this.summary(projectId);
-      const task = this.store.create<Task>('task', { projectId, goal, commandId, context: { research: context.research, projectId, assetIds: [...assetIds], view: context.view, selectedAssetId: context.selectedAssetId, selectedDraftId: selectedDraft?.id, selectedDraftRevision: selectedDraft?.revision, selectedDraft, summary: summary?.confirmed ? summary : undefined }, acceptance: 'pending' });
-      const run = this.store.create<Run>('run', { projectId, taskId: task.id, mode, status: 'queued', attempt: 1, continuation,continueAfterRunId,cancelRequested: false, resultAssetIds: [], policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId });
+      const task = this.store.create<Task>('task', { projectId, conversationId, goal, commandId, context: { research: context.research, projectId, assetIds: [...assetIds], view: context.view, selectedAssetId: context.selectedAssetId, selectedDraftId: selectedDraft?.id, selectedDraftRevision: selectedDraft?.revision, selectedDraft, summary: summary?.confirmed ? summary : undefined }, acceptance: 'pending' });
+      const run = this.store.create<Run>('run', { projectId, conversationId, taskId: task.id, mode, status: 'queued', attempt: 1, continuation,continueAfterRunId,cancelRequested: false, resultAssetIds: [], policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId });
       this.store.event('task.accepted', { task, run }, { projectId, runId: run.id, revision: run.revision }); return { task, run };
     });
   }
@@ -78,7 +95,7 @@ export class Service {
     if (this.store.list<Operation>('operation').some(o => o.runId === id && ['started', 'unknown'].includes(o.state))) throw new AppError(409, '存在结果未确认的操作，请先对账');
     return this.store.command(`retry:${commandId}`, fingerprint({ id }), () => {
       const continuation=run.mode==='pi'&&run.sessionPath&&run.sessionId?continuationFor(this.store,run.projectId,run.policy,run.id):undefined;
-      const next = this.store.create<Run>('run', { projectId: run.projectId, taskId: run.taskId, mode: run.mode, status: 'queued', attempt: run.attempt + 1, parentRunId: id, continuation,cancelRequested: false, resultAssetIds: [], policy: run.policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId: run.nodeId }); this.store.event('run.retry', next, { projectId: next.projectId, runId: next.id }); return next;
+      const next = this.store.create<Run>('run', { projectId: run.projectId, conversationId: run.conversationId, taskId: run.taskId, mode: run.mode, status: 'queued', attempt: run.attempt + 1, parentRunId: id, continuation,cancelRequested: false, resultAssetIds: [], policy: run.policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId: run.nodeId }); this.store.event('run.retry', next, { projectId: next.projectId, runId: next.id }); return next;
     });
   }
   memories(projectId: string) { return this.store.list<Memory>('memory').filter(m => !m.deleted && m.active && m.confirmed && m.kind !== 'temporary' && (m.projectId === undefined || m.projectId === projectId)); }

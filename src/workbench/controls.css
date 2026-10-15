@@ -1,0 +1,36 @@
+/* Shared control geometry and surfaces. Theme and line width inherit from the workbench. */
+.wb-root{--control-radius:2px;--overlay-shadow:0 8px 24px #0003}
+.wb-root button{border-radius:var(--control-radius);font:inherit}
+.wb-root button:focus-visible,.wb-root summary:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.wb-toolbar button,.wb-toolbar summary{min-height:32px;padding:6px 12px;font-size:13px}
+.wb-root .wb-modal{background:var(--bg-surface);border:var(--line-width) solid var(--border-strong);border-radius:4px;box-shadow:var(--overlay-shadow);padding:24px}
+.wb-modal h2{margin:0 0 8px;font-size:20px;font-weight:500}
+.wb-modal header>button,.wb-window-list header>button{display:grid;place-items:center;width:28px;min-width:28px;height:28px;padding:4px}
+.wb-root .wb-menu,.wb-root .wb-window-list,.wb-select-list{background:var(--bg-surface);border:var(--line-width) solid var(--border-strong);border-radius:2px;box-shadow:var(--overlay-shadow);padding:4px;color:var(--text-primary);font-size:13px}
+.wb-root .wb-window-list{top:52px;right:12px;width:280px}
+.wb-window-list header{margin:0;padding:8px 8px 10px;border-bottom:var(--line-width) solid var(--border-subtle)}
+.wb-window-list p{padding:12px 8px;color:var(--text-secondary)}
+.wb-root .wb-menu button,.wb-root .wb-window-list>button,.wb-select-list [role=option]{min-height:36px;padding:8px 12px;border:0;border-radius:0;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;font-size:13px}
+.wb-menu button:hover,.wb-window-list>button:hover,.wb-select-list [role=option].is-active{background:var(--bg-hover)}
+.wb-select-list [aria-selected=true]{color:var(--text-selected);background:var(--bg-selected)}
+.wb-select-list [role=option][aria-selected=true].is-active{background:var(--bg-selected)}
+.wb-select-list{position:fixed;z-index:3000;overflow:auto;overscroll-behavior:contain}
+.wb-select-list [role=option]{cursor:pointer;overflow-wrap:anywhere}
+.wb-select-list [role=option]>span:first-child{min-width:0;flex:1}
+.wb-root .wb-select{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;min-width:0;max-width:100%;width:220px;padding:7px 10px;border:var(--line-width) solid var(--border-strong);background:var(--bg-canvas);color:var(--text-primary);text-align:left;font-size:13px}
+.wb-select>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-select[aria-expanded=true]{border-color:var(--focus-ring)}
+.wb-modal>button:not(.wb-window-choice){min-height:36px;border:var(--line-width) solid var(--border-subtle);padding:7px 12px;margin:12px 8px 0 0}
+.wb-modal label:has(.wb-select){gap:16px;margin:20px 0}
+.wb-root .wb-window-choice{border-radius:0;padding:14px 8px}
+.wb-send-asset .wb-select{flex:1}
+.wb-project-picker{display:flex;min-width:120px;max-width:220px}
+.wb-toolbar .wb-project-picker .wb-select{min-height:32px;width:180px}
+@media(max-width:1100px){.wb-toolbar{height:auto;flex-wrap:wrap;align-items:flex-start}.wb-toolbar-actions{min-width:0;max-width:100%;flex-wrap:wrap;row-gap:6px}}
+.wb-root .wb-prompt{color:var(--text-primary);margin:auto;width:min(440px,92vw)}
+.wb-prompt::backdrop{background:#0009}
+.wb-prompt input{width:100%;min-height:36px}
+.wb-prompt p{line-height:1.7;color:var(--text-secondary)}
+.wb-prompt footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}
+.wb-prompt footer button{min-height:36px;padding:7px 16px;border:var(--line-width) solid var(--border-subtle)}
+@media(max-width:540px){.wb-modal label:has(.wb-select){align-items:stretch;flex-direction:column;gap:8px}.wb-modal .wb-select{width:100%}}

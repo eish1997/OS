@@ -13,6 +13,7 @@
     "start": "tsx server/index.ts",
     "test": "tsx --test tests/*.test.ts",
     "probe:pi": "tsx scripts/probe-pi.ts",
+    "test:workbench-ui": "vite build --outDir output/workbench-build && tsx scripts/workbench-ui-qa.ts && tsx scripts/workbench-layout-qa.ts && tsx scripts/workbench-appearance-qa.ts",
     "backup": "tsx scripts/backup.ts",
     "node": "tsx scripts/local-node.ts"
   },
@@ -30,6 +31,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "playwright-core": "1.62.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.2"

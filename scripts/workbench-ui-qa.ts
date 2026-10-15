@@ -1,0 +1,73 @@
+import { createRequire } from 'node:module';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import assert from 'node:assert/strict';
+import { createApp } from '../server/app.js';
+import { config } from '../server/config.js';
+const require=createRequire(import.meta.url);
+
+const {chromium}=require(process.env.PLAYWRIGHT_PACKAGE || 'playwright-core');
+const evidence=(process.env.WORKBENCH_QA_ROOT||'output/dev-evidence/workbench')+'/ui';mkdirSync(evidence,{recursive:true});
+// Host protocol only: scheduling is disabled, so this dummy key cannot make model calls.
+Object.assign(config,{apiKey:'offline-workbench-ui-key',provider:'openai',model:'gpt-5.6-sol',maxCalls:2,budgetUsd:1,reservePerCallUsd:.1});
+const app=createApp({dataDir:mkdtempSync(join(tmpdir(),'wb-ui-')),staticDir:'output/workbench-build',password:'workbench-ui-test-password',schedule:false});
+const project=app.service.createProject('窗口验收项目');const asset=app.assets.write(project.id,'验证资料.md','text/markdown','# 真实资产预览\n\n独立窗口资料。'+ '\n\n用于验证真实预览窗口滚动恢复的长段落。'.repeat(80));
+const removable=app.assets.write(project.id,'临时可删除.md','text/markdown','临时资源');
+await new Promise<void>(done=>app.server.listen(0,'127.0.0.1',done));
+const base=`http://127.0.0.1:${(app.server.address() as {port:number}).port}`;
+config.origin=base;
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH});const context=await browser.newContext({viewport:{width:1440,height:900}});const page=await context.newPage();
+const errors:string[]=[];page.on('pageerror',(e:Error)=>errors.push(e.message));
+page.setDefaultTimeout(15000);
+try{
+  await page.goto(base+'/workbench');await page.getByLabel('工作台密码').fill('workbench-ui-test-password');await page.getByRole('button',{name:'进入工作台',exact:true}).click();
+  await page.locator('.wb-root').waitFor();
+  await page.getByRole('button',{name:'添加窗口',exact:true}).first().click();await page.getByRole('button',{name:/布局演示/}).click();
+  await page.getByLabel('演示窗口 1内容').fill('拖动后保留的输入');
+  await page.getByLabel('左右分割',{exact:true}).first().click();await page.getByLabel('上下分割',{exact:true}).first().click();
+  await page.locator('.wb-panel').getByLabel('悬浮',{exact:true}).click();
+  await page.locator('.wb-floating').waitFor();assert.equal(await page.getByLabel('演示窗口 1内容').inputValue(),'拖动后保留的输入');
+  const title=page.locator('.wb-floating .wb-window-title');const rect=await title.boundingBox();
+  await page.mouse.move(rect.x+60,rect.y+18);await page.mouse.down();await page.mouse.move(800,480,{steps:12});await page.keyboard.press('Escape');await page.mouse.up();
+  assert.equal(await page.locator('.wb-floating').count(),1);assert.equal(await page.getByLabel('演示窗口 1内容').inputValue(),'拖动后保留的输入');
+  await page.locator('.wb-floating').getByLabel('置顶',{exact:true}).click();await page.locator('.wb-floating').getByLabel('收起为图标').click();
+  await page.locator('.wb-floating-icon').dblclick();await page.locator('.wb-floating.pinned').waitFor();
+  await page.getByRole('button',{name:'收拢浮窗',exact:true}).click();await page.locator('.wb-collection').waitFor();await page.locator('.wb-collection').dblclick();await page.locator('.wb-floating.pinned').waitFor();
+  await page.getByLabel('新建空间',{exact:true}).click();await page.locator('.wb-prompt input').fill('日常空间');await page.locator('.wb-prompt button[type=submit]').click();
+  assert.equal(await page.locator('.wb-floating').count(),1);assert.equal(await page.getByLabel('演示窗口 1内容').inputValue(),'拖动后保留的输入');
+  const moveTitle=await page.locator('.wb-floating .wb-window-title').boundingBox();await page.mouse.move(moveTitle.x+60,moveTitle.y+18);await page.mouse.down();await page.mouse.move(800,450,{steps:15});await page.mouse.up();
+  assert.equal(await page.locator('.wb-floating').count(),1);assert((await page.locator('.wb-floating').boundingBox()).x>400);
+  await page.locator('summary').filter({hasText:'布局'}).click();await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByRole('status').filter({hasText:'已保存'}).waitFor();
+  await page.reload();await page.locator('.wb-floating.pinned').waitFor();assert.equal(await page.getByLabel('演示窗口 1内容').inputValue(),'拖动后保留的输入');
+  await page.screenshot({path:join(evidence,'workspace.png'),fullPage:true});
+  const other=await browser.newContext({viewport:{width:1000,height:700}});await other.addCookies(await context.cookies());const second=await other.newPage();await second.goto(base+'/workbench');await second.locator('.wb-floating').waitFor();assert.equal(await second.getByLabel('演示窗口 1内容').inputValue(),'拖动后保留的输入');await other.close();
+  await page.locator('.wb-floating').getByLabel('关闭窗口',{exact:true}).click();await page.waitForFunction(()=>Boolean(document.activeElement?.closest('.wb-toolbar')));
+  await page.getByLabel('切换空间 资产空间',{exact:true}).click();
+  while(await page.locator('.wb-region').count()>1){await page.getByLabel('关闭空区域',{exact:true}).first().click();}await page.getByLabel('关闭空区域',{exact:true}).click();assert.equal(await page.locator('.wb-region').count(),1);await page.getByRole('button',{name:'添加窗口',exact:true}).waitFor();await page.getByLabel('切换空间 日常空间',{exact:true}).click();
+  async function newChat(){await page.getByLabel('当前项目').click();await page.locator('[role=option][data-value="'+project.id+'"]') .click();await page.getByRole('button',{name:'＋ 窗口',exact:true}).click();await page.getByRole('button',{name:/Pi 对话/}).click();await page.getByRole('dialog').waitFor({state:'hidden'});await page.getByRole('button',{name:'新建对话',exact:true}).click();await page.getByRole('button',{name:'新建对话',exact:true}).waitFor({state:'hidden'});}
+  await newChat();const chatA=page.locator('.wb-panel');const idA=await chatA.getAttribute('data-window');await chatA.getByLabel('对话输入').fill('A 会话独立输入');await chatA.getByLabel('悬浮',{exact:true}).click();
+  await newChat();const chatB=page.locator('.wb-panel');const idB=await chatB.getAttribute('data-window');await chatB.getByLabel('对话输入').fill('B 会话独立输入');
+  await page.getByLabel('切换空间 资产空间',{exact:true}).click();assert.equal(await page.locator(`[data-window="${idA}"]`).getByLabel('对话输入').inputValue(),'A 会话独立输入');
+  await page.getByLabel('当前项目').click();await page.locator('[role=option][data-value="'+project.id+'"]') .click();await page.getByRole('button',{name:'＋ 窗口',exact:true}).click();await page.getByRole('button',{name:/资产浏览/}).click();
+  await page.locator(`[data-window="${idA}"]`).getByLabel('收起为图标').click();
+  const assetWindow=page.locator('.wb-panel').filter({hasText:'资产浏览'});await assetWindow.getByRole('button',{name:/验证资料.md/}).click();await assetWindow.getByRole('heading',{name:'真实资产预览'}).waitFor();
+  const assetId=await assetWindow.getAttribute('data-window');const assetAny=page.locator(`[data-window="${assetId}"]`);await assetAny.getByLabel('筛选资产').fill('验证');await assetAny.locator('.wb-preview').evaluate((el:HTMLElement)=>{el.scrollTop=180;});await page.waitForFunction((id:string)=>document.querySelector(`[data-window="${id}"] .wb-preview`)!.scrollTop>=170,assetId);
+  await assetAny.getByLabel('悬浮',{exact:true}).click();await assetAny.getByRole('heading',{name:'真实资产预览'}).waitFor();await page.waitForFunction((id:string)=>document.querySelector(`[data-window="${id}"] .wb-preview`)!.scrollTop>=170,assetId);assert.equal(await assetAny.getByLabel('筛选资产').inputValue(),'验证');await assetAny.getByLabel('停靠到当前空间',{exact:true}).click();await assetAny.getByRole('heading',{name:'真实资产预览'}).waitFor();await page.waitForFunction((id:string)=>document.querySelector(`[data-window="${id}"] .wb-preview`)!.scrollTop>=170,assetId);await assetAny.getByLabel('筛选资产').fill('');
+  await assetAny.locator('.wb-preview').evaluate((el:HTMLElement)=>{el.scrollTop=0;});await page.screenshot({path:join(evidence,'asset-reading.png'),fullPage:true});assert.equal(await assetAny.locator('.wb-reading').evaluate((el:HTMLElement)=>getComputedStyle(el).backgroundColor),'rgb(238, 238, 234)');await assetAny.getByLabel('深色阅读',{exact:true}).click();await assetAny.locator('.wb-reading.is-dark').waitFor();await assetAny.getByLabel('深色阅读',{exact:true}).click();await assetAny.locator('.wb-reading.is-paper').waitFor();
+  await assetWindow.getByLabel('目标聊天').click();await page.locator('[role=option][data-value="'+idA+'"]') .click();await assetWindow.getByRole('button',{name:'添加资料',exact:true}).click();
+  await page.locator(`[data-window-icon="${idA}"]`).dblclick();
+  await page.locator(`[data-window="${idA}"]`).getByRole('button',{name:'发送 ↑',exact:true}).click();
+  await page.waitForFunction(async()=>{const s=await(await fetch('/api/snapshot')).json();return s.tasks.length===1;});
+  const accepted=app.store.list<any>('task')[0];assert.equal(accepted.goal,'A 会话独立输入');assert.deepEqual(accepted.context.assetIds,[asset.id]);assert.equal(accepted.conversationId,app.store.list<any>('conversation')[0].id);
+  await page.getByLabel('切换空间 日常空间',{exact:true}).click();assert.equal(await page.locator(`[data-window="${idB}"]`).getByLabel('对话输入').inputValue(),'B 会话独立输入');
+  await page.locator(`[data-window="${idB}"]`).getByRole('button',{name:'发送 ↑',exact:true}).click();await page.waitForFunction(async()=>{const s=await(await fetch('/api/snapshot')).json();return s.tasks.length===2;});
+  assert.notEqual(app.store.list<any>('run')[0].conversationId,app.store.list<any>('run')[1].conversationId);assert.equal(app.store.list<any>('run')[1].continueAfterRunId,undefined);
+  assert.equal(app.store.list<any>('run').reduce((n,r)=>n+r.calls,0),0);
+  await page.getByRole('status').filter({hasText:'已保存'}).waitFor();await page.screenshot({path:join(evidence,'conversations.png'),fullPage:true});
+  await page.getByLabel('切换空间 资产空间',{exact:true}).click();await page.getByRole('button',{name:'收拢浮窗',exact:true}).click();await assetWindow.getByRole('button',{name:/临时可删除.md/}).click();app.assets.remove(removable.id,removable.revision);await assetWindow.getByText('原选中文件已不可用，请选择其他文件。',{exact:true}).waitFor();
+  await page.getByLabel('当前项目').click();await page.locator('[role=option][data-value="'+project.id+'"]') .click();await page.getByRole('button',{name:'＋ 窗口',exact:true}).click();await page.getByRole('button',{name:/资产浏览/}).click();  const allAssetWindows=page.locator('[data-window]').filter({has:page.locator('.wb-assets-pane')});assert.equal(await allAssetWindows.count(),2);const otherAsset=allAssetWindows.filter({hasNot:page.getByText('原选中文件已不可用，请选择其他文件。',{exact:true})});await otherAsset.getByRole('button',{name:/验证资料.md/}).click();await otherAsset.getByLabel('目标聊天').click();await page.locator('[role=option][data-value="'+idB+'"]') .click();await otherAsset.getByRole('button',{name:'添加资料',exact:true}).click();await page.getByRole('status').filter({hasText:'已保存'}).waitFor();const savedLayout=(await(await context.request.get(base+'/api/workbench/config')).json()).layout;assert.deepEqual(savedLayout.windows[idB].view.assetIds,[asset.id]);assert.deepEqual(savedLayout.windows[idA].view.assetIds,[]);assert.equal(savedLayout.windows[assetId].view.assetId,removable.id);
+  assert.deepEqual(errors,[]);writeFileSync(join(evidence,'report.json'),JSON.stringify({status:'passed',at:new Date().toISOString(),browser:await browser.version(),checks:['nested split and close all empty regions retains root','state retained across float','Escape drag cancellation','pin and icon restore','group collection','global space switch','refresh','second browser context','real asset preview','two asset views target separate chats without shared selection','two independent chat submissions','scope unchanged after space switch','real asset filter and preview scroll survive float/dock','removed asset shows recoverable placeholder'],errors,modelRequests:0,limitations:['scheduler disabled for UI protocol tests; not online Pi inference','not full V01–V17 acceptance']},null,2));
+  console.log('Workbench layout browser smoke passed');
+}catch(error){writeFileSync(join(evidence,'report.json'),JSON.stringify({status:'failed',error:String(error),errors},null,2));await page.screenshot({path:join(evidence,'failure.png'),fullPage:true}).catch(()=>{});throw error;}
+finally{await browser.close();await app.close();}

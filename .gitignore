@@ -6,5 +6,6 @@ dist/
 data/
 .runtime/
 output/dev-evidence/private/
+/output/workbench-build/
 *.log
 /打开工作台.lnk

@@ -10,7 +10,7 @@ import type { StorageCapacity } from './storage.js';
 const compatible=(a:Policy,b:Policy)=>a.version===b.version&&a.modelBinding?.kind===b.modelBinding?.kind&&a.modelBinding?.provider===b.modelBinding?.provider&&a.modelBinding?.model===b.modelBinding?.model&&a.modelBinding?.connectionId===b.modelBinding?.connectionId;
 export function pendingContinuation(store:Store,projectId:string,policy:Policy,requested:string|null|undefined):string|undefined {
   if(requested===null)return;
-  const source=requested?store.get<Run>('run',requested):[...store.list<Run>('run',projectId)].reverse().find(r=>r.mode==='pi'&&compatible(r.policy,policy));
+  const source=requested?store.get<Run>('run',requested):[...store.list<Run>('run',projectId)].reverse().find(r=>!r.conversationId&&r.mode==='pi'&&compatible(r.policy,policy));
   if(!source)return;
   if(source.projectId!==projectId||source.mode!=='pi'||!compatible(source.policy,policy))throw new AppError(403,'不能接续其他项目、模型连接或策略版本的会话');
   return ['queued','running','waiting_user'].includes(source.status)?source.id:undefined;
@@ -34,7 +34,7 @@ export function inspectNative(path:string,sessionId:string,root:string,projectId
 export function continuationFor(store:Store,projectId:string,policy:Policy,requested:string|null|undefined,inspection:NativeInspection='continuation'):NativeContinuation|undefined {
   if(requested===null)return;
   const all=store.list<Run>('run',projectId);
-  const source=requested?store.get<Run>('run',requested):[...all].reverse().find(r=>r.mode==='pi'&&r.status==='completed'&&r.sessionId&&r.sessionPath&&compatible(r.policy,policy));
+  const source=requested?store.get<Run>('run',requested):[...all].reverse().find(r=>!r.conversationId&&r.mode==='pi'&&r.status==='completed'&&r.sessionId&&r.sessionPath&&compatible(r.policy,policy));
   if(!source)return;
   if(source.projectId!==projectId||source.mode!=='pi'||!compatible(source.policy,policy))throw new AppError(403,'不能接续其他项目、模型连接或策略版本的会话');
   if(!['completed','failed','cancelled','interrupted'].includes(source.status)||!source.sessionPath||!source.sessionId)throw new AppError(409,'原会话尚不可接续');

@@ -1,0 +1,29 @@
+/* Three visual layers. Transparent wrappers never own input; content explicitly opts in. */
+.wb-surface{isolation:isolate;background:transparent}
+.wb-canvas-layer{position:absolute;inset:0;z-index:0;background:var(--bg-canvas);overflow:hidden;touch-action:none}
+.wb-dock-scroll{z-index:1}
+.wb-dock-scroll,.wb-dock,.wb-split,.wb-split>div,.wb-region,.wb-panel,.wb-window-body,
+.wb-empty,.wb-demo,.wb-assets-pane,.wb-assets-content,.wb-files,.wb-preview,.wb-chat-pane,.wb-chat-history,.wb-chat-runs,
+.wb-welcome,.wb-welcome-content,.wb-start-options,.wb-start-options>div,.wb-start-layouts{pointer-events:none}
+.wb-region,.wb-preview,.wb-welcome{background:transparent}
+/* Floating windows are opaque surfaces; blank space also blocks canvas input. */
+.wb-floating{background:var(--bg-surface);pointer-events:auto;box-shadow:var(--overlay-shadow)}
+.wb-floating :is(.wb-window-body,.wb-empty,.wb-demo,.wb-assets-pane,.wb-assets-content,.wb-files,.wb-preview,.wb-chat-pane,.wb-chat-history,.wb-chat-runs){pointer-events:auto}
+/* Painted content islands and interactive controls receive native events. Their gaps do not. */
+.wb-surface :is(button,input,textarea,select,a,summary,iframe),
+.wb-surface .wb-window-title,.wb-surface .wb-separator,
+.wb-surface .wb-reading,.wb-surface .wb-preview img,.wb-surface .wb-preview-tools,
+.wb-surface .wb-pane-context,.wb-surface .wb-message,.wb-surface .wb-chat-composer,
+.wb-surface .wb-inline-error,.wb-surface .wb-chat-runs>div,
+.wb-surface .wb-demo>span,.wb-surface .wb-demo>p,.wb-surface .wb-empty>p,
+.wb-surface .wb-files>p,.wb-surface .wb-preview>p,.wb-surface .wb-preview>.wb-caption,
+.wb-surface .wb-welcome :is(h1,h2,p),.wb-surface .wb-start-layouts>span,
+.wb-surface [data-workbench-interactive]{pointer-events:auto}
+.wb-pane-context,.wb-message,.wb-message.user,.wb-preview-tools,.wb-chat-runs>div,
+.wb-demo>span,.wb-demo>p,.wb-empty>p,.wb-files>p,.wb-preview>p,.wb-preview>.wb-caption,
+.wb-welcome :is(h1,h2,p),.wb-start-layouts>span{background:var(--bg-surface)}
+/* Compact visible tools remain reachable without an invisible region-sized hover target. */
+.wb-region-tools{align-self:flex-end;width:max-content;opacity:1;pointer-events:none}
+.wb-region-tools button{pointer-events:auto}
+.wb-surface:has(.wb-welcome) .wb-dock-scroll{visibility:hidden}
+/* Modal backdrops deliberately block the canvas; dialogs are not workspace windows. */

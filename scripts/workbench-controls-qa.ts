@@ -1,0 +1,44 @@
+import { chromium } from 'playwright-core';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import assert from 'node:assert/strict';
+import { createApp } from '../server/app.js';
+import { config } from '../server/config.js';
+const root=(process.env.WORKBENCH_QA_ROOT||'output/dev-evidence/workbench-ui-064')+'/controls';mkdirSync(root,{recursive:true});
+const app=createApp({dataDir:mkdtempSync(join(tmpdir(),'wb-controls-')),staticDir:'output/workbench-build',password:'controls-test',schedule:false});
+for(let i=0;i<30;i++)app.service.createProject(`项目 ${String(i).padStart(2,'0')} · 长名称下拉列表验证`);
+await new Promise<void>(r=>app.server.listen(0,'127.0.0.1',r));
+const base=`http://127.0.0.1:${(app.server.address() as {port:number}).port}`;config.origin=base;
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH});
+const context=await browser.newContext({viewport:{width:1440,height:900}}),page=await context.newPage();
+const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+try{
+  await context.request.post(base+'/api/login',{data:{password:'controls-test'}});await page.goto(base);
+  const menu=page.locator('.wb-menu'),summary=page.locator('.wb-toolbar summary');
+  await summary.click();assert.equal(await menu.isVisible(),true);
+  await page.getByRole('button',{name:'窗口列表',exact:true}).click();assert.equal(await menu.isVisible(),false);assert.equal(await page.locator('.wb-window-list').isVisible(),true);
+  await summary.click();assert.equal(await page.locator('.wb-window-list').count(),0);assert.equal(await menu.isVisible(),true);
+  await page.getByRole('button',{name:'＋ 窗口',exact:true}).click();assert.equal(await menu.isVisible(),false);
+  const dialog=page.getByRole('dialog',{name:'添加窗口'}),select=page.getByRole('combobox',{name:'当前项目'});
+  await page.keyboard.press('Escape');await select.click();assert.equal(await page.getByRole('option').count(),31);
+  await page.screenshot({path:root+'/dark-select.png'});
+  await page.keyboard.press('End');await page.keyboard.press('Enter');assert.match(await select.innerText(),/项目 29/);
+  await select.click();await page.keyboard.press('Escape');assert.equal(await page.getByRole('listbox').count(),0);assert.equal(await dialog.isVisible(),false);
+  await page.keyboard.press('Escape');assert.equal(await dialog.count(),0);
+  await page.getByRole('button',{name:'新建空间',exact:true}).click();await page.locator('.wb-prompt input').fill('取消的空间');await page.keyboard.press('Escape');assert.equal(await page.locator('.wb-prompt').count(),0);
+  await page.getByRole('button',{name:'新建项目',exact:true}).click();await page.locator('.wb-prompt input').fill('弹窗验证项目');await page.locator('.wb-prompt button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('[aria-label="当前项目"]')?.textContent?.includes('弹窗验证项目'));await page.keyboard.press('Escape');
+  await page.getByRole('button',{name:'设置',exact:true}).click();const settings=page.getByRole('dialog',{name:'外观设置'});
+  await settings.getByRole('radio',{name:/浅色/}).check();await settings.getByLabel('线条粗细',{exact:false}).focus();await page.keyboard.press('End');await settings.getByRole('button',{name:'完成',exact:true}).click();
+  await summary.click();assert.equal(await menu.evaluate(el=>getComputedStyle(el).borderTopWidth),'3px');
+  await page.getByRole('button',{name:'保存',exact:true}).click();assert.equal(await menu.isVisible(),false);
+  await select.click();
+  assert.equal(await page.getByRole('listbox').evaluate(el=>getComputedStyle(el).borderTopWidth),'3px');
+  await page.screenshot({path:root+'/light-select.png'});
+  await page.keyboard.press('Escape');await page.keyboard.press('Escape');
+  await page.setViewportSize({width:800,height:600});await select.click();
+  const box=await page.getByRole('listbox').boundingBox();assert.ok(box&&box.x>=0&&box.y>=0&&box.x+box.width<=801&&box.y+box.height<=601);
+  await page.screenshot({path:root+'/small-select.png'});assert.deepEqual(errors,[]);
+  writeFileSync(root+'/report.json',JSON.stringify({status:'passed',checks:['exclusive toolbar overlays','menu dismisses on action','themed select with 30 projects','keyboard End/Enter selection','Escape closes project dropdown','light theme and 3px borders','800x600 dropdown stays in viewport'],errors},null,2));console.log('Controls browser validation passed');
+}catch(error){await page.screenshot({path:root+'/failure.png'});throw error;}
+finally{await browser.close();await app.close();}

@@ -1,4 +1,5 @@
 import { nativePiTools } from '../shared/pi-tools.js';
+import { WorkbenchConfigurations } from './workbench-config.js';
 import { researchRequest, researchGoal } from './research.js';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomBytes } from 'node:crypto';
@@ -30,7 +31,7 @@ async function json(req: IncomingMessage): Promise<Record<string, unknown>> {
 const reply = (res: ServerResponse, data: unknown, status = 200) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); };
 const strings = (v: unknown): string[] => { if (!Array.isArray(v) || v.length > 100 || !v.every(s => typeof s === 'string')) throw new AppError(400, '列表格式无效'); return v; };
 const revision = (v: unknown) => { if (!Number.isSafeInteger(v) || Number(v) < 1) throw new AppError(400, '需要有效版本号'); return Number(v); };
-export function createApp(options: { dataDir?: string; password?: string; schedule?: boolean; launchId?: string; onShutdown?: () => void; storageLimits?: Partial<StorageLimits>; chatgpt?: ChatGPTOptions; backup?:BackupOptions } = {}) {
+export function createApp(options: { dataDir?: string; staticDir?: string; password?: string; schedule?: boolean; launchId?: string; onShutdown?: () => void; storageLimits?: Partial<StorageLimits>; chatgpt?: ChatGPTOptions; backup?:BackupOptions } = {}) {
   const dataDir = options.dataDir ?? config.dataDir; const store = new Store(join(dataDir, 'workbench.sqlite'));
   const capacity = new StorageCapacity(dataDir, { ...config.storageLimits, ...options.storageLimits }); store.attachCapacity(capacity);
   const assets = new Assets(store, dataDir, capacity.limits.assetsBytes); const auth = new Auth(store, dataDir, options.password ?? config.password);
@@ -108,6 +109,21 @@ export function createApp(options: { dataDir?: string; password?: string; schedu
       }
       if (path.startsWith('/api/')) {
         const sessionHash = auth.require(req);
+        if (path === '/api/conversations') {
+          if (method === 'GET') return reply(res, store.list('conversation', url.searchParams.get('projectId') || undefined));
+          if (method === 'POST') { const data = await json(req); return reply(res, service.createConversation(text(data.projectId,'项目'), text(data.title,'对话标题',120), text(data.commandId,'命令',120)), 201); }
+        }
+        if (path.match(/^\/api\/conversations\/[^/]+\/messages$/) && method === 'GET') {
+          const conversation=store.get<Entity>('conversation',path.split('/')[3]);
+          const before=url.searchParams.has('before')?Number(url.searchParams.get('before')):undefined;
+          if(before!==undefined&&(!Number.isSafeInteger(before)||before<1))throw new AppError(400,'对话游标无效');
+          return reply(res,service.conversation(conversation.projectId!,before,50,conversation.id));
+        }
+        if (path === '/api/workbench/config') {
+          const configurations = new WorkbenchConfigurations(store);
+          if (method === 'GET') return reply(res, configurations.read());
+          if (method === 'PUT') { const data = await json(req); return reply(res, configurations.save(data.revision, data.layout)); }
+        }
         if(path.startsWith('/api/chatgpt/')) {
           if(path.startsWith('/api/chatgpt/transfer/')&&method==='POST'){
             const data=await json(req);
@@ -207,7 +223,7 @@ export function createApp(options: { dataDir?: string; password?: string; schedu
           if(data.timeoutMs!==undefined) {if(mode!=='pi'||!Number.isSafeInteger(data.timeoutMs)||Number(data.timeoutMs)<1000||Number(data.timeoutMs)>grant.timeoutMs)throw new AppError(400,'任务时间必须在宿主许可范围内');grant.timeoutMs=Number(data.timeoutMs);}
           if(data.continueFromRunId!==undefined&&mode!=='pi')throw new AppError(400,'只有Pi任务可接续原生会话');
           const continuation=data.continueFromRunId===null?null:data.continueFromRunId!==undefined?text(data.continueFromRunId,'接续任务',120):undefined;
-          return reply(res, service.submit(projectId, research ? researchGoal(research) : text(data.goal, '目标'), text(data.commandId, '命令'), mode as Run['mode'], grant, data.assetIds ? strings(data.assetIds) : [], typeof data.nodeId === 'string' ? data.nodeId : undefined, { research, view: research ? 'research' : typeof data.view === 'string' ? data.view : 'project', selectedAssetId: typeof data.selectedAssetId === 'string' ? data.selectedAssetId : undefined, selectedDraftId: data.selectedDraftId as string | undefined, selectedDraftRevision: data.selectedDraftRevision as number | undefined },research ? null : continuation), 202);
+          return reply(res, service.submit(projectId, research ? researchGoal(research) : text(data.goal, '目标'), text(data.commandId, '命令'), mode as Run['mode'], grant, data.assetIds ? strings(data.assetIds) : [], typeof data.nodeId === 'string' ? data.nodeId : undefined, { research, view: research ? 'research' : typeof data.view === 'string' ? data.view : 'project', selectedAssetId: typeof data.selectedAssetId === 'string' ? data.selectedAssetId : undefined, selectedDraftId: data.selectedDraftId as string | undefined, selectedDraftRevision: data.selectedDraftRevision as number | undefined },research ? null : continuation, data.conversationId === undefined ? undefined : text(data.conversationId, '对话')), 202);
         }
         if (path.match(/^\/api\/tasks\/[^/]+\/acceptance$/) && method === 'POST') {
           const data = await json(req); const id = path.split('/')[3]; const task = store.get<Task>('task', id);
@@ -260,7 +276,7 @@ export function createApp(options: { dataDir?: string; password?: string; schedu
         throw new AppError(404, '接口不存在');
       }
       if (!['GET', 'HEAD'].includes(method || '')) throw new AppError(405, '请求方法不支持');
-      const root = resolve('dist'); const file = resolve(root, '.' + decodeURIComponent(path));
+      const root = resolve(options.staticDir ?? 'dist'); const file = resolve(root, '.' + decodeURIComponent(path));
       if (file !== root && !file.startsWith(root + (process.platform === 'win32' ? '\\' : '/'))) throw new AppError(403, '路径不允许');
       const target = existsSync(file) && extname(file) ? file : join(root, 'index.html');
       if (!existsSync(target)) { res.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('界面尚未构建，请运行 npm run build'); }

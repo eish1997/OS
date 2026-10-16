@@ -1,0 +1,12 @@
+diff --git a/tests/e2e/perf/pixel-grid.spec.ts b/tests/e2e/perf/pixel-grid.spec.ts
+--- a/tests/e2e/perf/pixel-grid.spec.ts
++++ b/tests/e2e/perf/pixel-grid.spec.ts
+@@ -40,7 +40,7 @@
+     profiler.setVisible(false)
+     return { without, withGrid }
+   })
+-  console.log(
++  console.debug(
+     `Pan frame CPU at 400%: ${cost.without.toFixed(2)} ms without the grid, ${cost.withGrid.toFixed(2)} ms with it`
+   )
+   expect(cost.withGrid - cost.without).toBeLessThan(1)

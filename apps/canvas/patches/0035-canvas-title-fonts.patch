@@ -1,0 +1,108 @@
+diff --git a/src/app/document/local-note-fonts.ts b/src/app/document/local-note-fonts.ts
+--- a/src/app/document/local-note-fonts.ts
++++ b/src/app/document/local-note-fonts.ts
+@@ -10,7 +10,7 @@
+   let attempts = new WeakMap<SceneNode, string>()
+   const pending = new Set<string>()
+   let graph = editor.graph, queued = false, disposed = false
+-  const signature = (node: SceneNode) => JSON.stringify([graph.getNode(node.parentId ?? "")?.name, node.text, node.fontFamily, node.fontWeight, node.italic, node.fontSize, node.width, node.lineHeight, node.letterSpacing, node.styleRuns, node.textParagraphs])
++  const signature = (node: SceneNode) => JSON.stringify([node.text, node.fontFamily, node.fontWeight, node.italic, node.fontSize, node.width, node.lineHeight, node.letterSpacing, node.styleRuns, node.textParagraphs])
+   function schedule() {
+     if (queued || disposed) return
+     queued = true
+@@ -35,8 +35,6 @@
+     const current = () => !disposed && editor.graph === targetGraph && targetGraph.getNode(node.id) === node && signature(node) === key
+     try {
+       await ensureGraphFonts(targetGraph, [node.id], editor.renderer)
+-      // Frame labels are canvas text too, even when the note body is empty or Latin-only.
+-      await fontManager.ensureFallbackPack(['cjk'], targetGraph.getNode(node.parentId ?? '')?.name ?? '')
+       if (current()) {
+         // Font resolution changes layout, not authored text or document history.
+         targetGraph.withLayoutMutations(() => editor.updateTextEditNode(node.id, { text: node.text }))
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -3,6 +3,7 @@
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useLocalLayout } from '@/app/shell/local-layout'
++import { useLocalTitleFonts } from '@/app/document/local-title-fonts'
+ import { useLocalNoteFonts } from '@/app/document/local-note-fonts'
+ import { createLocalNote } from '@/app/document/local-note'
+ import { useLocalConnections } from '@/app/document/local-connections'
+@@ -17,6 +18,7 @@
+ import { osCanvasWorkspace } from '@/theme/os-canvas-workspace'
+ 
+ const store = useEditorStore()
++const { titleFontsLoading, titleFontsFailed, retryTitleFonts } = useLocalTitleFonts(store)
+ const { noteFontFailed, retryNoteFonts } = useLocalNoteFonts(store)
+ const { canConnect, connect, missing } = useLocalConnections(store)
+ const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
+@@ -52,6 +54,8 @@
+       <AppButton :disabled="!editing" @click="addNote">新建便签</AppButton>
+       <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
+       <AppAlert v-if="noteFontFailed" heading="便签字体加载失败" description="文字已保留，可以重新加载字体。"><template #actions><AppButton @click="retryNoteFonts">重试便签字体</AppButton></template></AppAlert>
++      <span v-if="titleFontsLoading" data-slot="title-font-loading" role="status">正在加载标题字体…</span>
++      <AppAlert v-if="titleFontsFailed" heading="标题字体加载失败" description="名称已保留，可以重新加载字体。"><template #actions><AppButton @click="retryTitleFonts">重试标题字体</AppButton></template></AppAlert>
+       <span v-if="missing" role="status">{{ missing }} 条连接缺少端点</span>
+       <IconButton
+         label="图层面板"
+diff --git a/src/app/document/local-title-fonts.ts b/src/app/document/local-title-fonts.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-title-fonts.ts
+@@ -0,0 +1,54 @@
++import { onScopeDispose, ref } from 'vue'
++import { uniq } from 'es-toolkit'
++import { fontManager } from '@open-pencil/core/text'
++import type { Editor } from '@open-pencil/core/editor'
++
++/** Canvas labels are not TEXT nodes, so document-body font discovery cannot see them. */
++export function useLocalTitleFonts(editor: Editor) {
++  const titleFontsLoading = ref(false), titleFontsFailed = ref(false)
++  let disposed = false, queued = false, running = false, attempted = ''
++  let graph = editor.graph
++  const active = () => !disposed
++  function names() {
++    return uniq([...editor.graph.nodes.values()]
++      .filter(node => ['FRAME', 'SECTION', 'COMPONENT', 'COMPONENT_SET', 'INSTANCE'].includes(node.type))
++      .map(node => node.name)).sort().join('\n')
++  }
++  function schedule() {
++    if (queued || disposed) return
++    queued = true
++    queueMicrotask(() => { queued = false; void prepare() })
++  }
++  async function prepare() {
++    if (disposed || running) return
++    if (graph !== editor.graph) { graph = editor.graph; attempted = ''; titleFontsFailed.value = false }
++    const text = names(), target = graph
++    if (!text || text === attempted) return
++    attempted = text
++    const scripts: ('cjk' | 'arabic')[] = []
++    if (/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(text)) scripts.push('cjk')
++    if (/\p{Script=Arabic}/u.test(text)) scripts.push('arabic')
++    if (!scripts.length) { titleFontsFailed.value = false; return }
++    running = true; titleFontsLoading.value = true; titleFontsFailed.value = false
++    const current = () => !disposed && editor.graph === target && names() === text
++    try {
++      const loaded = await fontManager.ensureFallbackPack(scripts, text)
++      if (scripts.some(script => !loaded[script]?.length)) throw new Error('Title font unavailable')
++      if (current()) editor.requestRender()
++    } catch {
++      if (current()) titleFontsFailed.value = true
++    } finally {
++      running = false
++      if (active()) { titleFontsLoading.value = false; schedule() }
++    }
++  }
++  const stops = [
++    editor.onEditorEvent('node:created', schedule),
++    editor.onEditorEvent('node:deleted', schedule),
++    editor.onEditorEvent('node:updated', (_id, changes) => { if ('name' in changes) schedule() }),
++    editor.onEditorEvent('graph:replaced', schedule)
++  ]
++  onScopeDispose(() => { disposed = true; for (const stop of stops) stop() })
++  schedule()
++  return { titleFontsLoading, titleFontsFailed, retryTitleFonts: () => { attempted = ''; schedule() } }
++}

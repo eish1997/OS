@@ -1,0 +1,8 @@
+{
+  "file": "provider-utils-zod.LICENSE",
+  "url": "https://api.github.com/repos/vercel/ai/git/blobs/b3b48f8f4534527adca8cd26cd424ae94e69b983",
+  "gitBlob": "b3b48f8f4534527adca8cd26cd424ae94e69b983",
+  "sha256": "6dd0d97acd4d13f4608a0f530f0487e0ff20812888bd1803aecfaaa17ff0f849",
+  "ref": "@ai-sdk/provider-utils@5.0.53:packages/provider-utils/src/to-json-schema/zod3-to-json-schema/LICENSE",
+  "bytes": 777
+}

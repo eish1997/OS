@@ -1,0 +1,252 @@
+diff --git a/packages/vue/src/canvas/surface/render-loop.ts b/packages/vue/src/canvas/surface/render-loop.ts
+index 8de97b5..94a953d 100644
+--- a/packages/vue/src/canvas/surface/render-loop.ts
++++ b/packages/vue/src/canvas/surface/render-loop.ts
+@@ -1,5 +1,7 @@
+ import type { Editor, EditorState } from '@open-pencil/core/editor'
+ 
++import { getEditorFrameScheduler } from '#vue/shared/input/editor-frame'
++
+ import type { CanvasRenderLayer } from './types'
+ 
+ type RenderLoopOptions = {
+@@ -8,46 +10,6 @@ type RenderLoopOptions = {
+   shouldSuspendRender?: () => boolean
+ }
+ 
+-type EditorRenderScheduler = {
+-  schedule: (callback: () => void) => void
+-  cancel: (callback: () => void) => void
+-}
+-
+-const renderSchedulers = new WeakMap<Editor, EditorRenderScheduler>()
+-
+-function getRenderScheduler(editor: Editor): EditorRenderScheduler {
+-  const existing = renderSchedulers.get(editor)
+-  if (existing) return existing
+-
+-  let frameId: number | null = null
+-  const callbacks = new Set<() => void>()
+-
+-  function flush() {
+-    frameId = null
+-    const pending = [...callbacks]
+-    callbacks.clear()
+-    for (const callback of pending) callback()
+-  }
+-
+-  const scheduler = {
+-    schedule(callback: () => void) {
+-      callbacks.add(callback)
+-      if (frameId !== null) return
+-      frameId = requestAnimationFrame(flush)
+-    },
+-    cancel(callback: () => void) {
+-      callbacks.delete(callback)
+-      if (callbacks.size === 0 && frameId !== null) {
+-        cancelAnimationFrame(frameId)
+-        frameId = null
+-      }
+-    }
+-  }
+-
+-  renderSchedulers.set(editor, scheduler)
+-  return scheduler
+-}
+-
+ function shouldScheduleForSelection(layer: CanvasRenderLayer | undefined) {
+   return layer !== 'scene'
+ }
+@@ -58,7 +20,7 @@ export function createCanvasRenderLoop(
+   options: RenderLoopOptions = {}
+ ) {
+   const getRenderState = options.getRenderState ?? (() => editor.state)
+-  const scheduler = getRenderScheduler(editor)
++  const scheduler = getEditorFrameScheduler(editor)
+   let dirty = true
+   let frameScheduled = false
+   let lastRenderVersion = -1
+diff --git a/packages/vue/src/shared/input/wheel.ts b/packages/vue/src/shared/input/wheel.ts
+index 45cedf1..5e5eb3d 100644
+--- a/packages/vue/src/shared/input/wheel.ts
++++ b/packages/vue/src/shared/input/wheel.ts
+@@ -4,7 +4,7 @@ import { onScopeDispose, type Ref } from 'vue'
+ import type { Editor } from '@open-pencil/core/editor'
+ import { emitNavigationTrace } from '@open-pencil/core/profiler'
+ 
+-import { createRafScheduler } from '#vue/shared/input/raf-scheduler'
++import { getEditorFrameScheduler } from '#vue/shared/input/editor-frame'
+ 
+ const WHEEL_DELTA_LINE = 1
+ const WHEEL_DELTA_PAGE = 2
+@@ -209,7 +209,7 @@ export function setupWheelPanZoom(canvasRef: Ref<HTMLCanvasElement | null>, edit
+     scheduleSettle()
+   }
+ 
+-  const wheelScheduler = createRafScheduler(flushWheel)
++  const wheelScheduler = getEditorFrameScheduler(editor)
+ 
+   function onWheel(event: WheelEvent) {
+     const canvas = canvasRef.value
+@@ -240,7 +240,7 @@ export function setupWheelPanZoom(canvasRef: Ref<HTMLCanvasElement | null>, edit
+       wheelAccum.deltaX -= step.dx
+       wheelAccum.deltaY -= step.dy
+     }
+-    wheelScheduler.schedule()
++    wheelScheduler.scheduleInput(flushWheel)
+   }
+ 
+   useEventListener(
+@@ -254,6 +254,7 @@ export function setupWheelPanZoom(canvasRef: Ref<HTMLCanvasElement | null>, edit
+   )
+ 
+   onScopeDispose(() => {
++    wheelScheduler.cancel(flushWheel)
+     if (settleTimer !== null) clearTimeout(settleTimer)
+   })
+ }
+diff --git a/tests/engine/vue/canvas/render-loop.test.ts b/tests/engine/vue/canvas/render-loop.test.ts
+index 762e692..c144b6d 100644
+--- a/tests/engine/vue/canvas/render-loop.test.ts
++++ b/tests/engine/vue/canvas/render-loop.test.ts
+@@ -2,6 +2,8 @@ import { describe, expect, test } from 'bun:test'
+ 
+ import type { Editor, EditorEvents } from '@open-pencil/core/editor'
+ 
++import { getEditorFrameScheduler } from '#vue/shared/input/editor-frame'
++
+ import { createCanvasRenderLoop } from '#vue/canvas/surface/render-loop'
+ 
+ type EditorEventName = keyof EditorEvents
+@@ -308,3 +310,58 @@ describe('canvas render loop', () => {
+     }
+   })
+ })
++
++
++describe('input and render frame ordering', () => {
++  test('coalesces input and renders all surfaces in the same frame', () => {
++    const raf = createFrameScheduler()
++    try {
++      const { editor, emit } = createEditor()
++      const order: string[] = []
++      createCanvasRenderLoop(editor, () => { order.push('scene') })
++      createCanvasRenderLoop(editor, () => { order.push('overlay') })
++      const scheduler = getEditorFrameScheduler(editor)
++      const input = () => { order.push('input'); emit('viewport:changed') }
++      scheduler.scheduleInput(input)
++      scheduler.scheduleInput(input)
++      raf.flush()
++      expect(order).toEqual(['input', 'scene', 'overlay'])
++      expect(raf.pendingCount).toBe(0)
++    } finally { raf.restore() }
++  })
++
++  test('applies input before an already scheduled render and cancels disposed input', () => {
++    const raf = createFrameScheduler()
++    try {
++      const { editor, emit } = createEditor()
++      const order: string[] = []
++      createCanvasRenderLoop(editor, () => { order.push('render') })
++      emit('repaint:requested')
++      const scheduler = getEditorFrameScheduler(editor)
++      const canceled = () => { order.push('canceled') }
++      scheduler.scheduleInput(canceled)
++      scheduler.cancel(canceled)
++      scheduler.scheduleInput(() => { order.push('input') })
++      raf.flush()
++      expect(order).toEqual(['input', 'render'])
++      expect(raf.pendingCount).toBe(0)
++    } finally { raf.restore() }
++  })
++
++  test('defers work requested during rendering without losing it or spinning', () => {
++    const raf = createFrameScheduler()
++    try {
++      const { editor } = createEditor()
++      const scheduler = getEditorFrameScheduler(editor)
++      const order: string[] = []
++      const input = () => { order.push('input') }
++      scheduler.schedule(() => { order.push('render'); scheduler.scheduleInput(input) })
++      raf.flush()
++      expect(order).toEqual(['render'])
++      expect(raf.pendingCount).toBe(1)
++      raf.flush()
++      expect(order).toEqual(['render', 'input'])
++      expect(raf.pendingCount).toBe(0)
++    } finally { raf.restore() }
++  })
++})
+diff --git a/packages/vue/src/shared/input/editor-frame.ts b/packages/vue/src/shared/input/editor-frame.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/vue/src/shared/input/editor-frame.ts
+@@ -0,0 +1,68 @@
++import type { Editor } from '@open-pencil/core/editor'
++
++type FrameCallback = () => void
++
++const schedulers = new WeakMap<Editor, ReturnType<typeof createEditorFrameScheduler>>()
++
++function createEditorFrameScheduler() {
++  const inputs = new Set<FrameCallback>()
++  const renders = new Set<FrameCallback>()
++  let frameId: number | null = null
++  let flushing = false
++
++  function ensureFrame() {
++    if (flushing || frameId !== null || (inputs.size === 0 && renders.size === 0)) return
++    frameId = requestAnimationFrame(flush)
++  }
++
++  function drain(callbacks: Set<FrameCallback>) {
++    // Snapshot so callbacks requeued during this phase wait for the next frame.
++    const pending = [...callbacks]
++    for (const callback of pending) {
++      if (!callbacks.delete(callback)) continue
++      callback()
++    }
++  }
++
++  function flush() {
++    frameId = null
++    flushing = true
++    try {
++      // Apply coalesced input before taking the render snapshot. A viewport change
++      // can therefore request its render in this frame instead of the next one.
++      drain(inputs)
++      drain(renders)
++    } finally {
++      flushing = false
++      ensureFrame()
++    }
++  }
++
++  return {
++    schedule(callback: FrameCallback) {
++      renders.add(callback)
++      ensureFrame()
++    },
++    scheduleInput(callback: FrameCallback) {
++      inputs.add(callback)
++      ensureFrame()
++    },
++    cancel(callback: FrameCallback) {
++      inputs.delete(callback)
++      renders.delete(callback)
++      if (!flushing && inputs.size === 0 && renders.size === 0 && frameId !== null) {
++        cancelAnimationFrame(frameId)
++        frameId = null
++      }
++    }
++  }
++}
++
++export function getEditorFrameScheduler(editor: Editor) {
++  let scheduler = schedulers.get(editor)
++  if (!scheduler) {
++    scheduler = createEditorFrameScheduler()
++    schedulers.set(editor, scheduler)
++  }
++  return scheduler
++}

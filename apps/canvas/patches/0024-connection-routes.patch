@@ -1,0 +1,168 @@
+diff --git a/src/app/document/local-connection-data.ts b/src/app/document/local-connection-data.ts
+--- a/src/app/document/local-connection-data.ts
++++ b/src/app/document/local-connection-data.ts
+@@ -4,7 +4,9 @@
+ export const key = 'os.canvas/connection'
+ export const anchorSides = ['top', 'right', 'bottom', 'left'] as const
+ export type AnchorSide = typeof anchorSides[number]
+-type Connection = { version: 1; source: string; target: string; sourceAnchor?: AnchorSide; targetAnchor?: AnchorSide }
++export const connectionRoutes = ['straight', 'elbow', 'curve'] as const
++export type ConnectionRoute = typeof connectionRoutes[number]
++export type Connection = { version: 1; source: string; target: string; sourceAnchor?: AnchorSide; targetAnchor?: AnchorSide; route?: ConnectionRoute }
+ 
+ export function anchorPoint(node: SceneNode, requested: AnchorSide | undefined, fallback: AnchorSide = 'right'): [number, number] {
+   const side = requested ?? fallback
+@@ -25,6 +27,7 @@
+       for (const [field, anchor] of Object.entries(value)) {
+         if (['sourceAnchor', 'targetAnchor'].includes(field) && !anchorSides.some(side => side === anchor)) return undefined
+       }
++      if ('route' in value && !connectionRoutes.some(route => route === value.route)) return undefined
+       return value as Connection
+     }
+   } catch { console.warn('关系连接元数据无法解析，原数据已保留。') }
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+--- a/src/app/document/local-connections.ts
++++ b/src/app/document/local-connections.ts
+@@ -2,6 +2,7 @@
+ import type { Editor } from '@open-pencil/core/editor'
+ import { getWorldMatrix, getParentWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+ import Matrix from '@open-pencil/scene-graph/matrix'
++import { connectionNetwork, sameConnectionNetwork } from './local-connection-route'
+ import { localNodeId } from './local-identity'
+ import { pluginId, key, relation, anchorPoint } from './local-connection-data'
+ 
+@@ -35,15 +36,12 @@
+         const points = Matrix.mapPoints(inverse, [...from, ...to])
+         const x = Math.min(points[0], points[2]), y = Math.min(points[1], points[3])
+         const width = Math.abs(points[2] - points[0]), height = Math.abs(points[3] - points[1])
+-        const vertices = [{ x: points[0] - x, y: points[1] - y }, { x: points[2] - x, y: points[3] - y }]
+-        const old = line.vectorNetwork?.vertices
++        const vectorNetwork = connectionNetwork([points[0] - x, points[1] - y, points[2] - x, points[3] - y], link.route)
+         if (Math.abs(line.x - x) < 0.00001 && Math.abs(line.y - y) < 0.00001 &&
+           Math.abs(line.width - width) < 0.00001 && Math.abs(line.height - height) < 0.00001 &&
+-          line.rotation === 0 && !line.flipX && !line.flipY && old?.length === 2 && vertices.every((v, i) =>
+-            Math.abs(v.x - old[i].x) < 0.00001 && Math.abs(v.y - old[i].y) < 0.00001)) continue
++          line.rotation === 0 && !line.flipX && !line.flipY && sameConnectionNetwork(line, vectorNetwork)) continue
+         editor.graph.updateNode(line.id, { x, y, width, height, rotation: 0, flipX: false, flipY: false,
+-          vectorNetwork: { vertices, segments: [{ start: 0, end: 1,
+-            tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }], regions: [] } })
++          vectorNetwork })
+       }
+       missing.value = absent
+     } finally { updating = false }
+diff --git a/src/app/document/local-connection-edit.ts b/src/app/document/local-connection-edit.ts
+--- a/src/app/document/local-connection-edit.ts
++++ b/src/app/document/local-connection-edit.ts
+@@ -1,7 +1,7 @@
+ import { computed } from 'vue'
+ import type { Editor } from '@open-pencil/core/editor'
+ import { key, pluginId, relation } from './local-connection-data'
+-import type { AnchorSide } from './local-connection-data'
++import type { AnchorSide, Connection, ConnectionRoute } from './local-connection-data'
+ 
+ export function useConnectionEdit(editor: Editor) {
+   const selected = computed(() => {
+@@ -11,24 +11,32 @@
+     const link = node && relation(node)
+     return node && link ? { id: node.id, locked: node.locked, link } : undefined
+   })
+-  function setAnchor(endpoint: 'source' | 'target', side: AnchorSide, targetId?: string) {
++  function change(patch: Partial<Connection>) {
+     const current = selected.value
+     if (!current || current.locked) return
+     const node = editor.graph.getNode(current.id)
+     if (!node) return
+-    const field = endpoint === 'source' ? 'sourceAnchor' : 'targetAnchor'
+-    if ((current.link[field] ?? (endpoint === 'source' ? 'right' : 'left')) === side &&
+-      (!targetId || targetId === current.link[endpoint])) return
+     const before = node.pluginData
+     const after = before.map(item => item.pluginId === pluginId && item.key === key
+-      ? { ...item, value: JSON.stringify({ ...current.link, [field]: side, [endpoint]: targetId ?? current.link[endpoint] }) } : item)
++      ? { ...item, value: JSON.stringify({ ...current.link, ...patch }) } : item)
+     const apply = (data: typeof before) => {
+       if (!editor.graph.getNode(current.id)) return
+       editor.graph.updateNode(current.id, { pluginData: data })
+       editor.requestRender()
+     }
+     apply(after)
+-    editor.undo.push({ label: 'Change connection anchor', forward: () => apply(after), inverse: () => apply(before) })
++    editor.undo.push({ label: 'Change connection', forward: () => apply(after), inverse: () => apply(before) })
+   }
+-  return { selected, setAnchor }
++  function setAnchor(endpoint: 'source' | 'target', side: AnchorSide, targetId?: string) {
++    const current = selected.value
++    if (!current) return
++    const field = endpoint === 'source' ? 'sourceAnchor' : 'targetAnchor'
++    if ((current.link[field] ?? (endpoint === 'source' ? 'right' : 'left')) === side &&
++      (!targetId || targetId === current.link[endpoint])) return
++    change({ [field]: side, [endpoint]: targetId ?? current.link[endpoint] })
++  }
++  function setRoute(route: ConnectionRoute) {
++    if ((selected.value?.link.route ?? 'straight') !== route) change({ route })
++  }
++  return { selected, setAnchor, setRoute }
+ }
+diff --git a/src/app/document/local-connection-route.ts b/src/app/document/local-connection-route.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connection-route.ts
+@@ -0,0 +1,30 @@
++import type { SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
++import type { ConnectionRoute } from './local-connection-data'
++
++/** A midpoint route in the connector parent's coordinates; no obstacle routing yet. */
++export function connectionNetwork(points: number[], route: ConnectionRoute = 'straight'): VectorNetwork {
++  const [x1, y1, x2, y2] = points
++  const start = { x: x1, y: y1 }, end = { x: x2, y: y2 }
++  const middle = (x1 + x2) / 2
++  const vertices = route === 'elbow' ? [start, { x: middle, y: y1 }, { x: middle, y: y2 }, end] : [start, end]
++  const segments = vertices.slice(1).map((_, i) => ({ start: i, end: i + 1,
++    tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }))
++  if (route === 'curve') {
++    segments[0].tangentStart = { x: middle - x1, y: 0 }
++    segments[0].tangentEnd = { x: middle - x2, y: 0 }
++  }
++  return { vertices, segments, regions: [] }
++}
++
++const near = (a: number, b: number) => Math.abs(a - b) < 0.00001
++export function sameConnectionNetwork(node: SceneNode, network: VectorNetwork) {
++  const old = node.vectorNetwork
++  if (!old || old.vertices.length !== network.vertices.length || old.segments.length !== network.segments.length) return false
++  if (!network.vertices.every((v, i) => near(v.x, old.vertices[i].x) && near(v.y, old.vertices[i].y))) return false
++  return network.segments.every((s, i) => {
++    const previous = old.segments[i]
++    return s.start === previous.start && s.end === previous.end &&
++      near(s.tangentStart.x, previous.tangentStart.x) && near(s.tangentStart.y, previous.tangentStart.y) &&
++      near(s.tangentEnd.x, previous.tangentEnd.x) && near(s.tangentEnd.y, previous.tangentEnd.y)
++  })
++}
+diff --git a/src/components/editor/LocalConnectionPanel.vue b/src/components/editor/LocalConnectionPanel.vue
+--- a/src/components/editor/LocalConnectionPanel.vue
++++ b/src/components/editor/LocalConnectionPanel.vue
+@@ -1,16 +1,23 @@
+ <script setup lang="ts">
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useConnectionEdit } from '@/app/document/local-connection-edit'
+-import { anchorSides } from '@/app/document/local-connection-data'
++import { anchorSides, connectionRoutes } from '@/app/document/local-connection-data'
+ import AppButton from '@/components/ui/button/AppButton.vue'
+ 
+-const { selected, setAnchor } = useConnectionEdit(useEditorStore())
++const { selected, setAnchor, setRoute } = useConnectionEdit(useEditorStore())
++const routeLabels = { straight: '直线', elbow: '折线', curve: '曲线' }
+ const labels = { top: '上', right: '右', bottom: '下', left: '左' }
+ const endpoints = ['source', 'target'] as const
+ </script>
+ 
+ <template>
+   <section v-if="selected" aria-label="连接锚点" class="border-b border-border p-3 text-xs">
++    <div class="mb-2 flex gap-1">
++      <AppButton v-for="route in connectionRoutes" :key="route" :disabled="selected.locked"
++        class="aria-pressed:bg-accent aria-pressed:text-on-accent"
++        :aria-pressed="(selected.link.route ?? 'straight') === route"
++        @click="setRoute(route)">{{ routeLabels[route] }}</AppButton>
++    </div>
+     <p class="mb-2">连接位置</p>
+     <div v-for="endpoint in endpoints" :key="endpoint" class="mb-1 flex items-center gap-1">
+       <span>{{ endpoint === 'source' ? '起点' : '终点' }}</span>

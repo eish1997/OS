@@ -1,0 +1,17 @@
+diff --git a/src/app/shell/keyboard/registry.ts b/src/app/shell/keyboard/registry.ts
+--- a/src/app/shell/keyboard/registry.ts
++++ b/src/app/shell/keyboard/registry.ts
+@@ -168,7 +168,12 @@
+       'selection.toggleVisibility',
+       'selection.toggleLock',
+       'selection.flipHorizontal',
+-      'selection.flipVertical'
++      'selection.flipVertical',
++      'selection.booleanUnion',
++      'selection.booleanSubtract',
++      'selection.booleanIntersect',
++      'selection.booleanExclude',
++      'selection.flatten'
+     ),
+     {
+       id: 'export-selection-png',

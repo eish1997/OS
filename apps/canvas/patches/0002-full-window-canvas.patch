@@ -1,0 +1,2944 @@
+diff --git a/desktop/Cargo.lock b/desktop/Cargo.lock
+index 26e9d05..b4472a8 100644
+--- a/desktop/Cargo.lock
++++ b/desktop/Cargo.lock
+@@ -3258,6 +3258,7 @@ version = "0.16.0"
+ dependencies = [
+  "fix-path-env",
+  "fontique",
++ "getrandom 0.3.4",
+  "keyring",
+  "objc2-core-foundation",
+  "objc2-core-text",
+diff --git a/desktop/Cargo.toml b/desktop/Cargo.toml
+index cfaf7f1..42590f2 100644
+--- a/desktop/Cargo.toml
++++ b/desktop/Cargo.toml
+@@ -23,6 +23,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
+ tauri-build = { version = "2", features = [] }
+ 
+ [dependencies]
++getrandom = "0.3.4"
+ tauri = { version = "2", features = ["devtools"] }
+ tauri-plugin-opener = "2"
+ serde = { version = "1", features = ["derive"] }
+diff --git a/desktop/src/lib.rs b/desktop/src/lib.rs
+index 8071484..83dac47 100644
+--- a/desktop/src/lib.rs
++++ b/desktop/src/lib.rs
+@@ -1,3 +1,4 @@
++mod os_workspace;
+ mod agents;
+ mod credentials;
+ mod deep_link;
+@@ -337,7 +338,8 @@ pub fn run() {
+     let _ = fix_path_env::fix();
+     augment_mcp_path();
+ 
+-    let mut builder = tauri::Builder::default();
++    let mut builder = tauri::Builder::default()
++        .register_asynchronous_uri_scheme_protocol("osworkspace", os_workspace::protocol);
+ 
+     #[cfg(feature = "native-test")]
+     {
+@@ -397,6 +399,7 @@ pub fn run() {
+             handle_menu_event(app, event.id().0.as_str());
+         })
+         .setup(|app| {
++            os_workspace::setup(app)?;
+             queue_open_paths(app.handle(), startup_open_paths());
+ 
+             use tauri_plugin_deep_link::DeepLinkExt;
+diff --git a/desktop/src/os_workspace.rs b/desktop/src/os_workspace.rs
+new file mode 100644
+index 0000000..84c935f
+--- /dev/null
++++ b/desktop/src/os_workspace.rs
+@@ -0,0 +1,152 @@
++use std::{
++    io::{BufRead, BufReader, Read, Write},
++    path::PathBuf,
++    process::{Child, ChildStdin, Command, Stdio},
++    sync::{mpsc, Arc, Mutex},
++    time::Duration,
++};
++use tauri::{http::{Request, Response}, Manager};
++
++const LIMIT: usize = 350 * 1024 * 1024;
++#[cfg(windows)]
++const ORIGIN: &str = "http://tauri.localhost";
++#[cfg(not(windows))]
++const ORIGIN: &str = "tauri://localhost";
++
++struct OwnedChild { child: Child, input: Option<ChildStdin> }
++impl Drop for OwnedChild {
++    fn drop(&mut self) {
++        self.input.take();
++        for _ in 0..20 {
++            if matches!(self.child.try_wait(), Ok(Some(_))) { return; }
++            std::thread::sleep(Duration::from_millis(50));
++        }
++        let _ = self.child.kill();
++        let _ = self.child.wait();
++    }
++}
++
++pub struct Workspace {
++    _child: Mutex<OwnedChild>,
++    url: String,
++    token: String,
++    client: reqwest::Client,
++}
++
++pub fn setup(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
++    let resources = if cfg!(debug_assertions) {
++        std::env::var_os("OS_CANVAS_RESOURCE_DIR").map(PathBuf::from)
++    } else {
++        Some(app.path().resource_dir()?.join("canvas"))
++    };
++    let Some(resources) = resources else { return Ok(()); };
++    let directory = if cfg!(debug_assertions) {
++        std::env::var_os("OS_CANVAS_DATA_DIR").map(PathBuf::from)
++            .ok_or("Desktop development requires an independent OS_CANVAS_DATA_DIR")?
++    } else { app.path().app_local_data_dir()?.join("canvas") };
++    let mut secret = [0u8; 32];
++    getrandom::fill(&mut secret).map_err(|_| "Cannot generate service credentials")?;
++    let token = secret.iter().map(|byte| format!("{byte:02x}")).collect::<String>();
++    // Tauri canonicalizes Windows paths to \\?\ form. Node's main-script resolver
++    // rejects that form; a file URL preserves Unicode/UNC paths without shell code.
++    let service_url = url::Url::from_file_path(resources.join("service/desktop-service.mjs"))
++        .map_err(|_| "Invalid workspace service file path")?;
++    let mut command = Command::new(resources.join("runtime/node.exe"));
++    command.args(["--input-type=module", "--eval", "import(process.argv[1])", service_url.as_str()])
++        .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
++    // Prevent inherited Node options from injecting code into this trusted process.
++    command.env_remove("NODE_OPTIONS").env_remove("NODE_PATH");
++    #[cfg(windows)] {
++        use std::os::windows::process::CommandExt;
++        command.creation_flags(0x08000000);
++    }
++    let mut child = command.spawn()?;
++    let stderr = child.stderr.take().ok_or("Service stderr unavailable")?;
++    let (error_sender, error_receiver) = mpsc::channel();
++    std::thread::spawn(move || {
++        let mut text = String::new();
++        let _ = stderr.take(8192).read_to_string(&mut text);
++        let _ = error_sender.send(text);
++    });
++    let stdout = child.stdout.take().ok_or("Service stdout unavailable")?;
++    let input = child.stdin.take();
++    let mut owned = OwnedChild { child, input };
++    let config = serde_json::json!({ "directory": directory, "token": token, "origin": ORIGIN });
++    writeln!(owned.input.as_mut().ok_or("Service stdin unavailable")?, "{config}")?;
++    let (sender, receiver) = mpsc::channel();
++    std::thread::spawn(move || {
++        let mut reader = BufReader::new(stdout);
++        let mut line = Vec::new();
++        // Bounded readiness message, never read arbitrary service output into memory.
++        let result = std::io::Read::take(&mut reader, 4096).read_until(b'\n', &mut line)
++            .map(|_| line);
++        let _ = sender.send(result);
++    });
++    let line = receiver.recv_timeout(Duration::from_secs(15))??;
++    if line.is_empty() {
++        let details = error_receiver.recv_timeout(Duration::from_secs(1)).unwrap_or_default();
++        return Err(format!("Workspace service exited before ready: {}", details.replace(&token, "[redacted]")).into());
++    }
++    let ready: serde_json::Value = serde_json::from_slice(&line)?;
++    if ready["type"] != "ready" || ready["protocolVersion"] != 1 { return Err("Invalid service readiness".into()); }
++    let url = ready["url"].as_str().ok_or("Missing service URL")?;
++    let parsed = url::Url::parse(url)?;
++    if parsed.scheme() != "http" || parsed.host_str() != Some("127.0.0.1") ||
++        parsed.port().is_none() || parsed.path() != "/" || parsed.query().is_some() ||
++        parsed.fragment().is_some() || !parsed.username().is_empty() || parsed.password().is_some() {
++        return Err("Invalid service address".into());
++    }
++    let client = reqwest::Client::builder().no_proxy()
++        .redirect(reqwest::redirect::Policy::none()).timeout(Duration::from_secs(60)).build()?;
++    app.manage(Arc::new(Workspace { _child: Mutex::new(owned), url: url.to_string(), token, client }));
++    Ok(())
++}
++
++fn response(status: u16, body: Vec<u8>, content_type: &str) -> Response<Vec<u8>> {
++    Response::builder().status(status)
++        .header("Access-Control-Allow-Origin", ORIGIN)
++        .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
++        .header("Access-Control-Allow-Headers", "Content-Type, X-OS-Workspace")
++        .header("Cache-Control", "no-store").header("Content-Type", content_type)
++        .body(body).expect("fixed response headers")
++}
++
++async fn forward(workspace: Arc<Workspace>, request: Request<Vec<u8>>) -> Result<Response<Vec<u8>>, reqwest::Error> {
++    let path = request.uri().path_and_query().map(|value| value.as_str()).unwrap_or("/");
++    let suffix = &path["/os-workspace".len()..];
++    let content_type = request.headers().get("Content-Type").and_then(|v| v.to_str().ok()).unwrap_or("application/json").to_string();
++    let mut upstream = workspace.client.request(request.method().clone(), format!("{}{suffix}", workspace.url))
++        .bearer_auth(&workspace.token).header("Origin", ORIGIN).header("Content-Type", content_type)
++        .body(request.into_body()).send().await?;
++    let status = upstream.status().as_u16();
++    let mime = upstream.headers().get("Content-Type").and_then(|v| v.to_str().ok()).unwrap_or("application/json").to_string();
++    let mut bytes = Vec::new();
++    while let Some(chunk) = upstream.chunk().await? {
++        if bytes.len().saturating_add(chunk.len()) > LIMIT { return Ok(response(413, Vec::new(), "text/plain")); }
++        bytes.extend_from_slice(&chunk);
++    }
++    Ok(response(status, bytes, &mime))
++}
++
++pub fn protocol(context: tauri::UriSchemeContext<'_, tauri::Wry>, request: Request<Vec<u8>>, responder: tauri::UriSchemeResponder) {
++    let origin = request.headers().get("Origin").and_then(|value| value.to_str().ok());
++    let path = request.uri().path();
++    if context.webview_label() != "main" || origin != Some(ORIGIN) ||
++        !(path == "/os-workspace" || path.starts_with("/os-workspace/")) {
++        responder.respond(response(403, Vec::new(), "text/plain")); return;
++    }
++    if request.method() == "OPTIONS" { responder.respond(response(204, Vec::new(), "text/plain")); return; }
++    if !matches!(request.method().as_str(), "GET" | "POST") ||
++        request.headers().get("X-OS-Workspace").and_then(|v| v.to_str().ok()) != Some("1") {
++        responder.respond(response(403, Vec::new(), "text/plain")); return;
++    }
++    if request.body().len() > LIMIT { responder.respond(response(413, Vec::new(), "text/plain")); return; }
++    let Some(state) = context.app_handle().try_state::<Arc<Workspace>>() else {
++        responder.respond(response(503, Vec::new(), "text/plain")); return;
++    };
++    let workspace = Arc::clone(state.inner());
++    tauri::async_runtime::spawn(async move {
++        let result = forward(workspace, request).await.unwrap_or_else(|_| response(503, Vec::new(), "text/plain"));
++        responder.respond(result);
++    });
++}
+diff --git a/packages/core/src/canvas/labels/cache.ts b/packages/core/src/canvas/labels/cache.ts
+index 32368dc..1aac36c 100644
+--- a/packages/core/src/canvas/labels/cache.ts
++++ b/packages/core/src/canvas/labels/cache.ts
+@@ -54,7 +54,7 @@ function collectVisibleLabels<
+   const geometry = createSceneGeometry(graph, preview)
+   for (const cached of cachedItems) {
+     const node = graph.getNode(cached.nodeId)
+-    if (!node) continue
++    if (!node || graph.isViewHidden(node.id)) continue
+     const bounds = geometry.bounds(node)
+     if (!isInViewport(bounds.x, bounds.y, bounds.width, bounds.height, viewport)) continue
+     const origin = geometry.toWorld(node, { x: 0, y: 0 })
+@@ -181,7 +181,7 @@ export class LabelCache {
+ 
+     for (const childId of parent.childIds) {
+       const child = graph.getNode(childId)
+-      if (!child || !child.visible) continue
++      if (!child || !child.visible || graph.isViewHidden(child.id)) continue
+ 
+       if (child.type === 'SECTION') {
+         const origin = graph.getAbsolutePosition(childId)
+diff --git a/packages/core/src/canvas/renderer.ts b/packages/core/src/canvas/renderer.ts
+index ef85274..ae607c7 100644
+--- a/packages/core/src/canvas/renderer.ts
++++ b/packages/core/src/canvas/renderer.ts
+@@ -154,6 +154,7 @@ export class SkiaRenderer {
+   renderingSceneBacking = false
+   scenePicture: SkPicture | null = null
+   scenePictureVersion = -1
++  viewVisibilityVersion = -1
+   scenePictureFontGeneration = -1
+   scenePicturePositionPreviewVersion = -1
+   scenePicturePageId: string | null = null
+diff --git a/packages/core/src/canvas/renderer/chunks/index.ts b/packages/core/src/canvas/renderer/chunks/index.ts
+index f987038..367a8cc 100644
+--- a/packages/core/src/canvas/renderer/chunks/index.ts
++++ b/packages/core/src/canvas/renderer/chunks/index.ts
+@@ -105,7 +105,7 @@ function countDescendants(graph: SceneGraph, nodeIds: string[]) {
+     const entry = stack.pop()
+     if (!entry) continue
+     const node = graph.getNode(entry.nodeId)
+-    if (!node?.visible) continue
++    if (!node?.visible || graph.isViewHidden(node.id)) continue
+     if (!entry.expanded) {
+       visited++
+       stack.push({ nodeId: entry.nodeId, expanded: true })
+@@ -127,7 +127,7 @@ function buildChunks(graph: SceneGraph, nodeIds: string[], counts: Map<string, n
+     const nodeId = stack.pop()
+     if (!nodeId) continue
+     const node = graph.getNode(nodeId)
+-    if (!node?.visible) continue
++    if (!node?.visible || graph.isViewHidden(node.id)) continue
+     const descendantCount = counts.get(nodeId) ?? 1
+     const split = shouldSplit(graph, node, descendantCount)
+     const kind: RenderChunkKind = split ? 'self' : 'subtree'
+diff --git a/packages/core/src/canvas/renderer/pipeline.ts b/packages/core/src/canvas/renderer/pipeline.ts
+index be35626..00bd16e 100644
+--- a/packages/core/src/canvas/renderer/pipeline.ts
++++ b/packages/core/src/canvas/renderer/pipeline.ts
+@@ -36,6 +36,13 @@ export function renderSceneToCanvas(
+ 
+ export type RenderLayer = 'full' | 'scene' | 'overlays'
+ 
++function updateViewVisibility(r: SkiaRenderer, graph: SceneGraph) {
++  if (r.viewVisibilityVersion === graph.viewVisibilityVersion) return
++  r.invalidateAllPictures()
++  r.labelCache.invalidate()
++  r.viewVisibilityVersion = graph.viewVisibilityVersion
++}
++
+ export function renderFromEditorState(
+   r: SkiaRenderer,
+   state: EditorState,
+@@ -49,6 +56,7 @@ export function renderFromEditorState(
+   interactive = false
+ ): void {
+   const previewMode = r.imagePreviews.enabled && needsImagePreviews(graph)
++  updateViewVisibility(r, graph)
+   if (
+     r.imageMemoryGraph !== graph ||
+     r.viewportImageRendering !== previewMode ||
+diff --git a/packages/core/src/canvas/renderer/retained-backing.ts b/packages/core/src/canvas/renderer/retained-backing.ts
+index 877e761..0919eb9 100644
+--- a/packages/core/src/canvas/renderer/retained-backing.ts
++++ b/packages/core/src/canvas/renderer/retained-backing.ts
+@@ -229,7 +229,7 @@ export function computeRetainedSubtreeBounds(
+     const nodeId = pending.pop()
+     if (!nodeId) continue
+     const node = graph.getNode(nodeId)
+-    if (!node?.visible) continue
++    if (!node?.visible || graph.isViewHidden(node.id)) continue
+ 
+     transformedBounds = unionVisualBounds(transformedBounds, worldNodeVisualBounds(graph, node))
+     pending.push(...node.childIds)
+diff --git a/packages/core/src/canvas/scene.ts b/packages/core/src/canvas/scene.ts
+index 237c509..d461b6c 100644
+--- a/packages/core/src/canvas/scene.ts
++++ b/packages/core/src/canvas/scene.ts
+@@ -338,7 +338,7 @@ export function renderNode(
+   hasTransformedAncestor = false
+ ): void {
+   const node = graph.getNode(nodeId)
+-  if (!node || !drawsNode(node, overlays)) return
++  if (!node || graph.isViewHidden(nodeId) || !drawsNode(node, overlays)) return
+ 
+   r._nodeCount++
+ 
+diff --git a/packages/core/src/editor/create.ts b/packages/core/src/editor/create.ts
+index d28364d..879be43 100644
+--- a/packages/core/src/editor/create.ts
++++ b/packages/core/src/editor/create.ts
+@@ -181,6 +181,7 @@ export function createEditor(options?: EditorOptions) {
+   }
+ 
+   function setSelectedIds(ids: Set<string>) {
++    ids = new Set([...ids].filter(id => !_graph.isViewHidden(id)))
+     const previous = [...state.selectedIds]
+     state.selectedIds = ids
+     if (ids.size === 0) state.measurementMode = 'off'
+diff --git a/packages/core/src/editor/selection/container.ts b/packages/core/src/editor/selection/container.ts
+index 1dceafd..895836f 100644
+--- a/packages/core/src/editor/selection/container.ts
++++ b/packages/core/src/editor/selection/container.ts
+@@ -2,7 +2,7 @@ import type { EditorContext } from '#core/editor/types'
+ 
+ export function createSelectionContainerActions(ctx: EditorContext) {
+   function validateEnteredContainer() {
+-    if (ctx.state.enteredContainerId && !ctx.graph.getNode(ctx.state.enteredContainerId)) {
++    if (ctx.state.enteredContainerId && (!ctx.graph.getNode(ctx.state.enteredContainerId) || ctx.graph.isViewHidden(ctx.state.enteredContainerId))) {
+       ctx.state.enteredContainerId = null
+     }
+   }
+diff --git a/packages/core/tests/editor/selection/view-filter.test.ts b/packages/core/tests/editor/selection/view-filter.test.ts
+new file mode 100644
+index 0000000..de0a0ad
+--- /dev/null
++++ b/packages/core/tests/editor/selection/view-filter.test.ts
+@@ -0,0 +1,39 @@
++import { expect, test } from 'bun:test'
++import { createEditor } from '@open-pencil/core/editor'
++import { extractExportGraph } from '@open-pencil/core/io'
++
++test('view exclusion protects descendant selection and hit targets without touching authored visibility', () => {
++  const editor = createEditor(), graph = editor.graph, page = editor.state.currentPageId
++  const back = graph.createNode('RECTANGLE', page, { x: 10, y: 10, width: 100, height: 100 })
++  const frame = graph.createNode('FRAME', page, { x: 10, y: 10, width: 100, height: 100 })
++  const child = graph.createNode('RECTANGLE', frame.id, { x: 0, y: 0, width: 80, height: 80,
++    fills: [{ type: 'SOLID', color: { r: 1, g: 0, b: 0, a: 1 }, opacity: 1, visible: true }] })
++  const before = JSON.stringify([...graph.nodes])
++  expect(graph.setViewHiddenNodes(new Set([frame.id]))).toBe(true)
++  expect(graph.setViewHiddenNodes(new Set([frame.id]))).toBe(false)
++  expect(graph.isViewHidden(child.id)).toBe(true)
++  expect(graph.hitTestDeep(30, 30, page)?.id).toBe(back.id)
++  editor.select([child.id])
++  expect(editor.state.selectedIds.size).toBe(0)
++  editor.selectAll()
++  expect([...editor.state.selectedIds]).toEqual([back.id])
++  editor.enterContainer(frame.id)
++  editor.validateEnteredContainer()
++  expect(editor.state.enteredContainerId).toBeNull()
++  expect(JSON.stringify([...graph.nodes])).toBe(before)
++  graph.setViewHiddenNodes(new Set())
++  expect(graph.hitTestDeep(30, 30, page)?.id).toBe(child.id)
++  editor.select([child.id])
++  expect([...editor.state.selectedIds]).toEqual([child.id])
++  expect(JSON.stringify([...graph.nodes])).toBe(before)
++})
++
++test('exports retain filtered-out content and do not inherit the transient view', () => {
++  const editor = createEditor(), graph = editor.graph
++  const node = graph.createNode('RECTANGLE', editor.state.currentPageId, { name: 'Retained artwork', width: 60, height: 30 })
++  graph.setViewHiddenNodes(new Set([node.id]))
++  const exported = extractExportGraph(graph, { scope: 'document' })
++  expect(exported.graph.getNode(node.id)?.name).toBe('Retained artwork')
++  expect(exported.graph.isViewHidden(node.id)).toBe(false)
++  expect(graph.isViewHidden(node.id)).toBe(true)
++})
+diff --git a/packages/scene-graph/src/hit-test.ts b/packages/scene-graph/src/hit-test.ts
+index 0543c83..ab1d0c0 100644
+--- a/packages/scene-graph/src/hit-test.ts
++++ b/packages/scene-graph/src/hit-test.ts
+@@ -150,7 +150,7 @@ function hitTestChildren(
+   for (let i = parent.childIds.length - 1; i >= 0; i--) {
+     const childId = parent.childIds[i]
+     const child = graph.nodes.get(childId)
+-    if (!child || child.internalOnly || !child.visible) continue
++    if (!child || child.internalOnly || !child.visible || graph.isViewHidden(child.id)) continue
+     if (CONTAINER_TYPES.has(child.type)) {
+       if (OPAQUE_CONTAINER_TYPES.has(child.type) && !deep) {
+         const hit = hitTestOpaqueContainer(graph, px, py, child, childId, deep, transformCache, pad)
+@@ -224,7 +224,7 @@ function frameChildAt(
+   const transformCache = new Map<string, boolean>()
+   for (let i = container.childIds.length - 1; i >= 0; i--) {
+     const child = graph.nodes.get(container.childIds[i])
+-    if (!child || child.internalOnly || !child.visible || child.type !== 'FRAME') continue
++    if (!child || child.internalOnly || !child.visible || graph.isViewHidden(child.id) || child.type !== 'FRAME') continue
+     // A board, such as a top-level frame in a section, keeps its empty area as background.
+     if (opensByItself(graph, child) && !ownsItsEmptyArea(graph, child)) continue
+     if (containsPoint(px, py, child, graph, transformCache)) return child
+@@ -381,7 +381,7 @@ function dropTargetIn(
+     const childId = parent.childIds[i]
+     if (excludeIds.has(childId)) continue
+     const child = graph.nodes.get(childId)
+-    if (!child || child.internalOnly || !child.visible || child.locked) continue
++    if (!child || child.internalOnly || !child.visible || graph.isViewHidden(child.id) || child.locked) continue
+     const target = rules.takes(child)
+     if (!target && !rules.passThrough.has(child.type)) continue
+ 
+diff --git a/packages/scene-graph/src/index.ts b/packages/scene-graph/src/index.ts
+index 84e2b3d..a74a2f8 100644
+--- a/packages/scene-graph/src/index.ts
++++ b/packages/scene-graph/src/index.ts
+@@ -185,6 +185,20 @@ export { captureGraphCheckpoint } from './checkpoint'
+ 
+ export class SceneGraph {
+   nodes = new Map<string, SceneNode>()
++  // Per-view exclusion is transient: never written to nodes, files, or history.
++  private viewHiddenNodes = new Set<string>()
++  viewVisibilityVersion = 0
++
++  setViewHiddenNodes(ids: ReadonlySet<string>): boolean {
++    if (ids.size === this.viewHiddenNodes.size && [...ids].every(id => this.viewHiddenNodes.has(id))) return false
++    this.viewHiddenNodes = new Set(ids)
++    this.viewVisibilityVersion++
++    return true
++  }
++
++  isViewHidden(id: string): boolean {
++    return this.viewHiddenNodes.size > 0 && Boolean(this.closest(id, node => this.viewHiddenNodes.has(node.id)))
++  }
+   images = new Map<string, Uint8Array>()
+   variables = new Map<string, Variable>()
+   variableCollections = new Map<string, VariableCollection>()
+diff --git a/packages/vue/src/canvas/islands/Island.vue b/packages/vue/src/canvas/islands/Island.vue
+index 467bc2c..dd97b24 100644
+--- a/packages/vue/src/canvas/islands/Island.vue
++++ b/packages/vue/src/canvas/islands/Island.vue
+@@ -38,7 +38,7 @@ const controls = computed(() => {
+ const roles = computed(() => controlRoles(controls.value))
+ const state = shallowRef(createIslandState(controls.value))
+ watch(
+-  () => [rootId, revision, [...controls.value.keys()].join('\n')],
++  [() => rootId, () => revision, () => [...controls.value.keys()].join('\n')],
+   () => (state.value = createIslandState(controls.value))
+ )
+ 
+diff --git a/packages/vue/src/canvas/islands/IslandLayer.vue b/packages/vue/src/canvas/islands/IslandLayer.vue
+index f302a65..195b782 100644
+--- a/packages/vue/src/canvas/islands/IslandLayer.vue
++++ b/packages/vue/src/canvas/islands/IslandLayer.vue
+@@ -47,6 +47,7 @@ const islands = computed(() => {
+   if (!view.play) return []
+   return playIslandRoots(editor.graph, view.currentPageId).map((id) => ({
+     id,
++    hidden: editor.graph.isViewHidden(id),
+     position: editor.graph.getAbsolutePosition(id)
+   }))
+ })
+@@ -74,6 +75,7 @@ function forwardWheel(event: WheelEvent) {
+       <Island
+         v-for="island in islands"
+         :key="island.id"
++        v-show="!island.hidden"
+         :root-id="island.id"
+         :revision="view.play.revision"
+         :tokens="tokens"
+diff --git a/packages/vue/src/shared/input/snap.ts b/packages/vue/src/shared/input/snap.ts
+index 448e7d1..5f02949 100644
+--- a/packages/vue/src/shared/input/snap.ts
++++ b/packages/vue/src/shared/input/snap.ts
+@@ -127,7 +127,7 @@ export function resolveObjectPixelSnap(
+     threshold
+   )
+   const objectSnap = editor.state.snappingPreferences.objects
+-    ? computeSnap(movingIds, movingBounds, targets, threshold)
++    ? computeSnap(movingIds, movingBounds, targets.filter(node => !editor.graph.isViewHidden(node.id)), threshold)
+     : { dx: 0, dy: 0, guides: [] }
+   const pixelSnap = editor.state.snappingPreferences.pixelGrid
+     ? computePixelGridSnap(movingBounds)
+diff --git a/packages/vue/tests/shared/input/snap-visibility.test.ts b/packages/vue/tests/shared/input/snap-visibility.test.ts
+new file mode 100644
+index 0000000..8cbeaa9
+--- /dev/null
++++ b/packages/vue/tests/shared/input/snap-visibility.test.ts
+@@ -0,0 +1,21 @@
++import { expect, test } from 'bun:test'
++import { createEditor } from '@open-pencil/core/editor'
++import { resolveObjectPixelSnap } from '#vue/shared/input/snap'
++
++test('filtered targets do not attract object snapping, while explicit canvas guides remain usable', () => {
++  const editor = createEditor(), graph = editor.graph
++  editor.state.snappingPreferences = { objects: true, geometry: false, pixelGrid: false }
++  const frame = graph.createNode('FRAME', editor.state.currentPageId)
++  const target = graph.createNode('RECTANGLE', frame.id, { x: 100, y: 100, width: 40, height: 40 })
++  const bounds = { x: 98, y: 20, width: 10, height: 10 }
++  const snap = () => resolveObjectPixelSnap(new Set(), bounds, [target], editor)
++  expect(snap().correction.x).toBe(2)
++  graph.setViewHiddenNodes(new Set([frame.id]))
++  expect(snap().correction).toEqual({ x: 0, y: 0 })
++  expect(snap().guides).toEqual([])
++  const explicit = resolveObjectPixelSnap(new Set(), bounds, [target], editor,
++    [{ kind: 'canvas-guide', axis: 'x', position: 99, from: -100, to: 200 }])
++  expect(explicit.correction.x).toBe(1)
++  graph.setViewHiddenNodes(new Set())
++  expect(snap().correction.x).toBe(2)
++})
+diff --git a/src/app/document/io/create.ts b/src/app/document/io/create.ts
+index 1140798..fd89717 100644
+--- a/src/app/document/io/create.ts
++++ b/src/app/document/io/create.ts
+@@ -95,6 +95,7 @@ export function createDocumentIOActions(
+     hasUnsavedChanges: sourceActions.hasUnsavedChanges,
+     markDocumentSaved: () => sourceActions.markDocumentSaved(),
+     saveFigFile: sourceActions.saveFigFile,
++    protectSavedRecovery: sourceActions.protectSavedRecovery,
+     saveFigFileAs: sourceActions.saveFigFileAs
+   }
+ }
+diff --git a/src/app/document/io/imported-document.ts b/src/app/document/io/imported-document.ts
+index 39472b0..d4863ad 100644
+--- a/src/app/document/io/imported-document.ts
++++ b/src/app/document/io/imported-document.ts
+@@ -7,7 +7,8 @@ import type { EditorPreparationHandle as DocumentLoadSession } from '@/app/edito
+ export async function applyImportedDocument(
+   editor: Editor,
+   imported: SceneGraph,
+-  load?: DocumentLoadSession
++  load?: DocumentLoadSession,
++  beforeCommit?: () => void
+ ) {
+   const firstPage = imported.getPages()[0] as SceneNode | undefined
+   const pageId = firstPage?.id ?? imported.rootId
+@@ -25,6 +26,7 @@ export async function applyImportedDocument(
+     load?.signal.throwIfAborted()
+     if (!prepared) throw new Error('Imported page preparation was superseded')
+ 
++    beforeCommit?.()
+     editor.replaceGraph(imported)
+     editor.undo.clear()
+     editor.clearSelection()
+diff --git a/src/app/document/io/source.ts b/src/app/document/io/source.ts
+index e086a3b..3b6cff5 100644
+--- a/src/app/document/io/source.ts
++++ b/src/app/document/io/source.ts
+@@ -16,6 +16,7 @@ import { recoveryEnabled } from '@/app/document/recovery/preferences'
+ import type { StorageDocumentBinding, StorageProviderID } from '@/app/integrations/storage/types'
+ import { createCanvasId } from '@/app/storage/id'
+ import { trackDocumentFormat } from '@/app/telemetry'
++import { appRuntimeConfig } from '@/app/runtime/config'
+ 
+ type DocumentSourceState = EditorState & {
+   documentName: string
+@@ -103,7 +104,7 @@ export function createDocumentSourceActions({
+     state,
+     version: changes.capture,
+     getSavedVersion,
+-    hasWritableSource: () => !!getFileHandle() || !!getFilePath() || !!getStorageBinding(),
++    hasWritableSource: () => !appRuntimeConfig.osCanvas && (!!getFileHandle() || !!getFilePath() || !!getStorageBinding()),
+     saveCurrentDocument: async (version) => {
+       const revision = changes.capture()
+       const data = await buildFigFile()
+@@ -242,6 +243,7 @@ export function createDocumentSourceActions({
+     saveFigFileAs: () => saveAndTrack(saveFigFileAs),
+     hasUnsavedChanges: changes.hasUnsavedChanges,
+     markDocumentSaved,
++    protectSavedRecovery: () => recovery.markProtectedVersion(changes.capture()),
+     getStorageBinding,
+     getRecoveryId: () => recovery.getRecoveryId(),
+     adoptRecoverySnapshot: (id: string) => {
+diff --git a/src/app/document/local-file-badges.ts b/src/app/document/local-file-badges.ts
+new file mode 100644
+index 0000000..f6e5d97
+--- /dev/null
++++ b/src/app/document/local-file-badges.ts
+@@ -0,0 +1,52 @@
++import { computed } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import type { ViewportTransform } from '@open-pencil/core/geometry'
++import type { SceneNode } from '@open-pencil/scene-graph'
++import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
++import Matrix from '@open-pencil/scene-graph/matrix'
++import { fileLinks } from '@/app/document/local-file-nodes'
++import { localNodeId } from '@/app/document/local-identity'
++
++function visibleAnchor(editor: Editor, node: SceneNode) {
++  const at = editor.graph.getAbsolutePosition(node.id)
++  let current: SceneNode | undefined = node
++  while (current && current.id !== editor.state.currentPageId) {
++    if (!current.visible || current.opacity === 0) return undefined
++    if (current.id !== node.id && current.clipsContent) {
++      const inverse = Matrix.invert(getWorldMatrix(current, editor.graph))
++      if (!inverse) return undefined
++      const [x, y] = Matrix.mapPoints(inverse, [at.x, at.y])
++      if (x < 0 || y < 0 || x > current.width || y > current.height) return undefined
++    }
++    current = current.parentId ? editor.graph.getNode(current.parentId) : undefined
++  }
++  return current ? at : undefined
++}
++
++export function useLocalFileBadges(editor: Editor, view: () => ViewportTransform, filterRevision: () => number) {
++  const anchors = computed(() => {
++    void editor.state.sceneVersion
++    void filterRevision()
++    const result = []
++    for (const node of editor.graph.nodes.values()) {
++      if (editor.graph.isViewHidden(node.id)) continue
++      const links = fileLinks(node)
++      if (!links.length) continue
++      const at = visibleAnchor(editor, node)
++      if (!at) continue
++      const missing = links.filter(link => link.availability === 'missing').length
++      const replaced = links.filter(link => link.availability === 'replaced').length
++      result.push({ id: node.id, uuid: localNodeId(node), at,
++        label: `本地 ${links.length}${missing ? ` · 缺失 ${missing}` : ''}${replaced ? ` · 待关联 ${replaced}` : ''}`,
++        description: `${node.name}：${links.map(link => `${link.path}（${({ available: '已关联', missing: '缺失', replaced: '待关联' })[link.availability]}）`).join('；')}`,
++        unavailable: missing + replaced > 0 })
++    }
++    return result
++  })
++  return computed(() => {
++    const viewport = view()
++    return anchors.value.map(badge => ({ ...badge,
++      x: badge.at.x * viewport.zoom + viewport.panX,
++      y: badge.at.y * viewport.zoom + viewport.panY }))
++  })
++}
+diff --git a/src/app/document/local-file-nodes.ts b/src/app/document/local-file-nodes.ts
+new file mode 100644
+index 0000000..9ca7d94
+--- /dev/null
++++ b/src/app/document/local-file-nodes.ts
+@@ -0,0 +1,168 @@
++import * as v from 'valibot'
++import { localNodeId } from '@/app/document/local-identity'
++import type { Editor } from '@open-pencil/core/editor'
++import type { SceneNode } from '@open-pencil/scene-graph'
++
++export const fileEntrySchema = v.object({ id: v.string(), mountId: v.string(), path: v.string(),
++  kind: v.picklist(['file', 'directory', 'link', 'other']), size: v.string(), revision: v.number(),
++  availability: v.picklist(['available', 'missing', 'replaced']),
++  outputOrigin: v.optional(v.object({ operationId: v.string(), canvasId: v.string(),
++    nodeId: v.string(), sourceRevision: v.number(),
++    snapshotHash: v.optional(v.string()), snapshotFormat: v.optional(v.picklist(['png', 'txt', 'unknown'])) })) })
++type FileEntry = v.InferOutput<typeof fileEntrySchema>
++const LINK_KEY = 'os.canvas/fileLink'
++const OUTPUTS_KEY = 'os.canvas/outputLinks'
++const LABEL_KEY = 'os.canvas/fileLabel'
++const annotation = (key: string, value: string) => ({ pluginId: 'os.canvas', key, value })
++
++export function attachOutputOrigins(editor: Editor, entries: FileEntry[], canvasId: string) {
++  const nodes = new Map([...editor.graph.nodes.values()].map(node => [localNodeId(node), node]))
++  for (const entry of entries) {
++    const origin = entry.outputOrigin
++    if (!origin || origin.canvasId !== canvasId || entry.availability !== 'available') continue
++    const node = nodes.get(origin.nodeId)
++    if (!node || node.type === 'CANVAS' || fileLinks(node).some(link => link.id === entry.id && link.mountId === entry.mountId)) continue
++    // Preserve the user's primary reference; additional exports belong to the
++    // same artwork and participate in scanning without creating separate cards.
++    if (fileLink(node)) writeOutputLinks(editor, node, [...outputLinks(node), entry])
++    else editor.graph.updateNode(node.id, { pluginData: [...node.pluginData,
++      annotation(LINK_KEY, JSON.stringify(entry))] })
++  }
++}
++
++function refreshFileLink(editor: Editor, node: SceneNode, entry: FileEntry) {
++  const primary = fileLink(node)
++  if (primary?.id !== entry.id || primary.mountId !== entry.mountId) {
++    const links = outputLinks(node)
++    const updated = links.map(link => link.id === entry.id && link.mountId === entry.mountId ? entry : link)
++    if (JSON.stringify(links) !== JSON.stringify(updated)) writeOutputLinks(editor, node, updated)
++    return
++  }
++  const payload = JSON.stringify(entry)
++  const existing = node.pluginData.find(item => item.key === LINK_KEY && item.pluginId === 'os.canvas')
++  const ownsLabels = editor.graph.getChildren(node.id).some(child => child.pluginData.some(
++    item => item.key === LABEL_KEY && item.pluginId === 'os.canvas'))
++  if (existing?.value === payload && (!ownsLabels || node.name === entry.path)) return
++  editor.graph.updateNode(node.id, {
++    ...(ownsLabels ? { name: entry.path } : {}),
++    pluginData: [...node.pluginData.filter(item => item.key !== LINK_KEY || item.pluginId !== 'os.canvas'),
++      annotation(LINK_KEY, payload)]
++  })
++}
++
++export function fileLink(node: SceneNode) {
++  const raw = node.pluginData.find(item => item.pluginId === 'os.canvas' && item.key === LINK_KEY)
++  if (!raw) return undefined
++  const parsed = v.safeParse(v.pipe(v.string(), v.parseJson(), fileEntrySchema), raw.value)
++  return parsed.success ? parsed.output : undefined
++}
++
++function outputLinks(node: SceneNode): FileEntry[] {
++  const raw = node.pluginData.find(item => item.pluginId === 'os.canvas' && item.key === OUTPUTS_KEY)
++  if (!raw) return []
++  const parsed = v.safeParse(v.pipe(v.string(), v.parseJson(), v.array(fileEntrySchema)), raw.value)
++  return parsed.success ? parsed.output : []
++}
++
++function writeOutputLinks(editor: Editor, node: SceneNode, links: FileEntry[]) {
++  editor.graph.updateNode(node.id, { pluginData: [
++    ...node.pluginData.filter(item => item.key !== OUTPUTS_KEY || item.pluginId !== 'os.canvas'),
++    annotation(OUTPUTS_KEY, JSON.stringify(links))
++  ] })
++}
++
++export function fileLinks(node: SceneNode): FileEntry[] {
++  const primary = fileLink(node)
++  return primary ? [primary, ...outputLinks(node)] : outputLinks(node)
++}
++
++export function selectedFileLink(editor: Editor) {
++  const node = selectedFileNode(editor)
++  return node ? fileLink(node) : undefined
++}
++
++export function selectedFileNode(editor: Editor) {
++  const selected = [...editor.state.selectedIds]
++  let node = selected.length === 1 ? editor.graph.getNode(selected[0]) : undefined
++  while (node && !fileLink(node) && node.parentId) node = editor.graph.getNode(node.parentId)
++  return node && fileLink(node) ? node : undefined
++}
++
++export function referencedFileMounts(editor: Editor, root: string) {
++  const references = new Map<string, Set<string>>([[root, new Set()]])
++  for (const node of editor.graph.nodes.values()) {
++    for (const link of fileLinks(node)) {
++      const ids = references.get(link.mountId) ?? new Set<string>()
++      ids.add(link.id); references.set(link.mountId, ids)
++    }
++  }
++  return references
++}
++
++export function relinkFileNode(editor: Editor, nodeId: string, entry: FileEntry) {
++  const node = editor.graph.getNode(nodeId)
++  if (!node || !fileLink(node)) throw new Error('原节点已移除，未改变关联。')
++  const finish = editor.captureDocumentChange()
++  editor.graph.updateNode(node.id, { pluginData: [
++    ...node.pluginData.filter(item => item.key !== LINK_KEY || item.pluginId !== 'os.canvas'),
++    annotation(LINK_KEY, JSON.stringify(entry))
++  ] })
++  const result = reconcileFileNodes(editor, [entry], [entry.id], 'available')
++  const change = finish()
++  editor.pushUndoStep({ label: '重新关联文件',
++    inverse: () => editor.restoreDocumentChange(change, 'before'),
++    forward: () => editor.restoreDocumentChange(change, 'after') })
++  editor.requestRender()
++  return result.textIds
++}
++
++// External observations update only owned labels/link metadata. Geometry, selection,
++// other children, work content and the user's undo stack remain under the editor.
++export function reconcileFileNodes(editor: Editor, entries: FileEntry[], known: string[], mountAvailability: 'available' | 'offline' | 'replaced' | 'unavailable') {
++  const graph = editor.graph
++  const seen = new Set(known)
++  const nodes = [...graph.nodes.values()]
++  const linked = nodes.flatMap(node => fileLinks(node).map(link => ({ node, link })))
++  const pageId = editor.state.currentPageId
++  const children = graph.getChildren(pageId)
++  const startX = Math.max((340 - editor.state.panX) / editor.state.zoom,
++    ...children.map(node => node.x + node.width + 40))
++  const startY = (160 - editor.state.panY) / editor.state.zoom
++  let added = 0
++  const textIds: string[] = []
++  for (const entry of entries) {
++    const matches = linked.filter(item => item.link.id === entry.id && item.link.mountId === entry.mountId)
++    if (!matches.length && !seen.has(entry.id)) {
++      const frame = graph.createNode('FRAME', pageId, { name: entry.path,
++        x: startX + (added % 3) * 260, y: startY + Math.floor(added / 3) * 120,
++        width: 240, height: 100, clipsContent: true,
++        fills: [{ type: 'SOLID', color: { r: 0.12, g: 0.12, b: 0.12, a: 1 }, opacity: 1, visible: true }],
++        pluginData: [annotation(LINK_KEY, JSON.stringify(entry))] })
++      for (const [role, y, fontSize] of [['name', 16, 16], ['status', 56, 12]] as const) {
++        graph.createNode('TEXT', frame.id, { name: role, x: 14, y, width: 212, height: 28,
++          text: '', fontSize, fontFamily: 'Inter',
++          fills: [{ type: 'SOLID', color: { r: 0.92, g: 0.91, b: 0.88, a: 1 }, opacity: 1, visible: true }],
++          pluginData: [annotation(LABEL_KEY, role)] })
++      }
++      matches.push({ node: frame, link: entry }); added++
++    }
++    seen.add(entry.id)
++    const kind = { directory: '文件夹', link: '链接', file: '文件', other: '文件' }[entry.kind]
++    const state = mountAvailability === 'available'
++      ? { missing: '原件缺失', replaced: '需要重新关联', available: '已关联本地' }[entry.availability]
++      : { offline: '目录离线', replaced: '目录需要重新关联', unavailable: '目录不可访问' }[mountAvailability]
++    for (const { node } of matches) {
++      refreshFileLink(editor, node, entry)
++      const primary = fileLink(node)
++      if (primary?.id !== entry.id || primary.mountId !== entry.mountId) continue
++      for (const child of graph.getChildren(node.id)) {
++        const role = child.pluginData.find(item => item.key === LABEL_KEY && item.pluginId === 'os.canvas')?.value
++        const text = role === 'name' ? entry.path : (role === 'status' ? `[本地${kind}] ${state}` : undefined)
++        if (text !== undefined && child.text !== text) {
++          graph.updateNode(child.id, { text }); textIds.push(child.id)
++        }
++      }
++    }
++  }
++  return { knownFileAssets: [...seen], textIds }
++}
+diff --git a/src/app/document/local-filter-session.ts b/src/app/document/local-filter-session.ts
+new file mode 100644
+index 0000000..b8216c5
+--- /dev/null
++++ b/src/app/document/local-filter-session.ts
+@@ -0,0 +1,34 @@
++import { computed, ref, watch } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import { localFilterProjection, type LocalFilter, type LocalContentType, type LocalAssociation } from '@/app/document/local-filter'
++
++export function createLocalFilter(editor: Editor) {
++  const criteria = ref<LocalFilter>({ types: [], associations: [], query: '' })
++  const revision = ref(0)
++  const projection = computed(() => {
++    void editor.state.sceneVersion
++    return localFilterProjection(editor.graph, editor.state.currentPageId, criteria.value)
++  })
++  const stop = watch(projection, value => {
++    if (!editor.graph.setViewHiddenNodes(value.hidden)) return
++    revision.value++
++    editor.select([...editor.state.selectedIds])
++    if (editor.state.hoveredNodeId && editor.graph.isViewHidden(editor.state.hoveredNodeId)) editor.setHoveredNode(null)
++    editor.validateEnteredContainer()
++    editor.requestRender()
++  }, { immediate: true, flush: 'sync' })
++  function toggleType(value: LocalContentType) {
++    const values = criteria.value.types
++    criteria.value = { ...criteria.value, types: values.includes(value) ? values.filter(item => item !== value) : [...values, value] }
++  }
++  function toggleAssociation(value: LocalAssociation) {
++    const values = criteria.value.associations
++    criteria.value = { ...criteria.value, associations: values.includes(value) ? values.filter(item => item !== value) : [...values, value] }
++  }
++  function clear() { criteria.value = { types: [], associations: [], query: '' } }
++  function showMatches() {
++    editor.revealNodes([...projection.value.shown].filter(id => editor.graph.getNode(id)?.visible))
++  }
++  return { criteria, projection, revision, toggleType, toggleAssociation, clear, showMatches,
++    dispose() { stop(); editor.graph.setViewHiddenNodes(new Set()) } }
++}
+diff --git a/src/app/document/local-filter.ts b/src/app/document/local-filter.ts
+new file mode 100644
+index 0000000..53cad74
+--- /dev/null
++++ b/src/app/document/local-filter.ts
+@@ -0,0 +1,65 @@
++import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
++import { fileLinks } from '@/app/document/local-file-nodes'
++
++export type LocalContentType = 'image' | 'video' | 'audio' | 'model' | 'text' | 'document'
++  | 'webpage' | 'folder' | 'shape' | 'line' | 'group' | 'file'
++export type LocalAssociation = 'local' | 'canvas' | 'unavailable'
++export type LocalFilter = { types: LocalContentType[]; associations: LocalAssociation[]; query: string }
++
++function fileType(path: string): LocalContentType {
++  const extension = path.split('.').at(-1)?.toLowerCase() ?? ''
++  if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif', 'bmp', 'tif', 'tiff'].includes(extension)) return 'image'
++  if (['mp4', 'webm', 'mov', 'mkv', 'avi'].includes(extension)) return 'video'
++  if (['mp3', 'wav', 'flac', 'ogg', 'm4a', 'aac'].includes(extension)) return 'audio'
++  if (['glb', 'gltf', 'obj', 'fbx', 'stl', 'blend'].includes(extension)) return 'model'
++  if (['txt', 'md', 'csv', 'json', 'yaml', 'yml'].includes(extension)) return 'text'
++  if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(extension)) return 'document'
++  if (['html', 'htm', 'url', 'webloc'].includes(extension)) return 'webpage'
++  return 'file'
++}
++
++function isFileCard(graph: SceneGraph, node: SceneNode) {
++  return graph.getChildren(node.id).some(child => child.pluginData.some(
++    item => item.pluginId === 'os.canvas' && item.key === 'os.canvas/fileLabel'))
++}
++
++export function localContentType(graph: SceneGraph, node: SceneNode): LocalContentType {
++  const link = fileLinks(node).at(0)
++  if (link && isFileCard(graph, node)) return link.kind === 'directory' ? 'folder' : fileType(link.path)
++  if (node.type === 'TEXT') return 'text'
++  if (node.type === 'LINE') return 'line'
++  if (['GROUP', 'FRAME', 'SECTION', 'COMPONENT', 'COMPONENT_SET', 'INSTANCE'].includes(node.type)) return 'group'
++  if (node.fills.some(fill => fill.type === 'IMAGE')) return 'image'
++  return 'shape'
++}
++
++function matches(graph: SceneGraph, node: SceneNode, filter: LocalFilter) {
++  const links = fileLinks(node)
++  const associations: LocalAssociation[] = links.length ? [] : ['canvas']
++  if (links.some(link => link.availability === 'available')) associations.push('local')
++  if (links.some(link => link.availability !== 'available')) associations.push('unavailable')
++  if (filter.types.length && !filter.types.includes(localContentType(graph, node))) return false
++  if (filter.associations.length && !filter.associations.some(value => associations.includes(value))) return false
++  const query = filter.query.trim().toLocaleLowerCase()
++  return !query || [node.name, ...links.map(link => link.path)].some(value => value.toLocaleLowerCase().includes(query))
++}
++
++/** A compound object is one display unit. Its authored content is never split or mutated. */
++export function localFilterProjection(graph: SceneGraph, pageId: string, filter: LocalFilter) {
++  const roots = graph.getChildren(pageId)
++  const shown = new Set<string>(), hidden = new Set<string>()
++  const seen = new Set<string>()
++  function matchesSubtree(node: SceneNode): boolean {
++    if (seen.has(node.id)) return false
++    seen.add(node.id)
++    if (matches(graph, node, filter)) return true
++    // Generated filename labels are presentation, not independent text assets.
++    if (isFileCard(graph, node)) return false
++    return graph.getChildren(node.id).some(matchesSubtree)
++  }
++  for (const root of roots) {
++    if (matchesSubtree(root)) shown.add(root.id)
++    else hidden.add(root.id)
++  }
++  return { shown, hidden, total: roots.length }
++}
+diff --git a/src/app/document/local-identity.ts b/src/app/document/local-identity.ts
+new file mode 100644
+index 0000000..535229f
+--- /dev/null
++++ b/src/app/document/local-identity.ts
+@@ -0,0 +1,74 @@
++import type { Editor } from '@open-pencil/core/editor'
++import type { SceneNode } from '@open-pencil/scene-graph'
++
++const namespace = 'os.canvas'
++const key = 'os.canvas/nodeId'
++const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
++
++export function localNodeId(node: SceneNode | undefined): string | undefined {
++  const value = node?.pluginData.find(entry => entry.pluginId === namespace && entry.key === key)?.value
++  return value && uuid.test(value) ? value : undefined
++}
++
++export function createLocalIdentity(editor: Editor) {
++  // Keep deleted IDs reserved until the graph is replaced: redo restores the same identity,
++  // while a clone/paste gets a new graph ID and cannot claim the source's identity.
++  const assigned = new Map<string, string>()
++  const owners = new Map<string, string>()
++  function ensure(node: SceneNode) {
++    if (node.id === editor.graph.rootId) return
++    const parent = node.parentId ? editor.graph.getNode(node.parentId) : undefined
++    if (parent?.type === 'CANVAS' && parent.id !== editor.graph.rootId) ensure(parent)
++    const previous = localNodeId(node)
++    const identity = assigned.get(node.id) ??
++      (previous && !owners.has(previous) ? previous : crypto.randomUUID())
++    assigned.set(node.id, identity)
++    owners.set(identity, node.id)
++    if (previous === identity) return
++    editor.graph.updateNode(node.id, { pluginData: [
++      ...node.pluginData.filter(entry => !(entry.pluginId === namespace && entry.key === key)),
++      { pluginId: namespace, key, value: identity }
++    ] })
++  }
++  function ensureAll() { for (const node of editor.graph.nodes.values()) ensure(node) }
++  function pageIdentities() {
++    return editor.graph.getPages().map(page => ({ id: localNodeId(page), name: page.name }))
++  }
++  function restorePages(pages: readonly { id: string; name: string }[]) {
++    const actual = editor.graph.getPages()
++    if (actual.length !== pages.length || new Set(pages.map(page => page.id)).size !== pages.length ||
++        pages.some((page, index) => !uuid.test(page.id) || page.name !== actual[index].name)) {
++      throw new Error('页面身份清单与保存快照不匹配')
++    }
++    for (const [index, page] of actual.entries()) {
++      const identity = pages[index].id
++      const owner = owners.get(identity)
++      if (owner && owner !== page.id) throw new Error('页面身份与节点身份冲突')
++    }
++    for (const [index, page] of actual.entries()) {
++      const identity = pages[index].id
++      assigned.set(page.id, identity); owners.set(identity, page.id)
++      ensure(page)
++    }
++  }
++  function reset() {
++    assigned.clear(); owners.clear()
++    for (const node of editor.graph.nodes.values()) {
++      const identity = localNodeId(node)
++      if (identity && !owners.has(identity)) {
++        assigned.set(node.id, identity); owners.set(identity, node.id)
++      }
++    }
++  }
++  reset()
++  const stops = [
++    editor.onEditorEvent('node:created', ensure),
++    editor.onEditorEvent('node:updated', (id, changes) => {
++      if (!changes.pluginData) return
++      const node = editor.graph.getNode(id)
++      if (node) ensure(node)
++    }),
++    editor.onEditorEvent('graph:replaced', reset)
++  ]
++  return { ensureAll, pageIdentities, restorePages, dispose: () => { for (const stop of stops) stop() } }
++}
+diff --git a/src/app/document/local-mount-relink.ts b/src/app/document/local-mount-relink.ts
+new file mode 100644
+index 0000000..bd71ca9
+--- /dev/null
++++ b/src/app/document/local-mount-relink.ts
+@@ -0,0 +1,56 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { ref } from 'vue'
++import * as v from 'valibot'
++import type { Editor } from '@open-pencil/core/editor'
++
++const previewSchema = v.object({ token: v.string(), mountId: v.string(), canvasId: v.string(), previousPath: v.string(), path: v.string() })
++
++export function createLocalMountRelink(editor: Editor, mountId: () => string, refresh: () => Promise<void>) {
++  const preview = ref<v.InferOutput<typeof previewSchema>>()
++  const busy = ref(false)
++  const error = ref('')
++  let generation = 0
++  let disposed = false
++  const isCurrent = (value: number, id: string) => !disposed && generation === value && mountId() === id
++  function cancel() { generation++; preview.value = undefined; error.value = '' }
++  const stopGraph = editor.onEditorEvent('graph:replaced', cancel)
++  async function call(id: string, action: string, body: { path: string } | { token: string }) {
++    const response = await workspaceFetch(`/os-workspace/mounts/${id}/relink-${action}`, { method: 'POST',
++      headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++      body: JSON.stringify(body), signal: AbortSignal.timeout(30000) })
++    if (!response.ok) throw new Error(response.status === 409
++      ? '目录已变化或已关联另一张画布，请重新检查；不会自动合并画布。'
++      : '无法访问目标目录，请检查完整路径。')
++    return response
++  }
++  async function prepare(path: string) {
++    if (busy.value) return
++    cancel()
++    const id = mountId(), current = generation
++    if (!id || !path.trim()) { error.value = '请打开原目录画布，并填写目标目录完整路径。'; return }
++    busy.value = true
++    try {
++      const response = await call(id, 'preview', { path: path.trim() })
++      const result = v.parse(v.pipe(v.string(), v.parseJson(), previewSchema), await response.text())
++      if (isCurrent(current, id)) preview.value = result
++    } catch (cause) {
++      if (isCurrent(current, id)) error.value = cause instanceof Error ? cause.message : '无法预览目录'
++    } finally { busy.value = false }
++  }
++  async function confirm() {
++    const candidate = preview.value
++    if (!candidate || busy.value) return
++    const current = generation
++    busy.value = true; error.value = ''
++    try {
++      await call(candidate.mountId, 'confirm', { token: candidate.token })
++      if (!isCurrent(current, candidate.mountId)) return
++      preview.value = undefined
++      await refresh()
++    } catch (cause) {
++      if (isCurrent(current, candidate.mountId)) error.value = cause instanceof Error ? cause.message : '无法恢复目录关联'
++    } finally { busy.value = false }
++  }
++  function dispose() { disposed = true; cancel(); stopGraph() }
++  return { preview, busy, error, prepare, confirm, cancel, dispose }
++}
+diff --git a/src/app/document/local-output.ts b/src/app/document/local-output.ts
+new file mode 100644
+index 0000000..38ad84e
+--- /dev/null
++++ b/src/app/document/local-output.ts
+@@ -0,0 +1,315 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { ref } from 'vue'
++import { fromUint8Array } from 'js-base64'
++import * as v from 'valibot'
++import type { Editor } from '@open-pencil/core/editor'
++import { localNodeId } from '@/app/document/local-identity'
++import { fileLinks, selectedFileNode } from '@/app/document/local-file-nodes'
++
++type Context = { canvasId: string; mountId: string; revision: number; version: number }
++type OutputEditor = Editor & { renderExportImage(ids: string[], scale: number, format: 'PNG'): Promise<Uint8Array | null> }
++type Pending = { operationId: string; canvasId: string; nodeId: string; sourceRevision: number;
++  mountId: string; name: string; contentBase64: string }
++const operationSchema = v.object({ operationId: v.string(), canvasId: v.string(), nodeId: v.string(),
++  mountId: v.string(), path: v.string(), sourceRevision: v.number(),
++  state: v.picklist(['prepared', 'ready', 'committed']) })
++type Operation = v.InferOutput<typeof operationSchema>
++type BatchItem = { id: string; nodeId: string; name: string; state: 'queued' | 'ready' | 'writing' | 'saved' | 'failed';
++  message: string; operation?: Pending }
++type Replacement = { replacementId: string; name: string }
++class OutputRequestError extends Error {
++  constructor(readonly statusCode: number, message: string) {
++    super(message)
++    this.name = 'OutputRequestError'
++  }
++}
++
++export function createLocalOutput(editor: OutputEditor, context: () => Context,
++  save: () => Promise<boolean>, refresh: () => Promise<void>, onIdle: () => void) {
++  const name = ref('成果.png'), busy = ref(false), error = ref(''), status = ref('')
++  const batch = ref<BatchItem[]>([])
++  let pending: Pending | undefined
++  const replacements = new Map<string, Replacement>()
++  function clearCompleted(operationId: string) {
++    if (pending?.operationId === operationId) pending = undefined
++  }
++  let disposed = false
++  const isDisposed = () => disposed
++  function release() { busy.value = false; if (!isDisposed()) onIdle() }
++  const selectionStatus = ref('')
++  let comparisonGeneration = 0
++  let comparisonTimer: ReturnType<typeof setTimeout> | undefined
++  const recovery = ref<Operation[]>([]), recoveryError = ref(''), recoveryBusy = ref(false)
++  let recoveryGeneration = 0
++  const isCurrent = (id: string) => !isDisposed() && context().canvasId === id
++  async function loadRecovery() {
++    const generation = ++recoveryGeneration, target = context()
++    recovery.value = []; recoveryError.value = ''
++    if (!target.mountId || isDisposed()) return
++    recoveryBusy.value = true
++    try {
++      const response = await workspaceFetch(`/os-workspace/canvases/${target.canvasId}/outputs`, {
++        headers: { 'X-OS-Workspace': '1' }, signal: AbortSignal.timeout(30000) })
++      if (!response.ok) throw new Error('无法读取未完成成果，请重试。')
++      const rows = v.parse(v.pipe(v.string(), v.parseJson(), v.array(operationSchema)), await response.text())
++      if (generation === recoveryGeneration && isCurrent(target.canvasId)) {
++        recovery.value = rows.filter(row => row.canvasId === target.canvasId && row.state !== 'committed')
++      }
++    } catch (cause) {
++      if (generation === recoveryGeneration && isCurrent(target.canvasId)) {
++        recoveryError.value = cause instanceof Error ? cause.message : '无法读取未完成成果'
++      }
++    } finally { if (generation === recoveryGeneration) recoveryBusy.value = false }
++  }
++  function updateSelectionStatus() {
++    const generation = ++comparisonGeneration
++    clearTimeout(comparisonTimer)
++    const node = selectedFileNode(editor)
++    const links = node ? fileLinks(node) : []
++    const labels = links.map(link => {
++      const state = { available: '已关联本地', missing: '原件缺失', replaced: '需要重新关联' }[link.availability]
++      return `${state} · ${link.path}`
++    })
++    selectionStatus.value = labels.join('；')
++    if (!node || !links.some(link => link.outputOrigin)) return
++    const graph = editor.graph
++    const compare = async () => {
++      const results = await compareSnapshots(node.id, links)
++      if (isDisposed() || comparisonGeneration !== generation || editor.graph !== graph) return
++      selectionStatus.value = labels.map((label, index) => `${label}${results[index]}`).join('；')
++    }
++    comparisonTimer = setTimeout(() => { void compare() }, 250)
++  }
++  async function compareSnapshots(id: string, links: ReturnType<typeof fileLinks>) {
++    const hashes = new Map<string, Promise<string | undefined>>()
++    const node = editor.graph.getNode(id)
++    return Promise.all(links.map(async link => {
++      const origin = link.outputOrigin
++      if (!origin || !node || origin.nodeId !== localNodeId(node) || origin.canvasId !== context().canvasId) return ''
++      if (!origin.snapshotHash || !origin.snapshotFormat || origin.snapshotFormat === 'unknown') return ' · 尚未核对导出内容'
++      let digest = hashes.get(origin.snapshotFormat)
++      if (!digest) {
++        digest = snapshotDigest(id, origin.snapshotFormat)
++        hashes.set(origin.snapshotFormat, digest)
++      }
++      const current = await digest
++      if (!current) return ' · 尚未核对导出内容'
++      return current === origin.snapshotHash ? ' · 与导出快照一致' : ' · 内容已修改，尚未重新导出'
++    }))
++  }
++  async function snapshotDigest(id: string, format: 'png' | 'txt') {
++    try {
++      const node = editor.graph.getNode(id)
++      if (!node || (format === 'txt' && node.type !== 'TEXT')) return undefined
++      const bytes = format === 'txt' ? new TextEncoder().encode(node.text) : await editor.renderExportImage([id], 1, 'PNG')
++      if (!bytes) return undefined
++      const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(bytes)))
++      return [...digest].map(byte => byte.toString(16).padStart(2, '0')).join('')
++    } catch { return undefined }
++  }
++  const stops = (['selection:changed', 'graph:replaced', 'node:updated', 'node:deleted',
++    'node:created', 'node:reparented', 'node:reordered', 'history:changed'] as const).map(
++    event => editor.onEditorEvent(event, updateSelectionStatus))
++  stops.push(editor.onEditorEvent('graph:replaced', () => {
++    recoveryGeneration++; recovery.value = []; recoveryError.value = ''; recoveryBusy.value = false
++    pending = undefined; batch.value = []; error.value = ''; status.value = ''
++  }))
++  async function call(path: string, body?: Pending | Replacement) {
++    const response = await workspaceFetch(`/os-workspace${path}`, { method: 'POST',
++      headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++      body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(30000) })
++    if (response.status === 409 && path === '/outputs') pending = undefined
++    if (response.status === 400) throw new OutputRequestError(400, '请检查文件名；更名时需保持原扩展名。')
++    if (response.status === 501) throw new OutputRequestError(501, '当前目录不支持安全提交文件。原快照已保留，可在未完成的成果中取消本次保存。')
++    if (!response.ok) throw new OutputRequestError(response.status, response.status === 409
++      ? '文件名已存在或目录、文件发生变化。原文件未被覆盖，请检查后重试。'
++      : '成果写入未确认，工作内容仍保留；重试会继续同一操作。')
++    return response
++  }
++  function captureSelection() {
++    const ids = [...editor.state.selectedIds]
++    if (ids.length !== 1) throw new Error('请选中一个成果，或使用分别保存。')
++    return capture({ id: ids[0], name: name.value.trim() })
++  }
++  async function capture(target: { id: string; name: string }): Promise<Pending> {
++    if (!context().mountId) throw new Error('请打开目录画布并选中成果。')
++    const graph = editor.graph, id = target.id, node = graph.getNode(id)
++    if (!node || node.type === 'CANVAS') throw new Error('请选择可导出的内容节点。')
++    const fileName = target.name
++    if (!/\.(png|txt)$/i.test(fileName)) throw new Error('当前支持 .png 图片快照，文字节点也可保存为 .txt。')
++    if (/\.txt$/i.test(fileName) && node.type !== 'TEXT') throw new Error('只有文字节点可以保存为 .txt。')
++    if (!await save()) throw new Error('请先完成画布保存，再保存成果。')
++    if (isDisposed() || editor.graph !== graph || !graph.getNode(id)) throw new Error('画布已切换，请重新选择成果。')
++    const source = context(), nodeId = localNodeId(node)
++    if (!nodeId) throw new Error('节点身份尚未保存。')
++    const bytes = /\.txt$/i.test(fileName) ? new TextEncoder().encode(node.text)
++      : await editor.renderExportImage([id], 1, 'PNG')
++    const current = context()
++    if (isDisposed() || editor.graph !== graph || current.canvasId !== source.canvasId || current.version !== source.version) {
++      throw new Error('导出期间内容有变化，请重新保存成果。')
++    }
++    if (!bytes) throw new Error('无法生成此节点的图片快照。')
++    return { operationId: crypto.randomUUID(), canvasId: source.canvasId, nodeId,
++      sourceRevision: source.revision, mountId: source.mountId, name: fileName, contentBase64: fromUint8Array(bytes) }
++  }
++  async function writeBatchItem(item: BatchItem) {
++    const operation = item.operation
++    if (!operation || !isCurrent(operation.canvasId)) return
++    item.state = 'writing'; item.message = '正在写入'
++    try {
++      await call('/outputs', operation)
++      if (!isCurrent(operation.canvasId)) return
++      await call(`/outputs/${operation.operationId}/commit`)
++      if (!isCurrent(operation.canvasId)) return
++      item.state = 'saved'; item.message = '文件已写入'
++    } catch (cause) {
++      item.state = 'failed'
++      item.message = cause instanceof Error ? cause.message : '保存未确认，请重试同一项'
++    }
++  }
++  async function finishBatch(targetId: string) {
++    if (!isCurrent(targetId)) return
++    await refresh()
++    if (!isCurrent(targetId)) return
++    const saved = await save()
++    if (!isCurrent(targetId)) return
++    for (const item of batch.value) {
++      if (item.state !== 'saved') continue
++      const linked = [...editor.graph.nodes.values()].some(node => fileLinks(node).some(
++        link => link.outputOrigin?.operationId === item.operation?.operationId))
++      item.message = saved && linked ? '文件与画布已保存' : '文件已写入，画布关联待保存'
++    }
++    const count = batch.value.filter(item => item.state === 'saved').length
++    status.value = `批量处理结束：${count} 项已写入，${batch.value.length - count} 项未完成`
++    await loadRecovery()
++  }
++  async function publishBatch() {
++    if (busy.value || isDisposed()) return
++    if (pending) { error.value = '请先重试或处理上一项未确认成果，再开始批量保存。'; return }
++    const ids = [...editor.state.selectedIds], fileName = name.value.trim()
++    const extension = /\.(png|txt)$/i.exec(fileName)
++    if (!context().mountId || !ids.length || !extension) {
++      error.value = '请打开目录画布，选择成果，并输入 .png 或 .txt 文件名。'; return
++    }
++    busy.value = true; error.value = ''; status.value = '正在准备批量成果'
++    const targetId = context().canvasId
++    const stem = fileName.slice(0, -extension[0].length)
++    batch.value = ids.map((nodeId, index) => ({ id: crypto.randomUUID(), nodeId,
++      name: `${stem}-${index + 1}${extension[0]}`, state: 'queued', message: '等待准备' }))
++    const items = batch.value
++    try {
++      // Capture every selected node before publishing any file. Each captured
++      // request retains its own saved source revision and bytes for exact retries.
++      for (const item of items) {
++        if (!isCurrent(targetId)) return
++        try {
++          item.operation = await capture({ id: item.nodeId, name: item.name })
++          item.state = 'ready'; item.message = '已准备'
++        } catch (cause) {
++          item.state = 'failed'; item.message = cause instanceof Error ? cause.message : '无法准备成果'
++        }
++      }
++      for (const item of items) {
++        if (!isCurrent(targetId)) return
++        if (item.state === 'ready') await writeBatchItem(item)
++      }
++      await finishBatch(targetId)
++    } catch (cause) {
++      if (isCurrent(targetId)) error.value = cause instanceof Error ? cause.message : '批量关联尚待保存'
++    } finally { release() }
++  }
++  async function retryBatch(item: BatchItem) {
++    if (busy.value || !item.operation || !isCurrent(item.operation.canvasId)) return
++    busy.value = true; error.value = ''
++    const targetId = item.operation.canvasId
++    try {
++      await writeBatchItem(item)
++      await finishBatch(targetId)
++    } catch (cause) {
++      if (isCurrent(targetId)) error.value = cause instanceof Error ? cause.message : '批量关联尚待保存'
++    } finally { release() }
++  }
++  async function publishSelection() {
++    if (!pending && editor.state.selectedIds.size > 1) await publishBatch()
++    else await publish()
++  }
++  async function publish() {
++    if (busy.value || isDisposed()) return
++    busy.value = true; error.value = ''; status.value = '正在保存成果'
++    const targetId = context().canvasId
++    try {
++      const operation = pending ?? await captureSelection()
++      if (!isCurrent(operation.canvasId)) return
++      pending = operation
++      await call('/outputs', operation)
++      await call(`/outputs/${operation.operationId}/commit`)
++      clearCompleted(operation.operationId)
++      await finish(operation)
++    } catch (cause) {
++      if (isCurrent(targetId)) {
++        error.value = cause instanceof Error ? cause.message : '无法保存成果'
++        status.value = '成果保存未完成'
++      }
++    } finally { release() }
++  }
++  async function finish(operation: { operationId: string; canvasId: string }) {
++    if (!isCurrent(operation.canvasId)) return
++    await refresh()
++    if (!isCurrent(operation.canvasId)) return
++    const saved = await save()
++    if (!isCurrent(operation.canvasId)) return
++    const linked = [...editor.graph.nodes.values()].some(node => fileLinks(node).some(link => link.outputOrigin?.operationId === operation.operationId))
++    status.value = saved && linked ? '成果已写入目录，画布已保存' : '文件已写入目录；画布关联尚待保存'
++    await loadRecovery()
++  }
++  async function resume(operation: Operation) {
++    if (busy.value || !isCurrent(operation.canvasId)) return
++    busy.value = true; error.value = ''; status.value = '正在继续保存原成果'
++    try {
++      await call(`/outputs/${operation.operationId}/commit`)
++      clearCompleted(operation.operationId)
++      await finish(operation)
++    } catch (cause) {
++      if (isCurrent(operation.canvasId)) {
++        error.value = cause instanceof Error ? cause.message : '无法继续保存成果'
++        status.value = '原成果仍待恢复，可重试'
++      }
++    } finally { release() }
++  }
++  async function cancelOperation(operation: Operation) {
++    if (busy.value || !isCurrent(operation.canvasId)) return
++    busy.value = true; error.value = ''
++    try {
++      await call(`/outputs/${operation.operationId}/cancel`)
++      clearCompleted(operation.operationId)
++      if (!isCurrent(operation.canvasId)) return
++      await loadRecovery()
++      if (isCurrent(operation.canvasId)) status.value = '已取消后续提交，画布内容和现有文件保留'
++    } catch {
++      if (isCurrent(operation.canvasId)) error.value = '未能取消。文件可能已写出，请继续恢复；取消不会删除文件。'
++    } finally { release() }
++  }
++  async function renameOperation(operation: Operation) {
++    if (busy.value || !isCurrent(operation.canvasId)) return
++    const replacement = replacements.get(operation.operationId) ?? { replacementId: crypto.randomUUID(), name: name.value.trim() }
++    replacements.set(operation.operationId, replacement)
++    busy.value = true; error.value = ''; status.value = `正在保存原快照为 ${replacement.name}`
++    try {
++      const response = await call(`/outputs/${operation.operationId}/replace`, replacement)
++      const result = v.parse(v.pipe(v.string(), v.parseJson(), operationSchema), await response.text())
++      clearCompleted(operation.operationId)
++      await call(`/outputs/${result.operationId}/commit`)
++      replacements.delete(operation.operationId)
++      await finish(result)
++    } catch (cause) {
++      if (cause instanceof OutputRequestError && [400, 409].includes(cause.statusCode)) replacements.delete(operation.operationId)
++      if (isCurrent(operation.canvasId)) {
++        error.value = cause instanceof Error ? cause.message : '无法更名保存原成果'
++        status.value = `更名保存未完成：${replacement.name}`
++        await loadRecovery()
++      }
++    } finally { release() }
++  }
++  return { name, busy, error, status, selectionStatus, publish, publishSelection, batch, publishBatch, retryBatch, recovery, recoveryError, recoveryBusy, loadRecovery, resume, cancelOperation, renameOperation,
++    dispose: () => { disposed = true; comparisonGeneration++; clearTimeout(comparisonTimer); for (const stop of stops) stop() } }
++}
+diff --git a/src/app/document/local-packages.ts b/src/app/document/local-packages.ts
+new file mode 100644
+index 0000000..8e264f4
+--- /dev/null
++++ b/src/app/document/local-packages.ts
+@@ -0,0 +1,111 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { ref } from 'vue'
++import * as v from 'valibot'
++import { downloadBlob, readBoundedBody } from '@/app/document/io/browser'
++import { useLocalLayout } from '@/app/shell/local-layout'
++
++const limit = 350 * 1024 * 1024
++const resultSchema = v.object({ operationId: v.string(), canvasId: v.string(), revision: v.number(),
++  layoutApplied: v.boolean(), layout: v.unknown() })
++const operationSchema = v.object({ operationId: v.string(), canvasId: v.string(),
++  state: v.picklist(['prepared', 'complete']), result: v.nullable(resultSchema) })
++type Context = { canvasId: string; revision: number; generation: number }
++
++export function createLocalPackages(context: () => Context, save: () => Promise<boolean>,
++  refreshDocuments: () => Promise<void>, unavailable: () => boolean) {
++  const busy = ref(false), error = ref(''), status = ref('')
++  const operations = ref<v.InferOutput<typeof operationSchema>[]>([])
++  const upload = ref<{ operationId: string; file: File }>()
++  const shellLayout = useLocalLayout()
++  let disposed = false
++  let controller = new AbortController()
++  const active = () => !disposed
++  async function request(path: string, init?: RequestInit) {
++    const headers = new Headers(init?.headers)
++    headers.set('X-OS-Workspace', '1')
++    const response = await workspaceFetch(`/os-workspace${path}`, { ...init,
++      headers, signal: controller.signal })
++    const messages: Record<number, string> = {
++      409: '作品或目录已存在，或保存版本已变化。请保留现有内容，检查后再重试。',
++      413: '作品包超过 350 MiB。',
++      422: '作品包损坏或格式不受支持，原有画布保持不变。'
++    }
++    if (!response.ok) throw new Error(messages[response.status]
++      ?? '作品包操作未完成。请重试；已准备的导入可从导入记录继续。')
++    return response
++  }
++  async function run(action: () => Promise<void>) {
++    if (busy.value || unavailable() || disposed) return
++    busy.value = true; error.value = ''
++    controller = new AbortController()
++    const timeout = setTimeout(() => controller.abort(), 60000)
++    try { await action() }
++    catch (cause) {
++      if (active()) error.value = controller.signal.aborted
++        ? '操作等待超时，可重试。已准备的导入仍保留在导入记录中。'
++        : (cause instanceof Error ? cause.message : '作品包操作失败')
++    }
++    finally { clearTimeout(timeout); busy.value = false }
++  }
++  async function load() {
++    const response = await request('/package-imports')
++    const rows = v.parse(v.pipe(v.string(), v.parseJson(), v.array(operationSchema)), await response.text())
++    if (active()) operations.value = rows
++  }
++  async function resumeOperation(operationId: string) {
++    const response = await request(`/package-imports/${operationId}/resume`, { method: 'POST' })
++    const result = v.parse(v.pipe(v.string(), v.parseJson(), resultSchema), await response.text())
++    if (!active()) return
++    if (result.layoutApplied && !shellLayout.busy.value && !shellLayout.error.value) await shellLayout.reload()
++    if (!active()) return
++    status.value = '作品已导入，可从本机画布列表打开。外部原件需核对关联。'
++      + (result.layoutApplied ? '包内布局已恢复到本机。' : '当前布局已保留，包内布局另存为预设。')
++    if (upload.value?.operationId === operationId) upload.value = undefined
++    await refreshDocuments()
++    await load()
++  }
++  async function retryUpload() {
++    await run(async () => {
++      const pending = upload.value
++      if (!pending) return
++      status.value = `正在导入 ${pending.file.name}`
++      await request(`/package-imports/${pending.operationId}`, { method: 'POST',
++        headers: { 'Content-Type': 'application/octet-stream' }, body: pending.file })
++      if (active()) await resumeOperation(pending.operationId)
++    })
++  }
++  async function importFile(file: File) {
++    if (busy.value || unavailable() || disposed) return
++    if (upload.value) { error.value = '请先重试当前作品包，避免遗失未确认的导入操作。'; return }
++    if (!file.size || file.size > limit) { error.value = '请选择不超过 350 MiB 的有效作品包。'; return }
++    upload.value = { operationId: crypto.randomUUID(), file }
++    await retryUpload()
++  }
++  async function exportCurrent() {
++    await run(async () => {
++      const before = context()
++      status.value = '正在保存并打包作品'
++      if (!await save()) throw new Error('请先完成当前画布保存，再导出作品包。')
++      const saved = context()
++      if (!active() || saved.canvasId !== before.canvasId || saved.generation !== before.generation) return
++      const response = await request(`/canvases/${saved.canvasId}/package`, { method: 'POST',
++        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ expectedRevision: saved.revision }) })
++      const bytes = await readBoundedBody(response, limit)
++      if (!active()) return
++      downloadBlob(bytes, `${saved.canvasId}.oscanvas`, 'application/octet-stream')
++      status.value = '作品包已下载，包含历史与文件关联；不包含外部原件。'
++    })
++  }
++  return { busy, error, status, operations, upload, importFile, retryUpload, exportCurrent,
++    applyLayout: (value: unknown) => run(async () => {
++      if (!await shellLayout.applyPreset(value)) throw new Error(shellLayout.error.value || '布局正在保存或已有新修改，请稍后再应用。')
++      if (active()) status.value = '已应用包内布局；画布内容与历史保持不变。'
++    }),
++    forgetUpload: () => {
++      if (busy.value) return
++      upload.value = undefined; error.value = ''
++      status.value = '可选择另一个作品包。已准备的操作仍保留在导入记录中。'
++    },
++    refresh: () => run(load), resume: (id: string) => run(() => resumeOperation(id)),
++    dispose: () => { disposed = true; controller.abort(); upload.value = undefined } }
++}
+diff --git a/src/app/document/local-relink.ts b/src/app/document/local-relink.ts
+new file mode 100644
+index 0000000..8fc6e77
+--- /dev/null
++++ b/src/app/document/local-relink.ts
+@@ -0,0 +1,68 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { ref, watch } from 'vue'
++import * as v from 'valibot'
++import type { Editor } from '@open-pencil/core/editor'
++import { fileEntrySchema, fileLink, relinkFileNode, selectedFileNode } from '@/app/document/local-file-nodes'
++import { ensureGraphFonts } from '@/app/editor/fonts'
++
++const targetSchema = v.object({ token: v.string(), path: v.string(), size: v.string() })
++
++export function createLocalRelink(editor: Editor, refresh: () => Promise<void>) {
++  const path = ref('')
++  const preview = ref<v.InferOutput<typeof targetSchema>>()
++  const busy = ref(false)
++  const error = ref('')
++  let generation = 0
++  let disposed = false
++  let nodeId = ''
++  const isCurrent = (value: number) => !disposed && generation === value
++  function cancel() { generation++; preview.value = undefined; error.value = ''; nodeId = '' }
++  const stopSelection = editor.onEditorEvent('selection:changed', cancel)
++  const stopGraph = editor.onEditorEvent('graph:replaced', cancel)
++  const stopPath = watch(path, cancel)
++  async function call(action: string, body: { path: string } | { token: string }) {
++    const response = await workspaceFetch(`/os-workspace/file-targets/${action}`, { method: 'POST',
++      headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++      body: JSON.stringify(body), signal: AbortSignal.timeout(30000) })
++    if (!response.ok) throw new Error(response.status === 409
++      ? '目标已变化或需要先确认原件替换，请重新检查。'
++      : '无法读取目标，请选择可访问的本地普通文件。')
++    return response
++  }
++  async function prepare() {
++    if (busy.value) return
++    cancel()
++    const node = selectedFileNode(editor)
++    if (!node || !path.value.trim()) { error.value = '请选中原节点并填写目标文件的完整路径。'; return }
++    if (fileLink(node)?.kind !== 'file') { error.value = '此入口用于重新关联普通文件。'; return }
++    nodeId = node.id
++    const current = generation
++    busy.value = true
++    try {
++      const response = await call('preview', { path: path.value.trim() })
++      const result = v.parse(v.pipe(v.string(), v.parseJson(), targetSchema), await response.text())
++      if (isCurrent(current)) preview.value = result
++    } catch (cause) {
++      if (isCurrent(current)) error.value = cause instanceof Error ? cause.message : '无法预览目标'
++    } finally { busy.value = false }
++  }
++  async function confirm() {
++    const candidate = preview.value
++    if (!candidate || busy.value) return
++    const current = generation
++    busy.value = true; error.value = ''
++    try {
++      const response = await call('confirm', { token: candidate.token })
++      const entry = v.parse(v.pipe(v.string(), v.parseJson(), fileEntrySchema), await response.text())
++      if (!isCurrent(current)) return
++      const textIds = relinkFileNode(editor, nodeId, entry)
++      preview.value = undefined
++      await ensureGraphFonts(editor.graph, textIds, editor.renderer)
++      if (isCurrent(current)) { editor.requestRender(); await refresh() }
++    } catch (cause) {
++      if (isCurrent(current)) error.value = cause instanceof Error ? cause.message : '无法关联目标'
++    } finally { busy.value = false }
++  }
++  function dispose() { disposed = true; cancel(); stopSelection(); stopGraph(); stopPath() }
++  return { path, preview, busy, error, prepare, confirm, cancel, dispose }
++}
+diff --git a/src/app/document/local-replacement.ts b/src/app/document/local-replacement.ts
+new file mode 100644
+index 0000000..8858203
+--- /dev/null
++++ b/src/app/document/local-replacement.ts
+@@ -0,0 +1,62 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { ref } from 'vue'
++import * as v from 'valibot'
++import type { Editor } from '@open-pencil/core/editor'
++import { selectedFileLink } from '@/app/document/local-file-nodes'
++
++const previewSchema = v.object({ token: v.string(), mountId: v.string(), assetId: v.string(),
++  path: v.string(), kind: v.string(), size: v.string(), revision: v.number() })
++
++export function createLocalReplacement(editor: Editor, mountId: () => string, refresh: () => Promise<void>) {
++  const preview = ref<v.InferOutput<typeof previewSchema>>()
++  const busy = ref(false)
++  const error = ref('')
++  let generation = 0
++  let disposed = false
++  const isCurrent = (value: number) => !disposed && generation === value
++  function cancel() { generation++; preview.value = undefined; error.value = '' }
++  const stopSelection = editor.onEditorEvent('selection:changed', cancel)
++  const stopGraph = editor.onEditorEvent('graph:replaced', cancel)
++  async function call(path: string, token?: string) {
++    const response = await workspaceFetch(`/os-workspace${path}`, { method: 'POST',
++      headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++      body: token ? JSON.stringify({ token }) : undefined, signal: AbortSignal.timeout(30000) })
++    if (!response.ok) throw new Error(response.status === 409
++      ? '原件或关联已变化，请重新预览后确认。'
++      : '无法处理关联，请保留当前内容后重试。')
++    return response
++  }
++  async function prepare() {
++    if (busy.value) return
++    cancel()
++    const link = selectedFileLink(editor)
++    if (link?.availability !== 'replaced' || link.mountId !== mountId() || !['file', 'directory'].includes(link.kind)) {
++      error.value = '请选中标记为“需要重新关联”的本地文件或文件夹。本入口确认同路径的新原件。'; return
++    }
++    const current = generation
++    busy.value = true
++    try {
++      const response = await call(`/mounts/${link.mountId}/files/${link.id}/replacement-preview`)
++      const result = v.parse(v.pipe(v.string(), v.parseJson(), previewSchema), await response.text())
++      if (isCurrent(current)) preview.value = result
++    } catch (cause) {
++      if (isCurrent(current)) error.value = cause instanceof Error ? cause.message : '无法预览原件'
++    } finally { busy.value = false }
++  }
++  async function confirm() {
++    const candidate = preview.value
++    if (!candidate || busy.value) return
++    const current = generation
++    busy.value = true; error.value = ''
++    try {
++      await call(`/mounts/${candidate.mountId}/files/${candidate.assetId}/replacement-confirm`, candidate.token)
++      if (!isCurrent(current)) return
++      preview.value = undefined
++      await refresh()
++    } catch (cause) {
++      if (isCurrent(current)) error.value = cause instanceof Error ? cause.message : '无法确认关联'
++    } finally { busy.value = false }
++  }
++  function dispose() { disposed = true; cancel(); stopSelection(); stopGraph() }
++  return { preview, busy, error, prepare, confirm, cancel, dispose }
++}
+diff --git a/src/app/document/local-workspace.ts b/src/app/document/local-workspace.ts
+new file mode 100644
+index 0000000..ff0e28a
+--- /dev/null
++++ b/src/app/document/local-workspace.ts
+@@ -0,0 +1,440 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import { fromUint8Array } from 'js-base64'
++import * as v from 'valibot'
++import { computed, ref, watch } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import { exportFigFile } from '@open-pencil/core/io/formats/fig'
++import { SceneGraph } from '@open-pencil/scene-graph'
++import { setPageBackgrounds } from '@open-pencil/core/figma-api'
++import { PAGE_DEFAULT_BACKGROUNDS } from '@open-pencil/core/constants'
++import { createDocumentChanges } from '@/app/document/io/changes'
++import { createLocalIdentity, localNodeId } from '@/app/document/local-identity'
++import { readFigDocument } from '@/app/document/io/fig'
++import { applyImportedDocument } from '@/app/document/io/imported-document'
++import { attachOutputOrigins, fileEntrySchema, referencedFileMounts, selectedFileLink, reconcileFileNodes } from '@/app/document/local-file-nodes'
++import { ensureGraphFonts } from '@/app/editor/fonts'
++import { createLocalReplacement } from '@/app/document/local-replacement'
++import { createLocalRelink } from '@/app/document/local-relink'
++import { createLocalMountRelink } from '@/app/document/local-mount-relink'
++import { createLocalOutput } from '@/app/document/local-output'
++import { createLocalPackages } from '@/app/document/local-packages'
++import { createLocalFilter } from '@/app/document/local-filter-session'
++
++type LocalEditor = Editor & {
++  state: Editor['state'] & { documentName: string; autosaveEnabled: boolean }
++  hasUnsavedChanges(): boolean
++  markDocumentSaved(): void
++  protectSavedRecovery(): Promise<void>
++  saveFigFile(): Promise<boolean>
++  openFigFile(file: File): Promise<void>
++  setDocumentSource(fileName: string, sourceFormat: string): void
++  renderExportImage(ids: string[], scale: number, format: 'PNG'): Promise<Uint8Array | null>
++}
++
++const sessions = new WeakMap<LocalEditor, ReturnType<typeof createLocalWorkspace>>()
++export function getLocalWorkspace(store: LocalEditor) {
++  const session = sessions.get(store)
++  if (!session) throw new Error('Local workspace session was not installed')
++  return session
++}
++export function installLocalWorkspace(store: LocalEditor) {
++  const session = createLocalWorkspace(store)
++  sessions.set(store, session)
++  store.saveFigFile = session.save
++  store.hasUnsavedChanges = session.hasUnsavedChanges
++  const dispose = store.dispose.bind(store)
++  store.dispose = () => { session.dispose(); sessions.delete(store); dispose() }
++}
++
++const savedSchema = v.object({ canvasId: v.string(), revision: v.number() })
++const finite = v.pipe(v.number(), v.finite())
++const viewSchema = v.looseObject({ pageId: v.optional(v.string()), panX: finite, panY: finite,
++  zoom: v.pipe(finite, v.minValue(0.02), v.maxValue(256)) })
++const metadataSchema = v.looseObject({ formatVersion: v.literal(1), name: v.string(), view: v.optional(viewSchema),
++  pages: v.optional(v.array(v.looseObject({ id: v.string(), name: v.string() }))) })
++// Listing needs only the envelope; validate the supported payload before opening it.
++const documentSchema = v.object({ canvasId: v.string(), revision: v.number(),
++  metadata: v.looseObject({ formatVersion: finite, name: v.string() }) })
++type StoredDocument = v.InferOutput<typeof documentSchema>
++const mountSchema = v.object({ id: v.string(), canvasId: v.string(), path: v.string(),
++  availability: v.picklist(['available', 'offline', 'replaced', 'unavailable']) })
++type StoredMount = v.InferOutput<typeof mountSchema>
++const scanSchema = v.object({ mount: mountSchema, entries: v.array(fileEntrySchema), scanStatus: v.string() })
++
++async function request(path: string, init?: RequestInit) {
++  const response = await workspaceFetch(`/os-workspace${path}`, {
++    ...init, headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++    signal: AbortSignal.timeout(30000)
++  })
++  if (!response.ok) throw new Error(response.status === 409
++    ? '画布已有更新，请保留当前内容后重新打开。'
++    : '本机保存服务不可用，内容仍保留在画布中。')
++  return response
++}
++
++function createLocalWorkspace(store: LocalEditor) {
++  const contentDirty = store.hasUnsavedChanges.bind(store)
++  store.state.autosaveEnabled = true
++  const busy = ref(false)
++  const error = ref('')
++  const status = ref('尚未保存到本机')
++  const documents = ref<StoredDocument[]>([])
++  const history = ref<StoredDocument[]>([])
++  const mounts = ref<StoredMount[]>([])
++  const mountBusy = ref(false)
++  const currentMountId = ref('')
++  const scanBusy = ref(false)
++  const scanStatus = ref('')
++  const stagedRestore = ref(false)
++  let canvasId: string = crypto.randomUUID()
++  let revision = 0
++  let retainedMetadata: v.InferOutput<typeof metadataSchema> | undefined
++  let generation = 0
++  let opening = false
++  let disposed = false
++  let timer: ReturnType<typeof setTimeout> | undefined
++  let scanTimer: ReturnType<typeof setTimeout> | undefined
++  const changes = createDocumentChanges(store)
++  const identity = createLocalIdentity(store)
++  const filter = createLocalFilter(store)
++  const output = createLocalOutput(store, () => ({ canvasId, mountId: currentMountId.value,
++    revision, version: changes.capture() }), save, scanFiles, schedule)
++  const packages = createLocalPackages(() => ({ canvasId, revision, generation }), save, refresh,
++    () => busy.value || scanBusy.value || output.busy.value || mountBusy.value)
++  const viewVersion = ref(0)
++  const savedViewVersion = ref(0)
++  const viewDirty = computed(() => viewVersion.value !== savedViewVersion.value)
++  // Keep exact input across an uncertain response, so retry cannot duplicate a commit.
++  let pending: { body: string; version: number; viewVersion: number } | undefined
++
++  function schedule() {
++    clearTimeout(timer)
++    if (disposed || opening || !store.state.autosaveEnabled || error.value ||
++        (revision === 0 && !contentDirty()) || (!contentDirty() && !viewDirty.value && !stagedRestore.value)) return
++    timer = setTimeout(() => { if (!busy.value && !output.busy.value) void save() }, 1000)
++  }
++  const stopDirtyWatch = watch(() => [contentDirty(), store.state.autosaveEnabled, viewVersion.value], schedule)
++  const stopViewWatch = store.onEditorEvent('viewport:changed', () => { if (!opening) viewVersion.value++ })
++  const stopPageWatch = watch(() => store.state.currentPageId, () => { if (!opening) viewVersion.value++ })
++  const stopGraphWatch = store.onEditorEvent('graph:replaced', () => {
++    if (opening) return
++    generation++; canvasId = crypto.randomUUID(); revision = 0; pending = undefined
++    retainedMetadata = undefined
++    currentMountId.value = ''; scanStatus.value = ''
++    history.value = []; stagedRestore.value = false
++    viewVersion.value = 0; savedViewVersion.value = 0
++    status.value = '尚未保存到本机'; error.value = ''; clearTimeout(timer)
++  })
++
++  async function refresh() {
++    try {
++      const response = await request('/canvases')
++      documents.value = v.parse(v.pipe(v.string(), v.parseJson(), v.array(documentSchema)), await response.text())
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法读取本机画布' }
++  }
++
++  async function refreshMounts() {
++    try {
++      const response = await request('/mounts')
++      mounts.value = v.parse(v.pipe(v.string(), v.parseJson(), v.array(mountSchema)), await response.text())
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法读取目录' }
++  }
++
++  async function scanFiles() { await scanDirectory(false) }
++
++  function canScanDirectory(automatic: boolean) {
++    return Boolean(currentMountId.value) && !scanBusy.value && !busy.value && !opening &&
++      !stagedRestore.value && !(automatic && output.busy.value)
++  }
++
++  async function scanDirectory(automatic: boolean) {
++    if (!canScanDirectory(automatic)) return
++    const target = currentMountId.value, graph = store.graph
++    const isCurrentScan = () => !disposed && store.graph === graph && currentMountId.value === target
++    scanBusy.value = true
++    if (!automatic) scanStatus.value = '正在扫描目录'
++    try {
++      const references = referencedFileMounts(store, target)
++      const results = await Promise.all([...references.keys()].map(async id => {
++        const response = await request(`/mounts/${id}/${automatic ? 'poll' : 'scan'}`, { method: 'POST' })
++        return v.parse(v.pipe(v.string(), v.parseJson(), scanSchema), await response.text())
++      }))
++      if (!isCurrentScan()) return
++      let knownFileAssets = readKnownFileAssets(retainedMetadata?.knownFileAssets)
++      const textIds: string[] = []
++      for (const result of results) {
++        const entries = result.mount.id === target ? result.entries
++          : result.entries.filter(entry => references.get(result.mount.id)?.has(entry.id))
++        attachOutputOrigins(store, entries, canvasId)
++        const reconciled = reconcileFileNodes(store, entries, knownFileAssets, result.mount.availability)
++        knownFileAssets = reconciled.knownFileAssets; textIds.push(...reconciled.textIds)
++      }
++      if (retainedMetadata) retainedMetadata = { ...retainedMetadata, knownFileAssets }
++      if (textIds.length) {
++        await ensureGraphFonts(graph, textIds, store.renderer)
++        if (!isCurrentScan()) return
++        for (const id of textIds) store.runLayoutForNode(id)
++        store.requestRender()
++      }
++      scanStatus.value = results.every(result => result.scanStatus === 'complete') ? '目录与关联文件已更新'
++        : '目录暂不可完整读取，已保留原有内容'
++      schedule()
++    } catch (cause) {
++      if (!isCurrentScan()) return
++      scanStatus.value = '目录刷新失败，原有内容保留'
++      if (!automatic) error.value = cause instanceof Error ? cause.message : '目录刷新失败'
++    } finally { scanBusy.value = false }
++  }
++
++  function scheduleDirectoryScan() {
++    clearTimeout(scanTimer)
++    if (disposed || !currentMountId.value) return
++    scanTimer = setTimeout(() => {
++      void scanDirectory(true).finally(scheduleDirectoryScan)
++    }, 1500)
++  }
++  const stopMountWatch = watch(currentMountId, scheduleDirectoryScan)
++  const replacement = createLocalReplacement(store, () => currentMountId.value, scanFiles)
++  const relink = createLocalRelink(store, scanFiles)
++  const mountRelink = createLocalMountRelink(store, () => currentMountId.value, async () => {
++    await refreshMounts(); await scanFiles()
++  })
++
++  async function openMount(mount: StoredMount) {
++    if (busy.value || mountBusy.value) return
++    if (pending || contentDirty() || viewDirty.value || stagedRestore.value) {
++      error.value = '当前画布有未保存内容，请先保存再打开目录。'; return
++    }
++    mountBusy.value = true; error.value = ''
++    const previousGraph = store.graph
++    try {
++      const response = await request('/canvases')
++      let entries = v.parse(v.pipe(v.string(), v.parseJson(), v.array(documentSchema)), await response.text())
++      let document = entries.find(entry => entry.canvasId === mount.canvasId)
++      if (!document) {
++        if (mount.availability !== 'available') throw new Error('目录当前不可用，尚未创建对应画布。')
++        const graph = new SceneGraph()
++        for (const page of graph.getPages()) setPageBackgrounds(graph, page, [{ type: 'SOLID',
++          color: { ...PAGE_DEFAULT_BACKGROUNDS[store.state.theme ?? 'dark'] }, opacity: 1, visible: true, blendMode: 'NORMAL' }])
++        const pages = graph.getPages().map(page => ({ id: crypto.randomUUID(), name: page.name }))
++        const scene = await exportFigFile(graph)
++        const metadata = { formatVersion: 1, name: mountDisplayName(mount.path),
++          mountId: mount.id, pages, view: { pageId: pages[0]?.id, panX: 0, panY: 0, zoom: 1 } }
++        const created = await workspaceFetch(`/os-workspace/canvases/${mount.canvasId}`, { method: 'POST',
++          headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(30000),
++          body: JSON.stringify({ operationId: crypto.randomUUID(), expectedRevision: 0,
++            sceneBase64: fromUint8Array(scene), metadata }) })
++        if (!created.ok && created.status !== 409) throw new Error('目录画布尚未保存，请重试加入目录。')
++        // Another window may have provisioned the reserved ID. Load its confirmed head.
++        const current = await request('/canvases')
++        entries = v.parse(v.pipe(v.string(), v.parseJson(), v.array(documentSchema)), await current.text())
++        document = entries.find(entry => entry.canvasId === mount.canvasId)
++      }
++      if (!document) throw new Error('目录画布尚未完成创建，请重试。')
++      if (disposed) return
++      if (store.graph !== previousGraph) throw new Error('已切换画布，目录已登记，请重新打开。')
++      if (await open(document)) await scanFiles()
++      await refresh()
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法打开目录画布' }
++    finally { mountBusy.value = false }
++  }
++
++  async function addMount(path: string) {
++    if (busy.value || mountBusy.value) return
++    mountBusy.value = true; error.value = ''
++    let mount: StoredMount | undefined
++    try {
++      const response = await request('/mounts', { method: 'POST', body: JSON.stringify({ path: path.trim() }) })
++      mount = v.parse(v.pipe(v.string(), v.parseJson(), mountSchema), await response.text())
++      await refreshMounts()
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法加入目录' }
++    finally { mountBusy.value = false }
++    if (mount && !disposed) await openMount(mount)
++  }
++
++  async function openSelectedFolder() {
++    if (busy.value || mountBusy.value) return
++    const link = selectedFileLink(store)
++    if (link?.kind !== 'directory' || link.mountId !== currentMountId.value) {
++      error.value = '请先在画布中选中一个本地文件夹节点。'; return
++    }
++    const previousGraph = store.graph
++    const isCurrent = () => !disposed && store.graph === previousGraph
++    if (contentDirty() || viewDirty.value || pending || stagedRestore.value) {
++      if (!await save() || !isCurrent()) return
++    }
++    mountBusy.value = true; error.value = ''
++    let mount: StoredMount | undefined
++    try {
++      const response = await request(`/mounts/${link.mountId}/files/${link.id}/open`, { method: 'POST' })
++      mount = v.parse(v.pipe(v.string(), v.parseJson(), mountSchema), await response.text())
++      await refreshMounts()
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法打开文件夹' }
++    finally { mountBusy.value = false }
++    if (mount && isCurrent()) await openMount(mount)
++  }
++
++  // Read lifecycle state after each await; another callback can dispose this session.
++  function isCurrentGeneration(expected: number) {
++    return expected === generation && !disposed
++  }
++
++  async function save() {
++    if (busy.value || disposed) return false
++    clearTimeout(timer)
++    const currentGeneration = generation
++    const targetId = canvasId
++    busy.value = true; error.value = ''; status.value = '正在保存'
++    try {
++      if (!pending) {
++        identity.ensureAll()
++        const version = changes.capture()
++        const capturedViewVersion = viewVersion.value
++        const pages = identity.pageIdentities().map(page => ({
++          ...retainedMetadata?.pages?.find(saved => saved.id === page.id), ...page
++        }))
++        const view = { ...retainedMetadata?.view, pageId: localNodeId(store.graph.getNode(store.state.currentPageId)),
++          panX: store.state.panX, panY: store.state.panY, zoom: store.state.zoom }
++        const outputSourceNodeIds = [...store.graph.nodes.values()].map(localNodeId).filter(id => id !== undefined)
++        const scene = await exportFigFile(store.graph, undefined, undefined, store.state.currentPageId)
++        if (!isCurrentGeneration(currentGeneration)) return false
++        pending = { version, viewVersion: capturedViewVersion, body: JSON.stringify({ operationId: crypto.randomUUID(),
++          expectedRevision: revision, sceneBase64: fromUint8Array(scene),
++          metadata: { ...retainedMetadata, formatVersion: 1, name: store.state.documentName || '未命名画布', view, pages, outputSourceNodeIds } }) }
++      }
++      const snapshot = pending
++      const response = await request(`/canvases/${targetId}`, { method: 'POST', body: snapshot.body })
++      const saved = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
++      if (saved.canvasId !== targetId) throw new Error('保存返回的画布身份不匹配')
++      if (!isCurrentGeneration(currentGeneration)) return false
++      revision = saved.revision
++      stagedRestore.value = false
++      const currentVersion = changes.capture()
++      changes.markSaved(snapshot.version)
++      savedViewVersion.value = snapshot.viewVersion
++      if (currentVersion === snapshot.version) {
++        store.markDocumentSaved()
++        await store.protectSavedRecovery()
++        if (!isCurrentGeneration(currentGeneration)) return false
++        status.value = '已保存到本机'
++      } else status.value = '旧快照已保存，仍有新改动'
++      pending = undefined
++      await refresh()
++      return !contentDirty() && !viewDirty.value
++    } catch (cause) {
++      if (!isCurrentGeneration(currentGeneration)) return false
++      status.value = '保存失败，可重试'
++      error.value = cause instanceof Error ? cause.message : '保存失败'
++      return false
++    } finally { busy.value = false; schedule() }
++  }
++
++  async function showHistory() {
++    if (busy.value) return
++    const target = canvasId
++    try {
++      const response = await request(`/canvases/${canvasId}/revisions`)
++      if (target !== canvasId || disposed) return
++      history.value = v.parse(v.pipe(v.string(), v.parseJson(), v.array(documentSchema)), await response.text())
++    } catch (cause) { error.value = cause instanceof Error ? cause.message : '无法读取历史版本' }
++  }
++
++  async function open(document: StoredDocument, restore = false): Promise<boolean> {
++    if (busy.value) return false
++    if (document.metadata.formatVersion !== 1) {
++      error.value = '不支持的作品格式，请使用兼容版本打开；原作品未修改。'
++      return false
++    }
++    const parsed = v.safeParse(metadataSchema, document.metadata)
++    if (!parsed.success) {
++      error.value = '作品元数据损坏或不兼容，原作品未修改。'
++      return false
++    }
++    const metadata = parsed.output
++    if (pending || contentDirty() || viewDirty.value || stagedRestore.value) {
++      error.value = '当前画布有未保存内容，请先保存再打开其他画布。'; return false
++    }
++    clearTimeout(timer)
++    busy.value = true; error.value = ''; opening = true
++    const previousGraph = store.graph
++    const previousRevision = revision
++    const previousVersion = changes.capture()
++    const previousView = { panX: store.state.panX, panY: store.state.panY,
++      zoom: store.state.zoom, pageId: store.state.currentPageId }
++    try {
++      const response = await request(`/canvases/${document.canvasId}/scene?revision=${document.revision}`)
++      const file = new File([await response.arrayBuffer()], `${metadata.name}.fig`)
++      const imported = await readFigDocument(file)
++      await applyImportedDocument(store, imported, undefined, () => {
++        const viewChanged = store.state.panX !== previousView.panX || store.state.panY !== previousView.panY ||
++          store.state.zoom !== previousView.zoom || store.state.currentPageId !== previousView.pageId
++        if (viewChanged) viewVersion.value++
++        if (disposed || store.graph !== previousGraph || changes.capture() !== previousVersion || viewChanged) {
++          throw new Error('打开期间发生新编辑，已保留当前内容，请重试。')
++        }
++      })
++      store.state.documentName = metadata.name
++      store.setDocumentSource(file.name, 'fig')
++      if (metadata.pages) identity.restorePages(metadata.pages)
++      const appliedVersion = changes.capture()
++      const view = metadata.view
++      if (view) {
++        const page = store.graph.getPages().find(page => localNodeId(page) === view.pageId)
++        if (page && page.id !== store.state.currentPageId) await store.switchPage(page.id)
++        store.setZoomAroundPoint(view.zoom, 0, 0)
++        store.pan(view.panX - store.state.panX, view.panY - store.state.panY)
++      }
++      viewVersion.value = 0; savedViewVersion.value = 0
++      canvasId = document.canvasId; revision = restore ? previousRevision : document.revision
++      retainedMetadata = metadata
++      currentMountId.value = typeof metadata.mountId === 'string' ? metadata.mountId : ''
++      scanStatus.value = ''
++      store.state.autosaveEnabled = true
++      stagedRestore.value = restore
++      if (changes.capture() === appliedVersion) {
++        changes.markSaved()
++        store.markDocumentSaved()
++      }
++      status.value = restore ? '历史版本已载入，正在保存为新修订' : '已保存到本机'
++      void output.loadRecovery()
++      return true
++    } catch (cause) {
++      if (store.graph !== previousGraph) {
++        generation++; canvasId = crypto.randomUUID(); revision = 0; pending = undefined
++        retainedMetadata = undefined
++        currentMountId.value = ''; scanStatus.value = ''
++        status.value = '打开未完成，尚未关联本机画布'
++      }
++      error.value = cause instanceof Error ? cause.message : '打开失败'
++      return false
++    }
++    finally { busy.value = false; opening = false }
++  }
++  async function restoreVersion(document: StoredDocument) {
++    if (document.canvasId !== canvasId) { error.value = '历史列表已过期，请重新读取。'; return }
++    if (await open(document, true)) { await save(); await showHistory() }
++  }
++  const visibleStatus = computed(() => status.value === '已保存到本机' && (contentDirty() || viewDirty.value)
++    ? '有未保存改动' : status.value)
++  function dispose() {
++    packages.dispose()
++    filter.dispose()
++    replacement.dispose()
++    relink.dispose()
++    mountRelink.dispose()
++    output.dispose()
++    clearTimeout(scanTimer); stopMountWatch()
++    disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
++  }
++  return { packages, filter, output, mountRelink, relink, replacement, busy, mountBusy, mounts, refreshMounts, addMount, openMount, openSelectedFolder, currentMountId, scanBusy, scanStatus, scanFiles, error, status: visibleStatus, documents, history, save, refresh, open, showHistory, restoreVersion, dispose,
++    hasUnsavedChanges: () => contentDirty() || viewDirty.value || Boolean(pending) || stagedRestore.value }
++}
++
++function mountDisplayName(path: string) {
++  return path.split(/[\\/]/).findLast(part => part.length > 0) ?? '文件夹画布'
++}
++
++function readKnownFileAssets(value: unknown) {
++  const parsed = v.safeParse(v.array(v.string()), value)
++  return parsed.success ? parsed.output : []
++}
+diff --git a/src/app/document/workspace-fetch.ts b/src/app/document/workspace-fetch.ts
+new file mode 100644
+index 0000000..690beec
+--- /dev/null
++++ b/src/app/document/workspace-fetch.ts
+@@ -0,0 +1,10 @@
++import { convertFileSrc } from '@tauri-apps/api/core'
++import { isTauri } from '@/app/tauri/env'
++
++// The native protocol keeps the service address and token out of the renderer.
++// Browser development continues to use the authenticated Vite host proxy.
++export function workspaceFetch(path: string, init?: RequestInit): Promise<Response> {
++  if (!path.startsWith('/os-workspace/')) throw new Error('Invalid workspace request path')
++  const url = isTauri() ? new URL(path, convertFileSrc('', 'osworkspace')).href : path
++  return fetch(url, init)
++}
+diff --git a/src/app/editor/session/create.ts b/src/app/editor/session/create.ts
+index a86d559..0d2dfbf 100644
+--- a/src/app/editor/session/create.ts
++++ b/src/app/editor/session/create.ts
+@@ -6,6 +6,8 @@ import { SceneGraph } from '@open-pencil/scene-graph'
+ import { createShaderRasterizer } from '@open-pencil/vue'
+ 
+ import { recordPreparationOutcome } from '@/app/diagnostics'
++import { installLocalWorkspace } from '@/app/document/local-workspace'
++import { appRuntimeConfig } from '@/app/runtime/config'
+ import {
+   getActiveEditorStore,
+   setActiveEditorStore,
+@@ -245,6 +247,7 @@ function buildEditorStore(initialGraph?: SceneGraph) {
+   }
+ 
+   defineEditorStoreAccessors(store, editor)
++  if (appRuntimeConfig.osCanvas) installLocalWorkspace(store)
+ 
+   return store
+ }
+diff --git a/src/app/editor/session/modules.ts b/src/app/editor/session/modules.ts
+index 9338cab..73b11ed 100644
+--- a/src/app/editor/session/modules.ts
++++ b/src/app/editor/session/modules.ts
+@@ -81,6 +81,7 @@ export function createEditorStoreModules(
+     hasUnsavedChanges: documentIO.hasUnsavedChanges,
+     /** Takes the document as it is now as its saved state, so closing it asks nothing. */
+     markDocumentSaved: documentIO.markDocumentSaved,
++    protectSavedRecovery: documentIO.protectSavedRecovery,
+     saveFigFile: documentIO.saveFigFile,
+     saveFigFileAs: documentIO.saveFigFileAs,
+     getDocumentFilePath: documentIO.getDocumentFilePath,
+diff --git a/src/app/runtime/config.ts b/src/app/runtime/config.ts
+index 5be9fca..0c57e3a 100644
+--- a/src/app/runtime/config.ts
++++ b/src/app/runtime/config.ts
+@@ -6,6 +6,7 @@ export type CollaborationTransportMode = 'default' | 'test'
+ 
+ export interface AppRuntimeConfig {
+   test: boolean
++  osCanvas: boolean
+   navigationBenchmark: boolean
+   recentFiles: boolean
+   showChrome: boolean
+@@ -26,6 +27,7 @@ export function parseAppRuntimeConfig(
+     renderer === 'tiled' || renderer === 'retained' ? renderer : preferredRenderer
+   return {
+     test: params.has('test'),
++    osCanvas: params.has('os-canvas'),
+     navigationBenchmark: params.has('navigation-benchmark'),
+     recentFiles: params.has('recent-files'),
+     showChrome: !params.has('no-chrome'),
+diff --git a/src/app/settings/preferences/store.ts b/src/app/settings/preferences/store.ts
+index cf0895a..02c553d 100644
+--- a/src/app/settings/preferences/store.ts
++++ b/src/app/settings/preferences/store.ts
+@@ -68,7 +68,11 @@ export interface SharingPreferences {
+ export const AI_SETUP_STATES = ['pending', 'done'] as const
+ export type AISetupState = (typeof AI_SETUP_STATES)[number]
+ 
++export const LOCAL_OUTPUT_SHORTCUTS = ['Control+Alt+KeyE', 'Control+Alt+KeyS', 'off'] as const
++export type LocalOutputShortcut = (typeof LOCAL_OUTPUT_SHORTCUTS)[number]
++
+ export interface AppPreferences {
++  localOutput: { shortcut: LocalOutputShortcut }
+   appearance: { animations: AnimationPreference; accent: AccentPreference }
+   chat: {
+     reasoningDisplay: ReasoningDisplay
+@@ -97,6 +101,7 @@ export interface AppPreferences {
+ }
+ 
+ export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
++  localOutput: { shortcut: 'Control+Alt+KeyE' },
+   appearance: { animations: 'system', accent: { ...DEFAULT_ACCENT } },
+   chat: {
+     reasoningDisplay: 'collapsed',
+@@ -153,6 +158,7 @@ const appPreferencesSchema = section({
+     followAgents: v.fallback(v.boolean(), defaults.chat.followAgents)
+   }),
+   version: v.fallback(v.literal(1), 1),
++  localOutput: section({ shortcut: v.fallback(v.picklist(LOCAL_OUTPUT_SHORTCUTS), defaults.localOutput.shortcut) }),
+   recovery: section({ enabled: v.fallback(v.boolean(), defaults.recovery.enabled) }),
+   editing: section({
+     snapping: section({
+@@ -282,3 +288,7 @@ export function updateCommentPreferences(changes: Partial<CommentPreferences>):
+ export function updateToolbarLayout(toolbar: ToolbarLayout): void {
+   appPreferences.value = { ...appPreferences.value, toolbar }
+ }
++
++export function updateLocalOutputShortcut(shortcut: LocalOutputShortcut): void {
++  appPreferences.value = { ...appPreferences.value, localOutput: { shortcut } }
++}
+diff --git a/src/app/shell/keyboard/registry.ts b/src/app/shell/keyboard/registry.ts
+index 820742d..1e48289 100644
+--- a/src/app/shell/keyboard/registry.ts
++++ b/src/app/shell/keyboard/registry.ts
+@@ -1,6 +1,10 @@
+ import { tinykeys } from 'tinykeys'
+ import type { KeyBindingMap } from 'tinykeys'
+-import { onScopeDispose } from 'vue'
++import { onScopeDispose, watch } from 'vue'
++import { appRuntimeConfig } from '@/app/runtime/config'
++import { appPreferences } from '@/app/settings/preferences/store'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { getActiveEditorStore } from '@/app/editor/active-store'
+ 
+ import { editorCommandMetadata } from '@open-pencil/vue'
+ import type { EditorCommandId } from '@open-pencil/vue'
+@@ -351,6 +355,18 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
+   )
+ 
+   const unsubscribeGlobal = tinykeys(window, globalBindings, { capture: true })
++  if (appRuntimeConfig.osCanvas) {
++    watch(() => appPreferences.value.localOutput.shortcut, (keys, _previous, cleanup) => {
++      if (keys === 'off') return
++      cleanup(tinykeys(window, { [keys]: event => {
++        if (event.repeat || shouldIgnoreShortcut(event, options) || options.store.state.play) return
++        const workspace = getLocalWorkspace(getActiveEditorStore())
++        if (workspace.busy.value || workspace.scanBusy.value || workspace.output.busy.value || !workspace.currentMountId.value) return
++        event.preventDefault()
++        void workspace.output.publishSelection()
++      } }, { capture: true }))
++    }, { immediate: true })
++  }
+ 
+   onScopeDispose(() => {
+     unsubscribeEditor()
+diff --git a/src/app/shell/local-layout.ts b/src/app/shell/local-layout.ts
+new file mode 100644
+index 0000000..8fa5e25
+--- /dev/null
++++ b/src/app/shell/local-layout.ts
+@@ -0,0 +1,85 @@
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++import * as v from 'valibot'
++import { computed, ref } from 'vue'
++
++const layoutSchema = v.looseObject({ formatVersion: v.literal(1),
++  panels: v.looseObject({ layers: v.boolean(), properties: v.boolean() }) })
++const savedSchema = v.object({ revision: v.number() })
++const readSchema = v.object({ revision: v.number(), layout: layoutSchema })
++type Layout = v.InferOutput<typeof layoutSchema>
++const layout = ref<Layout>({ formatVersion: 1, panels: { layers: true, properties: true } })
++const error = ref('')
++const busy = ref(false)
++let revision = 0
++let loaded = false
++let started = false
++let edit = 0
++let pending: { edit: number; body: string } | undefined
++
++async function request(init?: RequestInit) {
++  const response = await workspaceFetch('/os-workspace/layout', { ...init,
++    headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(15000) })
++  if (!response.ok) throw new Error(response.status === 409
++    ? '其他窗口已修改布局，请重新读取后再调整。'
++    : '布局尚未保存，画布作品不受影响。')
++  return response.text()
++}
++
++async function load(preserveEdits = false) {
++  if (busy.value) return
++  busy.value = true; error.value = ''
++  const before = edit
++  try {
++    const saved = v.parse(v.pipe(v.string(), v.parseJson(), readSchema), await request())
++    revision = saved.revision; loaded = true; pending = undefined
++    if (before === edit && !preserveEdits) layout.value = saved.layout
++    else layout.value = { ...saved.layout, panels: { ...saved.layout.panels, ...layout.value.panels } }
++  } catch (cause) { error.value = cause instanceof Error ? cause.message : '布局读取失败' }
++  finally { busy.value = false }
++  if (loaded && (before !== edit || preserveEdits)) await save()
++}
++
++async function save() {
++  if (busy.value || !loaded) return
++  busy.value = true; error.value = ''
++  try {
++    let committed: number
++    do {
++      pending ??= { edit, body: JSON.stringify({ operationId: crypto.randomUUID(), expectedRevision: revision, layout: layout.value }) }
++      const saved = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await request({ method: 'POST', body: pending.body }))
++      revision = saved.revision
++      committed = pending.edit
++      pending = undefined
++    } while (committed !== edit)
++  } catch (cause) { error.value = cause instanceof Error ? cause.message : '布局保存失败' }
++  finally { busy.value = false }
++}
++
++async function applyPreset(value: unknown) {
++  if (busy.value || pending || error.value) return false
++  const parsed = v.safeParse(layoutSchema, value)
++  if (!parsed.success) { error.value = '包内布局格式不受支持，当前布局已保留。'; return false }
++  const before = edit
++  let applied = false
++  busy.value = true
++  try {
++    const saved = v.parse(v.pipe(v.string(), v.parseJson(), readSchema), await request())
++    revision = saved.revision; loaded = true
++    if (before === edit) { layout.value = parsed.output; edit++; applied = true }
++  } catch (cause) { error.value = cause instanceof Error ? cause.message : '布局读取失败' }
++  finally { busy.value = false }
++  if (!error.value && before !== edit) await save()
++  return applied && !error.value
++}
++
++export function useLocalLayout() {
++  if (!started) { started = true; void load() }
++  function toggle(panel: 'layers' | 'properties') {
++    layout.value = { ...layout.value, panels: { ...layout.value.panels, [panel]: !layout.value.panels[panel] } }
++    edit++
++    if (!error.value) void save()
++  }
++  return { layersOpen: computed(() => layout.value.panels.layers),
++    propertiesOpen: computed(() => layout.value.panels.properties), error, busy, toggle, applyPreset,
++    reload: () => load(), retry: () => loaded ? save() : load(true) }
++}
+diff --git a/src/components/EditorCanvas.vue b/src/components/EditorCanvas.vue
+index 4552807..779832d 100644
+--- a/src/components/EditorCanvas.vue
++++ b/src/components/EditorCanvas.vue
+@@ -45,6 +45,7 @@ import { canvasOverlayObstacles } from '@/app/editor/canvas/obstacles'
+ import { useFollowView } from '@/app/presence/follow-view'
+ import { appRuntimeConfig } from '@/app/runtime/config'
+ import CommentsLayer from '@/components/comments/CommentsLayer.vue'
++import LocalFileBadges from '@/components/editor/LocalFileBadges.vue'
+ import IssueMarkerTooltip from '@/components/design-check/IssueMarkerTooltip.vue'
+ import PreparationOverlay from '@/components/preparation/canvas/Overlay.vue'
+ import FollowFrame from '@/components/presence/FollowFrame.vue'
+@@ -261,6 +262,7 @@ const cursor = computed(() =>
+           class="absolute inset-0 block size-full touch-none outline-none"
+         />
+         <PlayIslands :view="paneView" :drawn="drawnView" :canvas="canvasRef" />
++        <LocalFileBadges v-if="appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <AppDropOverlay :visible="isDraggingOver" />
+         <IssueMarkerTooltip :marker="hoveredIssueMarker" :canvas="canvasRef" />
+         <CanvasLabelEditor
+diff --git a/src/components/editor/EditorWorkspace.vue b/src/components/editor/EditorWorkspace.vue
+index ae37ca0..62f2c0a 100644
+--- a/src/components/editor/EditorWorkspace.vue
++++ b/src/components/editor/EditorWorkspace.vue
+@@ -26,6 +26,7 @@ import VariablesDialog from '@/components/variables/VariablesDialog.vue'
+ import splitterTheme from '@/theme/splitter'
+ 
+ import WorkspacePill from './WorkspacePill.vue'
++import OsCanvasWorkspace from './OsCanvasWorkspace.vue'
+ 
+ const showChrome = appRuntimeConfig.showChrome
+ /**
+@@ -51,6 +52,11 @@ const { pending: roomPending } = useRoomActions()
+     <ActiveRoomOverlay />
+   </div>
+ 
++  <OsCanvasWorkspace
++    v-else-if="appRuntimeConfig.osCanvas && !isMobile"
++    :key="'os-' + tab.id"
++  />
++
+   <SplitterGroup
+     v-else-if="!isMobile && showChrome && store.state.showUI && !playingAlone"
+     :key="tab.id"
+diff --git a/src/components/editor/LocalFileBadges.vue b/src/components/editor/LocalFileBadges.vue
+new file mode 100644
+index 0000000..07a834a
+--- /dev/null
++++ b/src/components/editor/LocalFileBadges.vue
+@@ -0,0 +1,22 @@
++<script setup lang="ts">
++import type { ViewportTransform } from '@open-pencil/core/geometry'
++import { useEditorStore } from '@/app/editor/active-store'
++import { useLocalFileBadges } from '@/app/document/local-file-badges'
++import { localFileBadges } from '@/theme/local-file-badges'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++
++const { drawn } = defineProps<{ drawn: ViewportTransform | null }>()
++const store = useEditorStore()
++const { revision } = getLocalWorkspace(store).filter
++const badges = useLocalFileBadges(store, () => drawn ?? store.state, () => revision.value)
++const styles = localFileBadges()
++</script>
++
++<template>
++  <div v-if="store.state.showUI && store.state.play === null" :class="styles.layer()" aria-label="本地文件关联标识">
++    <span v-for="badge in badges" :key="badge.id" :class="styles.badge()"
++      :style="{ left: `${badge.x}px`, top: `${badge.y}px` }"
++      :data-unavailable="badge.unavailable" :data-node-id="badge.uuid"
++      data-slot="local-file-badge" role="img" :aria-label="badge.description">{{ badge.label }}</span>
++  </div>
++</template>
+diff --git a/src/components/editor/LocalFilterPanel.vue b/src/components/editor/LocalFilterPanel.vue
+new file mode 100644
+index 0000000..dd0f23c
+--- /dev/null
++++ b/src/components/editor/LocalFilterPanel.vue
+@@ -0,0 +1,41 @@
++<script setup lang="ts">
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { useEditorStore } from '@/app/editor/active-store'
++import type { LocalContentType, LocalAssociation } from '@/app/document/local-filter'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import { localWorkspace } from '@/theme/local-workspace'
++
++const { criteria, projection, toggleType, toggleAssociation, clear, showMatches } = getLocalWorkspace(useEditorStore()).filter
++const types: { value: LocalContentType; label: string }[] = [
++  { value: 'image', label: '图片' }, { value: 'video', label: '视频' }, { value: 'audio', label: '音频' },
++  { value: 'model', label: '3D' }, { value: 'text', label: '文本' }, { value: 'document', label: '文档' },
++  { value: 'webpage', label: '网页' }, { value: 'folder', label: '文件夹' }, { value: 'shape', label: '图形' },
++  { value: 'line', label: '线条' }, { value: 'group', label: '分组/画框' }, { value: 'file', label: '其它文件' }
++]
++const associations: { value: LocalAssociation; label: string }[] = [
++  { value: 'local', label: '已关联本地' }, { value: 'canvas', label: '仅画布内容' }, { value: 'unavailable', label: '关联失效' }
++]
++const styles = localWorkspace()
++</script>
++
++<template>
++  <details :class="styles.directory()" data-slot="local-filter-panel">
++    <summary :class="styles.status()">筛选 · {{ projection.shown.size }}/{{ projection.total }}</summary>
++    <AppInput v-model="criteria.query" aria-label="筛选名称或文件名" placeholder="搜索名称或文件名" />
++    <div :class="styles.actions()" aria-label="文件关联筛选">
++      <AppButton v-for="option in associations" :key="option.value" :aria-pressed="criteria.associations.includes(option.value)"
++        :variant="criteria.associations.includes(option.value) ? 'subtle' : 'ghost'"
++        :aria-label="`筛选${option.label}`" @click="toggleAssociation(option.value)">{{ option.label }}</AppButton>
++    </div>
++    <div :class="styles.actions()" aria-label="内容类型筛选">
++      <AppButton v-for="option in types" :key="option.value" :aria-pressed="criteria.types.includes(option.value)"
++        :variant="criteria.types.includes(option.value) ? 'subtle' : 'ghost'"
++        :aria-label="`筛选${option.label}`" @click="toggleType(option.value)">{{ option.label }}</AppButton>
++    </div>
++    <p :class="styles.status()" data-slot="local-filter-count">显示 {{ projection.shown.size }} 项 · 隐藏 {{ projection.hidden.size }} 项</p>
++    <p :class="styles.status()">组内有内容匹配时保留整组；筛选不会修改或删除内容。</p>
++    <AppButton @click="clear">清除筛选</AppButton>
++    <AppButton :disabled="projection.shown.size === 0" @click="showMatches">查看匹配内容</AppButton>
++  </details>
++</template>
+diff --git a/src/components/editor/LocalPackagePanel.vue b/src/components/editor/LocalPackagePanel.vue
+new file mode 100644
+index 0000000..e514276
+--- /dev/null
++++ b/src/components/editor/LocalPackagePanel.vue
+@@ -0,0 +1,43 @@
++<script setup lang="ts">
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { useEditorStore } from '@/app/editor/active-store'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import AppAlert from '@/components/ui/feedback/AppAlert.vue'
++import { localWorkspace } from '@/theme/local-workspace'
++
++const workspace = getLocalWorkspace(useEditorStore())
++const { busy, error, status, operations, upload, importFile, retryUpload, exportCurrent, refresh, resume, forgetUpload, applyLayout } = workspace.packages
++const styles = localWorkspace()
++function selectFile(event: Event) {
++  if (!(event.target instanceof HTMLInputElement)) return
++  const file = event.target.files?.[0]
++  event.target.value = ''
++  if (file) void importFile(file)
++}
++</script>
++
++<template>
++  <details :class="styles.directory()">
++    <summary>作品包</summary>
++    <p :class="styles.status()">包含整张画布与历史、文件关联和布局，不包含外部原件。</p>
++    <div :class="styles.actions()">
++      <AppButton :disabled="busy || workspace.busy.value || workspace.scanBusy.value" @click="exportCurrent">导出作品包</AppButton>
++      <AppButton :disabled="busy" @click="refresh">导入记录</AppButton>
++    </div>
++    <input type="file" accept=".oscanvas" aria-label="选择作品包导入" :class="styles.status()"
++      :disabled="busy || Boolean(upload) || workspace.busy.value || workspace.scanBusy.value" @change="selectFile" />
++    <div v-if="upload" :class="styles.actions()">
++      <AppButton :disabled="busy" @click="retryUpload">重试导入 {{ upload.file.name }}</AppButton>
++      <AppButton :disabled="busy" @click="forgetUpload">选择另一个作品包</AppButton>
++    </div>
++    <p v-if="status" role="status" :class="styles.status()" data-slot="package-status">{{ status }}</p>
++    <AppAlert v-if="error" tone="error" heading="作品包" :description="error" />
++    <div v-if="operations.length" :class="styles.list()" aria-label="作品包导入记录">
++      <div v-for="operation in operations" :key="operation.operationId" :class="styles.directory()">
++        <p :class="styles.status()">{{ operation.canvasId }} · {{ operation.state === 'complete' ? '已导入' : '待继续' }}</p>
++        <AppButton v-if="operation.state === 'prepared'" :disabled="busy" @click="resume(operation.operationId)">继续导入作品</AppButton>
++        <AppButton v-if="operation.result" :disabled="busy" @click="applyLayout(operation.result.layout)">应用包内布局</AppButton>
++      </div>
++    </div>
++  </details>
++</template>
+diff --git a/src/components/editor/LocalWorkspacePanel.vue b/src/components/editor/LocalWorkspacePanel.vue
+new file mode 100644
+index 0000000..9a62f36
+--- /dev/null
++++ b/src/components/editor/LocalWorkspacePanel.vue
+@@ -0,0 +1,128 @@
++<script setup lang="ts">
++import { ref } from 'vue'
++import { appPreferences, updateLocalOutputShortcut, LOCAL_OUTPUT_SHORTCUTS } from '@/app/settings/preferences/store'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { useEditorStore } from '@/app/editor/active-store'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import AppAlert from '@/components/ui/feedback/AppAlert.vue'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import LocalFilterPanel from '@/components/editor/LocalFilterPanel.vue'
++import LocalPackagePanel from '@/components/editor/LocalPackagePanel.vue'
++import { localWorkspace } from '@/theme/local-workspace'
++
++const { busy, mountBusy, mounts, refreshMounts, addMount, openMount, openSelectedFolder, currentMountId, scanBusy, scanStatus, scanFiles, error, status, documents, history, save, refresh, open, showHistory, restoreVersion } = getLocalWorkspace(useEditorStore())
++const directoryPath = ref('')
++const { preview: mountPreview, busy: mountRelinkBusy, error: mountRelinkError,
++  prepare: prepareMount, confirm: confirmMount, cancel: cancelMount } = getLocalWorkspace(useEditorStore()).mountRelink
++const { path: targetPath, preview: targetPreview, busy: targetBusy, error: targetError,
++  prepare: prepareTarget, confirm: confirmTarget, cancel: cancelTarget } = getLocalWorkspace(useEditorStore()).relink
++const { preview: replacementPreview, busy: replacementBusy, error: replacementError,
++  prepare: prepareReplacement, confirm: confirmReplacement, cancel: cancelReplacement } = getLocalWorkspace(useEditorStore()).replacement
++const { name: outputName, busy: outputBusy, error: outputError, status: outputStatus,
++  selectionStatus, publish: publishOutput, batch: outputBatch, publishBatch, retryBatch, recovery: outputRecovery, recoveryError: outputRecoveryError,
++  recoveryBusy: outputRecoveryBusy, loadRecovery: loadOutputRecovery, resume: resumeOutput,
++  cancelOperation: cancelOutput, renameOperation: renameOutput } = getLocalWorkspace(useEditorStore()).output
++const styles = localWorkspace()
++</script>
++
++<template>
++  <div :class="styles.root()" @pointerdown.stop @wheel.stop>
++    <LocalFilterPanel />
++    <LocalPackagePanel />
++    <div :class="styles.actions()">
++      <AppButton :disabled="busy" @click="save">保存到本机</AppButton>
++      <AppButton :disabled="busy" @click="refresh">本机画布</AppButton>
++      <AppButton :disabled="busy" @click="showHistory">历史版本</AppButton>
++    </div>
++    <div :class="styles.directory()">
++      <AppInput v-model="directoryPath" aria-label="本地目录路径" placeholder="输入本地文件夹路径" @enter="addMount(directoryPath)" />
++      <div :class="styles.actions()">
++        <AppButton :disabled="busy || mountBusy || !directoryPath.trim()" @click="addMount(directoryPath)">加入目录</AppButton>
++        <AppButton :disabled="busy || mountBusy" @click="refreshMounts">我的目录</AppButton>
++        <AppButton :disabled="busy || scanBusy || !currentMountId" @click="scanFiles">刷新目录</AppButton>
++        <AppButton :disabled="busy || mountBusy || !currentMountId" @click="openSelectedFolder">打开选中文件夹</AppButton>
++        <AppButton :disabled="busy || replacementBusy || !currentMountId" @click="prepareReplacement">重新关联原件</AppButton>
++        <AppButton :disabled="busy || mountRelinkBusy || !currentMountId || !directoryPath.trim()" @click="prepareMount(directoryPath)">恢复当前目录关联</AppButton>
++      </div>
++      <p v-if="scanStatus" role="status" :class="styles.status()" data-slot="directory-scan-status">{{ scanStatus }}</p>
++      <AppAlert v-if="mountPreview" tone="warning" heading="恢复目录关联"
++        :description="`原位置：${mountPreview.previousPath}；目标：${mountPreview.path}。保留当前画布和工作内容，重新扫描目标目录。同名的新文件仍需单独确认关联。`">
++        <template #actions>
++          <AppButton :disabled="mountRelinkBusy" @click="confirmMount">确认目录关联</AppButton>
++          <AppButton :disabled="mountRelinkBusy" @click="cancelMount">取消目录关联</AppButton>
++        </template>
++      </AppAlert>
++      <AppAlert v-if="mountRelinkError" tone="error" heading="目录关联" :description="mountRelinkError" />
++      <p v-if="selectionStatus" :class="styles.status()" data-slot="selected-file-status">{{ selectionStatus }}</p>
++      <AppInput v-model="outputName" :disabled="outputBusy" aria-label="成果文件名" placeholder="成果.png 或文字.txt" />
++      <AppButton :disabled="busy || scanBusy || outputBusy || !currentMountId" @click="publishOutput">保存选中成果到目录</AppButton>
++      <AppButton :disabled="busy || scanBusy || outputBusy || !currentMountId" @click="publishBatch">分别保存所选成果</AppButton>
++      <p :class="styles.status()">PNG 导出图片快照，TXT 导出文字内容；更换文件名可另存一份。批量添加 -1、-2 等序号，同名文件保留。</p>
++      <div v-if="outputBatch.length" :class="styles.list()" aria-label="批量保存结果">
++        <div v-for="item in outputBatch" :key="item.id" :class="styles.directory()" :data-state="item.state">
++          <p role="status" :class="styles.status()">{{ item.name }} · {{ item.message }}</p>
++          <AppButton v-if="item.state === 'failed' && item.operation" :disabled="outputBusy || busy || scanBusy" @click="retryBatch(item)">重试 {{ item.name }}</AppButton>
++        </div>
++      </div>
++      <p :class="styles.status()">成果快捷键：{{ appPreferences.localOutput.shortcut === 'off' ? '已关闭' : appPreferences.localOutput.shortcut.replace('Control', 'Ctrl').replace('Key', '') }}；多选时分别保存。</p>
++      <div :class="styles.actions()" aria-label="成果快捷键设置">
++        <AppButton v-for="shortcut in LOCAL_OUTPUT_SHORTCUTS" :key="shortcut"
++          :aria-pressed="appPreferences.localOutput.shortcut === shortcut"
++          :aria-label="`成果快捷键 ${shortcut === 'off' ? '关闭' : shortcut.replace('Control', 'Ctrl').replace('Key', '')}`"
++          @click="updateLocalOutputShortcut(shortcut)">
++          {{ shortcut === 'off' ? '关闭快捷键' : shortcut.replace('Control', 'Ctrl').replace('Key', '') }}
++        </AppButton>
++      </div>
++      <p v-if="outputStatus" role="status" :class="styles.status()" data-slot="output-status">{{ outputStatus }}</p>
++      <AppAlert v-if="outputError" tone="error" heading="成果落盘" :description="outputError" />
++      <AppButton :disabled="outputRecoveryBusy || outputBusy || !currentMountId" @click="loadOutputRecovery">未完成的成果</AppButton>
++      <div v-if="outputRecovery.length" :class="styles.list()" aria-label="未完成成果列表">
++        <div v-for="operation in outputRecovery" :key="operation.operationId" :class="styles.directory()">
++          <AppButton :disabled="busy || scanBusy || outputBusy" @click="resumeOutput(operation)">
++            继续保存 {{ operation.path }}（原内容版本 {{ operation.sourceRevision }}）
++          </AppButton>
++          <div :class="styles.actions()">
++            <AppButton :disabled="busy || scanBusy || outputBusy || !outputName.trim()" @click="renameOutput(operation)">按上方新文件名保存原快照</AppButton>
++            <AppButton :disabled="busy || outputBusy" @click="cancelOutput(operation)">取消保存 {{ operation.path }}</AppButton>
++          </div>
++        </div>
++      </div>
++      <AppAlert v-if="outputRecoveryError" tone="error" heading="成果恢复" :description="outputRecoveryError" />
++      <AppInput v-model="targetPath" aria-label="重新关联目标文件路径" placeholder="目标文件完整路径" @enter="prepareTarget" />
++      <AppButton :disabled="busy || targetBusy || !targetPath.trim()" @click="prepareTarget">预览其他位置的原件</AppButton>
++      <AppAlert v-if="targetPreview" tone="info" heading="关联到选定文件"
++        :description="`目标：${targetPreview.path}（${targetPreview.size} 字节）。仅改变选中节点的文件引用，可撤销；确认后目标所在目录会登记用于持续同步。`">
++        <template #actions>
++          <AppButton :disabled="targetBusy" @click="confirmTarget">确认更改节点引用</AppButton>
++          <AppButton :disabled="targetBusy" @click="cancelTarget">取消更改引用</AppButton>
++        </template>
++      </AppAlert>
++      <AppAlert v-if="targetError" tone="error" heading="目标文件" :description="targetError" />
++      <AppAlert v-if="replacementPreview" tone="warning" heading="确认新原件"
++        :description="`将此资产关联到 ${replacementPreview.path}（${replacementPreview.size} 字节）。引用它的节点会更新，画布位置和工作内容保留。文件夹确认会保留已登记子画布；其中同名新文件仍需分别确认。`">
++        <template #actions>
++          <AppButton :disabled="replacementBusy" @click="confirmReplacement">确认关联新原件</AppButton>
++          <AppButton :disabled="replacementBusy" @click="cancelReplacement">取消关联</AppButton>
++        </template>
++      </AppAlert>
++      <AppAlert v-if="replacementError" tone="error" heading="文件关联" :description="replacementError" />
++      <div v-if="mounts.length" :class="styles.list()" aria-label="本地目录列表">
++        <AppButton v-for="mount in mounts" :key="mount.id" :disabled="busy || mountBusy" :title="mount.path" :aria-label="mount.path" @click="openMount(mount)">
++          {{ mount.path.split(/[\\/]/).filter(Boolean).at(-1) ?? mount.path }}{{ mount.availability === 'available' ? '' : ' · 不可用' }}
++        </AppButton>
++      </div>
++    </div>
++    <div v-if="history.length" :class="styles.list()" aria-label="历史版本列表">
++      <AppButton v-for="version in history" :key="version.revision" :disabled="busy" @click="restoreVersion(version)">
++        恢复版本 {{ version.revision }}
++      </AppButton>
++    </div>
++    <p role="status" :class="styles.status()" data-slot="local-save-status">{{ status }}</p>
++    <AppAlert v-if="error" tone="error" heading="本机画布" :description="error" />
++    <div v-if="documents.length" :class="styles.list()" aria-label="本机画布列表">
++      <AppButton v-for="document in documents" :key="document.canvasId" :disabled="busy" @click="open(document)">
++        {{ document.metadata.name }} · {{ document.revision }}
++      </AppButton>
++    </div>
++  </div>
++</template>
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+new file mode 100644
+index 0000000..40f6307
+--- /dev/null
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -0,0 +1,90 @@
++<script setup lang="ts">
++import { computed } from 'vue'
++
++import { useEditorStore } from '@/app/editor/active-store'
++import { useLocalLayout } from '@/app/shell/local-layout'
++import EditorCanvas from '@/components/EditorCanvas.vue'
++import LocalWorkspacePanel from '@/components/editor/LocalWorkspacePanel.vue'
++import LayersPanel from '@/components/LayersPanel.vue'
++import PropertiesPanel from '@/components/PropertiesPanel.vue'
++import Toolbar from '@/components/toolbar/Toolbar.vue'
++import IconButton from '@/components/ui/button/IconButton.vue'
++import AppAlert from '@/components/ui/feedback/AppAlert.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import { osCanvasWorkspace } from '@/theme/os-canvas-workspace'
++
++const store = useEditorStore()
++const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
++const editing = computed(() => store.state.showUI && store.state.play === null)
++const styles = osCanvasWorkspace()
++</script>
++
++<template>
++  <div data-slot="os-canvas-workspace" :class="styles.root()">
++    <LocalWorkspacePanel />
++    <!-- The canvas stays mounted and full-size when panels or preview state change. -->
++    <div data-slot="os-canvas-layer" :class="styles.canvas()">
++      <EditorCanvas />
++    </div>
++    <div :class="styles.controls()" aria-label="画布面板">
++      <IconButton
++        label="图层面板"
++        :active="layersOpen"
++        toggle
++        @click="toggle('layers')"
++      >
++        <icon-lucide-panel-left class="size-4" />
++      </IconButton>
++      <IconButton
++        label="属性面板"
++        :active="propertiesOpen"
++        toggle
++        @click="toggle('properties')"
++      >
++        <icon-lucide-panel-right class="size-4" />
++      </IconButton>
++      <IconButton
++        v-if="store.state.play === null"
++        label="预览交互"
++        @click="store.startPlay()"
++      >
++        <icon-lucide-play class="size-4" />
++      </IconButton>
++      <IconButton v-else label="返回编辑" @click="store.stopPlay()">
++        <icon-lucide-square class="size-4" />
++      </IconButton>
++    </div>
++    <AppAlert v-if="layoutError" :class="styles.layoutError()" tone="warning" heading="布局未保存" :description="layoutError">
++      <template #actions>
++        <AppButton :disabled="layoutBusy" @click="retry">重试布局保存</AppButton>
++        <AppButton :disabled="layoutBusy" @click="reload">重新读取布局</AppButton>
++      </template>
++    </AppAlert>
++    <!-- v-show retains panel instances and drafts; none of these dimensions size the canvas. -->
++    <section
++      v-show="editing && layersOpen"
++      data-slot="os-layers-overlay"
++      aria-label="图层"
++      :class="styles.layers()"
++      @pointerdown.stop
++      @wheel.stop
++      @contextmenu.stop
++    >
++      <LayersPanel />
++    </section>
++    <section
++      v-show="editing && propertiesOpen"
++      data-slot="os-properties-overlay"
++      aria-label="属性"
++      :class="styles.properties()"
++      @pointerdown.stop
++      @wheel.stop
++      @contextmenu.stop
++    >
++      <PropertiesPanel />
++    </section>
++    <div v-show="editing" :class="styles.toolbar()">
++      <Toolbar />
++    </div>
++  </div>
++</template>
+diff --git a/src/theme/local-file-badges.ts b/src/theme/local-file-badges.ts
+new file mode 100644
+index 0000000..19b5071
+--- /dev/null
++++ b/src/theme/local-file-badges.ts
+@@ -0,0 +1,8 @@
++import { tv } from 'tailwind-variants'
++
++export const localFileBadges = tv({
++  slots: {
++    layer: 'pointer-events-none absolute inset-0 overflow-hidden',
++    badge: 'pointer-events-none absolute max-w-40 -mt-1 translate-x-1 -translate-y-full truncate rounded border border-border bg-panel px-1 text-xs text-muted data-[unavailable=true]:border-warning-border data-[unavailable=true]:text-warning'
++  }
++})
+diff --git a/src/theme/local-workspace.ts b/src/theme/local-workspace.ts
+new file mode 100644
+index 0000000..0c111ef
+--- /dev/null
++++ b/src/theme/local-workspace.ts
+@@ -0,0 +1,9 @@
++import { tv } from 'tailwind-variants'
++
++export const localWorkspace = tv({ slots: {
++  root: 'absolute right-3 top-2 z-30 max-h-[calc(100%-1rem)] max-w-80 overflow-auto rounded border border-border bg-panel p-2',
++  actions: 'flex flex-wrap items-center gap-2',
++  directory: 'mt-2 flex flex-col gap-1 border-t border-border pt-2',
++  status: 'text-xs text-muted',
++  list: 'max-h-48 overflow-auto'
++} })
+diff --git a/src/theme/os-canvas-workspace.ts b/src/theme/os-canvas-workspace.ts
+new file mode 100644
+index 0000000..e64ee0a
+--- /dev/null
++++ b/src/theme/os-canvas-workspace.ts
+@@ -0,0 +1,15 @@
++import { tv } from 'tailwind-variants'
++
++export const osCanvasWorkspace = tv({
++  slots: {
++    root: 'os-canvas-workspace relative min-h-0 min-w-0 flex-1 overflow-hidden bg-canvas text-surface',
++    canvas: 'absolute inset-0 flex',
++    controls: 'absolute left-3 top-2 z-20 flex gap-1 rounded border border-border bg-panel p-1',
++    layoutError: 'absolute left-3 top-14 z-30 max-w-80',
++    layers:
++      'absolute left-3 top-14 bottom-4 z-10 flex w-60 overflow-hidden rounded border border-border bg-panel',
++    properties:
++      'absolute right-3 top-14 bottom-4 z-10 flex w-72 flex-col overflow-hidden rounded border border-border bg-panel',
++    toolbar: 'pointer-events-none absolute inset-x-0 bottom-0 z-20 [&>*]:pointer-events-auto'
++  }
++})
+diff --git a/src/theme/tokens.css b/src/theme/tokens.css
+index eb58186..d09d0da 100644
+--- a/src/theme/tokens.css
++++ b/src/theme/tokens.css
+@@ -101,6 +101,23 @@
+   --color-code-comment: #969eaa;
+ }
+ 
++/* OS Factory + ASCII shell: scope the prototype to its workspace. */
++.os-canvas-workspace {
++  --color-panel: #191919;
++  --color-panel-secondary: #141414;
++  --color-panel-field: #242321;
++  --color-panel-field-hover: #30302e;
++  --color-panel-focus: #eeeeee;
++  --color-panel-selected: #77716b;
++  --color-panel-selected-muted: #30302e;
++  --color-canvas: #101010;
++  --color-border: #30302e;
++  --color-hover: #242321;
++  --color-surface: #eeeeee;
++  --color-muted: #b8b3b0;
++  --color-input: #141414;
++}
++
+ html[data-theme='light'] {
+   --color-panel: #ffffff;
+   --color-panel-secondary: #f7f8fa;
+diff --git a/tests/app/document/local-filter.test.ts b/tests/app/document/local-filter.test.ts
+new file mode 100644
+index 0000000..46f1a06
+--- /dev/null
++++ b/tests/app/document/local-filter.test.ts
+@@ -0,0 +1,41 @@
++import { expect, test } from 'bun:test'
++import { SceneGraph } from '@open-pencil/scene-graph'
++import { localFilterProjection } from '@/app/document/local-filter'
++
++test('compound filtering matches all dimensions on one node and preserves the entire authored tree', () => {
++  const graph = new SceneGraph(), page = graph.addPage('Assets')
++  const frame = graph.createNode('FRAME', page.id, { x: 120, y: 90, name: 'Design' })
++  graph.createNode('TEXT', frame.id, { name: 'Notes', text: 'work in progress' })
++  const rectangle = graph.createNode('RECTANGLE', page.id)
++  const before = JSON.stringify([...graph.nodes])
++  const filtered = localFilterProjection(graph, page.id, { types: ['text'], associations: ['canvas'], query: 'notes' })
++  expect([...filtered.shown]).toEqual([frame.id])
++  expect([...filtered.hidden]).toEqual([rectangle.id])
++  expect(JSON.stringify([...graph.nodes])).toBe(before)
++  const cleared = localFilterProjection(graph, page.id, { types: [], associations: [], query: '' })
++  expect(cleared.hidden.size).toBe(0)
++  expect(cleared.total).toBe(2)
++  expect(JSON.stringify([...graph.nodes])).toBe(before)
++})
++
++test('file card type comes from the asset and generated labels cannot match as canvas text', () => {
++  const graph = new SceneGraph(), page = graph.addPage('Assets')
++  const card = graph.createNode('FRAME', page.id, { name: 'Photo', pluginData: [{ pluginId: 'os.canvas',
++    key: 'os.canvas/fileLink', value: JSON.stringify({ id: 'asset', mountId: 'mount', path: '照片.PNG',
++      kind: 'file', size: '120', revision: 1, availability: 'available' }) }] })
++  graph.createNode('TEXT', card.id, { name: '照片.PNG', pluginData: [{ pluginId: 'os.canvas',
++    key: 'os.canvas/fileLabel', value: '1' }] })
++  expect(localFilterProjection(graph, page.id, { types: ['image', 'audio'], associations: ['local'], query: '.png' }).shown.has(card.id)).toBe(true)
++  expect(localFilterProjection(graph, page.id, { types: ['text'], associations: [], query: '' }).hidden.has(card.id)).toBe(true)
++  expect(localFilterProjection(graph, page.id, { types: [], associations: ['canvas'], query: '' }).hidden.has(card.id)).toBe(true)
++})
++
++test('missing association remains local metadata and does not become unassociated canvas content', () => {
++  const graph = new SceneGraph(), page = graph.addPage('Assets')
++  const node = graph.createNode('TEXT', page.id, { name: 'Result', pluginData: [{ pluginId: 'os.canvas',
++    key: 'os.canvas/fileLink', value: JSON.stringify({ id: 'asset', mountId: 'mount', path: '成果.txt',
++      kind: 'file', size: '120', revision: 2, availability: 'missing' }) }] })
++  expect(localFilterProjection(graph, page.id, { types: ['text'], associations: ['unavailable', 'local'], query: '成果' }).shown.has(node.id)).toBe(true)
++  expect(localFilterProjection(graph, page.id, { types: [], associations: ['canvas'], query: '' }).hidden.has(node.id)).toBe(true)
++  expect(localFilterProjection(graph, page.id, { types: [], associations: ['local'], query: '' }).hidden.has(node.id)).toBe(true)
++})
+diff --git a/tests/engine/app/runtime/config.test.ts b/tests/engine/app/runtime/config.test.ts
+index ed951ce..5a4497c 100644
+--- a/tests/engine/app/runtime/config.test.ts
++++ b/tests/engine/app/runtime/config.test.ts
+@@ -10,6 +10,7 @@ describe('app runtime configuration', () => {
+       )
+     ).toEqual({
+       test: true,
++      osCanvas: false,
+       navigationBenchmark: true,
+       recentFiles: true,
+       showChrome: false,
+@@ -34,6 +35,7 @@ describe('app runtime configuration', () => {
+   test('uses production-safe defaults for absent or unknown values', () => {
+     expect(parseAppRuntimeConfig('?renderer=unknown')).toEqual({
+       test: false,
++      osCanvas: false,
+       navigationBenchmark: false,
+       recentFiles: false,
+       showChrome: true,
+diff --git a/vite.config.ts b/vite.config.ts
+index 33cee0d..7be59fd 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -24,6 +24,7 @@ import { aiIconCollection } from './vite/icons'
+ import { openPencilPwaPlugin } from './vite/pwa'
+ import { rawMarkdownPlugin } from './vite/raw-markdown'
+ import { createDevServerOptions } from './vite/server'
++import { osWorkspacePlugin } from './vite/os-workspace'
+ 
+ const host = process.env.TAURI_DEV_HOST
+ const automationRoute = localAutomationRoute(host)
+@@ -45,6 +46,7 @@ export default defineConfig(async ({ command }) => {
+     // Dynamic browser fixtures must not trigger a dependency-optimizer reload mid-test.
+     optimizeDeps: { include: ['ai/test'] },
+     plugins: [
++      osWorkspacePlugin(),
+       rawMarkdownPlugin(),
+       copyCanvasKitAssetsPlugin(),
+       tailwindcss(),
+diff --git a/vite/os-workspace.ts b/vite/os-workspace.ts
+new file mode 100644
+index 0000000..abece25
+--- /dev/null
++++ b/vite/os-workspace.ts
+@@ -0,0 +1,50 @@
++import type { Plugin, ViteDevServer } from 'vite'
++
++// The local host owns the token; it is never bundled into renderer code.
++export function osWorkspacePlugin(): Plugin {
++    function configure(server: Pick<ViteDevServer, 'middlewares'>) {
++      server.middlewares.use('/os-workspace', async (request, response) => {
++        const token = process.env.OS_CANVAS_TOKEN
++        const target = process.env.OS_CANVAS_SERVICE_URL
++        const origin = process.env.OPENPENCIL_DEV_ORIGIN
++        if (!token || !target || !origin) {
++          response.writeHead(503); response.end('Local workspace is not running'); return
++        }
++        if (request.headers.host !== new URL(origin).host ||
++            (request.headers.origin && request.headers.origin !== origin) ||
++            request.headers['x-os-workspace'] !== '1') {
++          response.writeHead(403); response.end('Workspace request rejected'); return
++        }
++        try {
++          let body: Uint8Array | undefined
++          if (request.method === 'POST') {
++            const chunks: Buffer[] = []
++            let size = 0
++            for await (const chunk of request) {
++              const bytes = Buffer.from(chunk)
++              size += bytes.length
++              if (size > 350 * 1024 * 1024) {
++                response.writeHead(413); response.end('Request too large'); return
++              }
++              chunks.push(bytes)
++            }
++            body = new Uint8Array(Buffer.concat(chunks))
++          }
++          const result = await fetch(`${target}${request.url ?? '/'}`, {
++            method: request.method, body,
++            headers: { Authorization: `Bearer ${token}`, Origin: origin,
++              'Content-Type': request.headers['content-type'] ?? 'application/json' },
++            signal: AbortSignal.timeout(30000)
++          })
++          response.writeHead(result.status, {
++            'Content-Type': result.headers.get('content-type') ?? 'application/json',
++            'Cache-Control': 'no-store'
++          })
++          response.end(Buffer.from(await result.arrayBuffer()))
++        } catch {
++          response.writeHead(503); response.end('Local workspace is unavailable')
++        }
++      })
++    }
++  return { name: 'os-workspace', configureServer: configure, configurePreviewServer: configure }
++}

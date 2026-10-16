@@ -1,0 +1,121 @@
+diff --git a/src/components/properties/shared-style/SharedStylesSection.vue b/src/components/properties/shared-style/SharedStylesSection.vue
+--- a/src/components/properties/shared-style/SharedStylesSection.vue
++++ b/src/components/properties/shared-style/SharedStylesSection.vue
+@@ -9,6 +9,10 @@
+ import PanelSection from '@/components/ui/panel/PanelSection.vue'
+ import AppSelect from '@/components/ui/select/AppSelect.vue'
+ 
++import EffectStyleFields from './EffectStyleFields.vue'
++import { effectDrafts, readEffects, type EffectDraft } from './effect-draft'
++
++const effects = ref<EffectDraft[]>([])
+ const editor = useEditorStore()
+ const selected = ref('')
+ const name = ref('')
+@@ -23,10 +27,11 @@
+ watch(definitions, nodes => {
+   if (!nodes.some(node => node.id === selected.value)) selected.value = nodes[0]?.id ?? ''
+ }, { immediate: true })
+-watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills, ...SHARED_TEXT_STYLE_FIELDS.map(key => style.value?.[key])]), () => {
++watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills, style.value?.effects, ...SHARED_TEXT_STYLE_FIELDS.map(key => style.value?.[key])]), () => {
+   name.value = style.value?.name ?? ''
+   const color = style.value?.fills[0]?.color
+   hex.value = color ? [color.r, color.g, color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase() : ''
++  effects.value = effectDrafts(style.value?.effects ?? [])
+   text.fontFamily = style.value?.fontFamily ?? ''
+   for (const field of textFields) text[field.key] = style.value?.[field.key] ?? ''
+   error.value = ''
+@@ -74,10 +79,14 @@
+     if (!typography) return
+     Object.assign(patch, typography)
+   }
++  if (current.sharedStyleType === 'EFFECT') {
++    try { patch.effects = readEffects(effects.value) }
++    catch (cause) { error.value = cause instanceof Error ? cause.message : '效果输入无效'; return }
++  }
+   const finish = editor.captureDocumentChange(editor.state.currentPageId)
+   try {
+     editor.graph.updateNode(current.id, patch)
+-    if (patch.fills || current.sharedStyleType === 'TEXT') updateReferences(current)
++    if (patch.fills || patch.effects || current.sharedStyleType === 'TEXT') updateReferences(current)
+   } catch (cause) {
+     editor.restoreDocumentChange(finish(), 'before')
+     error.value = cause instanceof Error ? cause.message : '更新样式失败'
+@@ -104,6 +113,7 @@
+         <label class="text-xs text-muted">字体<AppInput v-model="text.fontFamily" aria-label="样式字体" size="sm" /></label>
+         <label v-for="field in textFields" :key="field.key" class="text-xs text-muted">{{ field.label }}<AppInput v-model="text[field.key]" :aria-label="`样式${field.label}`" type="number" size="sm" /></label>
+       </template>
++      <EffectStyleFields v-if="style?.sharedStyleType === 'EFFECT'" v-model="effects" />
+       <AppButton size="sm" @click="save">保存样式修改</AppButton>
+       <span v-if="error" role="alert" class="text-xs">{{ error }}</span>
+     </div>
+diff --git a/src/components/properties/shared-style/effect-draft.ts b/src/components/properties/shared-style/effect-draft.ts
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/shared-style/effect-draft.ts
+@@ -0,0 +1,31 @@
++import { copyEffects, type Effect } from '@open-pencil/scene-graph'
++
++export interface EffectDraft {
++  source: Effect
++  type: Effect['type']
++  hex: string
++  alpha: string | number
++  x: string | number
++  y: string | number
++  radius: string | number
++  spread: string | number
++  visible: boolean
++}
++export function effectDrafts(effects: Effect[]): EffectDraft[] {
++  return copyEffects(effects).map(source => ({
++    source, type: source.type, visible: source.visible,
++    hex: [source.color.r, source.color.g, source.color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase(),
++    alpha: source.color.a * 100, x: source.offset.x, y: source.offset.y, radius: source.radius, spread: source.spread
++  }))
++}
++export function readEffects(drafts: EffectDraft[]): Effect[] {
++  return drafts.map((draft, index) => {
++    const hex = draft.hex.trim().replace(/^#/, '')
++    const values = [draft.alpha, draft.x, draft.y, draft.radius, draft.spread]
++    const [alpha, x, y, radius, spread] = values.map(Number)
++    if (!/^[0-9a-f]{6}$/i.test(hex) || values.some(value => String(value).trim() === '') || ![alpha, x, y, radius, spread].every(Number.isFinite) || alpha < 0 || alpha > 100 || radius < 0) throw new Error(`效果 ${index + 1}：请填写有效颜色和数值，透明度为 0–100，模糊不能为负数`)
++    return { ...draft.source, type: draft.type, visible: draft.visible, offset: { x, y }, radius, spread,
++      color: { r: Number.parseInt(hex.slice(0, 2), 16) / 255, g: Number.parseInt(hex.slice(2, 4), 16) / 255, b: Number.parseInt(hex.slice(4, 6), 16) / 255, a: alpha / 100 }
++    }
++  })
++}
+diff --git a/src/components/properties/shared-style/EffectStyleFields.vue b/src/components/properties/shared-style/EffectStyleFields.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/shared-style/EffectStyleFields.vue
+@@ -0,0 +1,29 @@
++<script setup lang="ts">
++import type { EffectDraft } from './effect-draft'
++import { effectDrafts } from './effect-draft'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import AppSelect from '@/components/ui/select/AppSelect.vue'
++import AppCheckbox from '@/components/ui/toggle/AppCheckbox.vue'
++const effects = defineModel<EffectDraft[]>({ required: true })
++const types = [{ value: 'DROP_SHADOW', label: '投影' }, { value: 'INNER_SHADOW', label: '内阴影' }, { value: 'LAYER_BLUR', label: '图层模糊' }, { value: 'BACKGROUND_BLUR', label: '背景模糊' }, { value: 'FOREGROUND_BLUR', label: '前景模糊' }]
++const fields = [{ key: 'alpha', label: '透明度 %' }, { key: 'radius', label: '模糊' }, { key: 'x', label: '水平偏移' }, { key: 'y', label: '垂直偏移' }, { key: 'spread', label: '扩展' }] as const
++function add() {
++  effects.value.push(...effectDrafts([{ type: 'DROP_SHADOW', color: { r: 0, g: 0, b: 0, a: 0.25 }, offset: { x: 0, y: 4 }, radius: 8, spread: 0, visible: true }]))
++}
++</script>
++<template>
++  <div v-for="(effect, index) in effects" :key="index" class="flex flex-col gap-2" :data-style-effect="index">
++    <AppSelect v-model="effect.type" :options="types" :label="`效果 ${index + 1} 类型`" />
++    <label class="text-xs text-muted">颜色<AppInput v-model="effect.hex" :aria-label="`效果 ${index + 1} 颜色`" size="sm" /></label>
++    <div class="grid grid-cols-2 gap-2">
++      <label v-for="field in fields" :key="field.key" class="text-xs text-muted">{{ field.label }}<AppInput v-model="effect[field.key]" :aria-label="`效果 ${index + 1} ${field.label}`" type="number" size="sm" /></label>
++    </div>
++    <div class="flex items-center gap-2">
++      <AppCheckbox v-model="effect.visible" :aria-label="`效果 ${index + 1} 可见`" />
++      <span class="text-xs text-muted">可见</span>
++      <AppButton size="xs" :aria-label="`删除效果 ${index + 1}`" @click="effects.splice(index, 1)">删除</AppButton>
++    </div>
++  </div>
++  <AppButton size="sm" @click="add">添加样式效果</AppButton>
++</template>

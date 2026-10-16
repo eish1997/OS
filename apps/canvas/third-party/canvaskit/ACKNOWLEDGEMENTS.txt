@@ -1,0 +1,12 @@
+OS Canvas rendering component acknowledgements
+
+Portions of this software use the FreeType Project (https://freetype.org),
+under the FreeType License. Original copyright notices and the full FTL
+are included in the dependency notices.
+
+This software is based in part on the work of the Independent JPEG Group.
+
+CanvasKit source defines an optional Noto Mono embedded font. Its notice is
+included conservatively. Noto Naskh Arabic and Inter are bundled
+editor font assets. Their separate original copyright notices and OFL
+texts accompany this distribution.

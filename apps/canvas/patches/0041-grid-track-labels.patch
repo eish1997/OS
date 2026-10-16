@@ -1,0 +1,11 @@
+diff --git a/src/components/properties/layout/grid/GridControls.vue b/src/components/properties/layout/grid/GridControls.vue
+--- a/src/components/properties/layout/grid/GridControls.vue
++++ b/src/components/properties/layout/grid/GridControls.vue
+@@ -47,6 +47,7 @@
+           <span v-else class="flex-1 px-1 text-xs text-muted">{{ ctx.trackLabel(track) }}</span>
+           <AppSelect
+             :model-value="track.sizing"
++            :label="`${trackProp === 'gridTemplateColumns' ? panels.columns : panels.rows} ${i + 1} ${panels.resizing}`"
+             :options="ctx.trackSizingOptions"
+             @update:model-value="
+               ctx.updateGridTrack(trackProp, i, {

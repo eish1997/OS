@@ -1,0 +1,37 @@
+diff --git a/src/app/editor/vector/history.ts b/src/app/editor/vector/history.ts
+--- a/src/app/editor/vector/history.ts
++++ b/src/app/editor/vector/history.ts
+@@ -25,7 +25,11 @@
+   }
+ }
+ 
+-export function createVectorEditHistoryActions(editor: Editor, state: VectorEditState) {
++export function createVectorEditHistoryActions(
++  editor: Editor,
++  state: VectorEditState,
++  onRestore?: (editState: NodeEditState) => void
++) {
+   function nodeEditPushHistory() {
+     const es = state.nodeEditState
+     if (es) pushNodeEditHistory(es)
+@@ -41,6 +45,7 @@
+     es.selectedVertexIndices = new Set()
+     es.selectedHandles = new Set()
+     es.hoveredHandleInfo = null
++    onRestore?.(es)
+     editor.requestRender()
+   }
+ 
+diff --git a/src/app/editor/vector/create.ts b/src/app/editor/vector/create.ts
+--- a/src/app/editor/vector/create.ts
++++ b/src/app/editor/vector/create.ts
+@@ -21,7 +21,8 @@
+     createVectorEditHandleActions(editor, getNodeEditState)
+   const { nodeEditPushHistory, nodeEditUndo, nodeEditRedo } = createVectorEditHistoryActions(
+     editor,
+-    state
++    state,
++    commitNodeEditChanges
+   )
+   const { nodeEditConnectEndpoints, nodeEditAddVertex, nodeEditRemoveVertex } =
+     createVectorEditNetworkActions(editor, state, getNodeEditState)

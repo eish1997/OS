@@ -1,0 +1,75 @@
+diff --git a/src/app/document/local-connection-drag.ts b/src/app/document/local-connection-drag.ts
+--- a/src/app/document/local-connection-drag.ts
++++ b/src/app/document/local-connection-drag.ts
+@@ -6,6 +6,7 @@
+ import { anchorPoint, anchorSides, relation } from './local-connection-data'
+ import type { AnchorSide } from './local-connection-data'
+ import { localNodeId } from './local-identity'
++import { anchorUnclipped, anchorUncovered } from './local-connection-visibility'
+ import { useConnectionEdit } from './local-connection-edit'
+ 
+ type Endpoint = 'source' | 'target'
+@@ -19,10 +20,11 @@
+     const transform = view(), found: Anchor[] = []
+     function visit(id: string) {
+       const node = editor.graph.getNode(id)
+-      if (!node || !node.visible || node.locked || editor.graph.isViewHidden(id)) return
++      if (!node || !node.visible || node.opacity === 0 || node.locked || editor.graph.isViewHidden(id)) return
+       const uuid = localNodeId(node)
+       if (uuid && !relation(node)) for (const side of anchorSides) {
+         const [x, y] = Matrix.mapPoints(getWorldMatrix(node, editor.graph), anchorPoint(node, side))
++        if (!anchorUnclipped(editor.graph, node, x, y)) continue
+         found.push({ uuid, side, x: x * transform.zoom + transform.panX, y: y * transform.zoom + transform.panY })
+       }
+       for (const child of node.childIds) visit(child)
+@@ -54,13 +56,16 @@
+   function move(event: PointerEvent) {
+     const active = drag.value
+     if (!active || active.pointer !== event.pointerId) return
+-    const bounds = (event.currentTarget as HTMLElement).parentElement?.getBoundingClientRect()
+-    if (!bounds) return
++    const layer = (event.currentTarget as HTMLElement).parentElement
++    if (!layer) return
++    const bounds = layer.getBoundingClientRect()
+     const x = event.clientX - bounds.left, y = event.clientY - bounds.top
+     let candidate: Anchor | undefined, nearest = 14
+     for (const anchor of anchors.value) {
+       const distance = Math.hypot(anchor.x - x, anchor.y - y)
+-      if (distance < nearest) { nearest = distance; candidate = anchor }
++      if (distance < nearest && anchorUncovered(layer, bounds.left + anchor.x, bounds.top + anchor.y)) {
++        nearest = distance; candidate = anchor
++      }
+     }
+     drag.value = { ...active, candidate, x: candidate?.x ?? x, y: candidate?.y ?? y }
+   }
+diff --git a/src/app/document/local-connection-visibility.ts b/src/app/document/local-connection-visibility.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connection-visibility.ts
+@@ -0,0 +1,26 @@
++import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
++import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
++import Matrix from '@open-pencil/scene-graph/matrix'
++
++/** Test each ancestor clip in its own coordinates, including rotated frames. */
++export function anchorUnclipped(graph: SceneGraph, node: SceneNode, x: number, y: number) {
++  let parent = graph.getNode(node.parentId ?? '')
++  while (parent) {
++    if (parent.clipsContent) {
++      const inverse = Matrix.invert(getWorldMatrix(parent, graph))
++      if (!inverse) return false
++      const [px, py] = Matrix.mapPoints(inverse, [x, y])
++      if (px < -0.00001 || py < -0.00001 || px > parent.width + 0.00001 || py > parent.height + 0.00001) return false
++    }
++    parent = graph.getNode(parent.parentId ?? '')
++  }
++  return true
++}
++
++/** Pointer capture must not make a panel-covered anchor eligible for a drop. */
++export function anchorUncovered(layer: HTMLElement, x: number, y: number) {
++  const area = layer.closest('[data-test-id="canvas-area"]')
++  const canvas = area?.querySelector('[data-test-id="canvas-element"]')
++  const top = document.elementsFromPoint(x, y).find(element => !layer.contains(element))
++  return canvas !== null && top === canvas
++}

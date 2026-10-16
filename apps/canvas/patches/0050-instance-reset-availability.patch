@@ -1,0 +1,42 @@
+diff --git a/src/components/properties/component-properties/ResetInstanceAction.vue b/src/components/properties/component-properties/ResetInstanceAction.vue
+--- a/src/components/properties/component-properties/ResetInstanceAction.vue
++++ b/src/components/properties/component-properties/ResetInstanceAction.vue
+@@ -1,5 +1,6 @@
+ <script setup lang="ts">
+-import { computed, ref } from 'vue'
++import { ref, watch } from 'vue'
++import { useSceneComputed } from '@open-pencil/vue'
+ 
+ import { getNodeEditCapability, isEmptyDocumentChange } from '@open-pencil/core/editor'
+ import { FigmaAPI } from '@open-pencil/core/figma-api'
+@@ -10,15 +11,23 @@
+ 
+ const { editor, node } = defineProps<{ editor: EditorStore; node: SceneNode }>()
+ const error = ref('')
+-const enabled = computed(() =>
+-  node.type === 'INSTANCE' &&
+-  !!node.componentId &&
+-  !!editor.graph.getNode(node.componentId) &&
+-  getNodeEditCapability(editor.graph, node.id).editable
+-)
++function canReset() {
++  const current = editor.graph.getNode(node.id)
++  if (current?.type !== 'INSTANCE' || !current.componentId) return false
++  if (!editor.graph.getNode(current.componentId)) return false
++  for (let ancestor: SceneNode | undefined = current; ancestor;) {
++    if (ancestor.locked) return false
++    ancestor = ancestor.parentId ? editor.graph.getNode(ancestor.parentId) : undefined
++  }
++  return getNodeEditCapability(editor.graph, current.id).editable
++}
++
++const enabled = useSceneComputed(canReset)
++watch(() => node.id, () => { error.value = '' })
++
+ 
+ function reset() {
+-  if (!enabled.value) return
++  if (!canReset()) return
+   error.value = ''
+   const finish = editor.captureDocumentChange(editor.state.currentPageId)
+   try {

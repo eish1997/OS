@@ -1,0 +1,74 @@
+diff --git a/src/theme/tokens.css b/src/theme/tokens.css
+index d09d0da..29bccae 100644
+--- a/src/theme/tokens.css
++++ b/src/theme/tokens.css
+@@ -102,13 +102,14 @@
+ }
+ 
+ /* OS Factory + ASCII shell: scope the prototype to its workspace. */
++html[data-os-canvas='true'],
+ .os-canvas-workspace {
+   --color-panel: #191919;
+   --color-panel-secondary: #141414;
+   --color-panel-field: #242321;
+   --color-panel-field-hover: #30302e;
+   --color-panel-focus: #eeeeee;
+-  --color-panel-selected: #77716b;
++  --color-panel-selected: #eeeeee;
+   --color-panel-selected-muted: #30302e;
+   --color-canvas: #101010;
+   --color-border: #30302e;
+diff --git a/src/app/shell/theme.ts b/src/app/shell/theme.ts
+index 78c3914..d0eb7d1 100644
+--- a/src/app/shell/theme.ts
++++ b/src/app/shell/theme.ts
+@@ -6,6 +6,7 @@ import { IS_BROWSER } from '@open-pencil/core/constants'
+ import { parseColor } from '@open-pencil/scene-graph/color'
+ 
+ import { getActiveEditorStoreOrNull, useActiveEditorStoreRef } from '@/app/editor/active-store'
++import { appRuntimeConfig } from '@/app/runtime/config'
+ import { useAccentPalette } from '@/app/shell/accent'
+ import { ACCENT_TOKENS, type AccentPalette } from '@/app/shell/accent/palette'
+ 
+@@ -19,6 +20,7 @@ const theme = useLocalStorage<AppTheme>(THEME_STORAGE_KEY, DEFAULT_THEME)
+ const prefersDark = usePreferredDark()
+ /** The theme in effect; a stored value that is not a theme reads as the default dark. */
+ export const resolvedAppTheme = computed<'dark' | 'light'>(() => {
++  if (appRuntimeConfig.osCanvas) return 'dark'
+   if (theme.value === 'auto') return prefersDark.value ? 'dark' : 'light'
+   return theme.value === 'light' ? 'light' : 'dark'
+ })
+@@ -40,7 +42,9 @@ function updateCanvasTheme(): void {
+   if (!store) return
+   store.state.rulerTheme = readRulerTheme() ?? undefined
+   store.state.theme = resolvedAppTheme.value
+-  store.state.selectionTheme = accentPalette.value.selection
++  store.state.selectionTheme = appRuntimeConfig.osCanvas
++    ? { color: parseColor('#EEEEEE'), foreground: parseColor('#24231F') }
++    : accentPalette.value.selection
+   store.requestRepaint()
+ }
+ 
+@@ -54,11 +58,21 @@ export function setAppTheme(value: AppTheme): void {
+ 
+ function applyAccent(palette: AccentPalette): void {
+   const style = document.documentElement.style
+-  for (const token of ACCENT_TOKENS) style.setProperty(token, palette.tokens[token])
++  const tokens = appRuntimeConfig.osCanvas ? {
++    '--color-accent': '#EEEEEE',
++    '--color-on-accent': '#24231F',
++    '--color-primary': '#EEEEEE',
++    '--color-on-primary': '#24231F',
++    '--color-panel-focus': '#EEEEEE',
++    '--color-panel-selected': '#EEEEEE',
++    '--color-panel-selected-muted': '#30302E'
++  } : palette.tokens
++  for (const token of ACCENT_TOKENS) style.setProperty(token, tokens[token])
+ }
+ 
+ function applyTheme(value: 'dark' | 'light', setting: AppTheme): void {
+   if (!IS_BROWSER || !('document' in globalThis)) return
++  document.documentElement.dataset.osCanvas = String(appRuntimeConfig.osCanvas)
+   document.documentElement.dataset.theme = value
+   document.documentElement.dataset.themeSetting = setting
+   document.documentElement.style.colorScheme = value

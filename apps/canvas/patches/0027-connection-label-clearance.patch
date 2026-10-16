@@ -1,0 +1,12 @@
+diff --git a/src/app/document/local-connection-label.ts b/src/app/document/local-connection-label.ts
+--- a/src/app/document/local-connection-label.ts
++++ b/src/app/document/local-connection-label.ts
+@@ -18,7 +18,7 @@
+     fills: [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93, a: 1 }, opacity: 1, visible: true }],
+     pluginData: [{ pluginId: 'os.canvas', key: labelKey, value: '1' }]
+   })
+-  const x = line.width / 2 - child.width / 2, y = line.height / 2 - child.height - 6
++  const x = line.width / 2 - child.width / 2, y = -child.height - Math.max(6, line.strokeWeight / 2 + 4)
+   if (child.text === text && child.visible === Boolean(text) && Math.abs(child.x - x) < 0.00001 && Math.abs(child.y - y) < 0.00001) return
+   const changedText = child.text !== text
+   graph.updateNode(child.id, { text, visible: Boolean(text), x, y })

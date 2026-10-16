@@ -1,0 +1,29 @@
+diff --git a/packages/scene-graph/src/index.ts b/packages/scene-graph/src/index.ts
+--- a/packages/scene-graph/src/index.ts
++++ b/packages/scene-graph/src/index.ts
+@@ -733,7 +733,7 @@
+       }
+     }
+     if (node.type === 'TEXT') invalidateTextCaches(node, changes)
+-    if (this.sourceMetadataPreservationDepth === 0 && !this.isApplyingLayout) {
++    if (this.sourceMetadataPreservationDepth === 0 && !this.isApplyingDerivedLayout) {
+       markSourceFieldsEdited(node, Object.keys(changes))
+     }
+     if (changes.vectorNetwork) {
+diff --git a/packages/scene-graph/tests/basic/update-node.test.ts b/packages/scene-graph/tests/basic/update-node.test.ts
+--- a/packages/scene-graph/tests/basic/update-node.test.ts
++++ b/packages/scene-graph/tests/basic/update-node.test.ts
+@@ -284,3 +284,13 @@
+     expect(expectDefined(afterUpdate, 'updated node').textPicture).toBeNull()
+   })
+ })
++
++
++test('edited layout geometry invalidates saved source size, derived loading preserves it', () => {
++  const graph = new SceneGraph()
++  const node = graph.createNode('FRAME', pageId(graph), { width: 240, height: 200 })
++  graph.applyDerivedLayoutDuring(() => graph.withLayoutMutations(() => graph.updateNode(node.id, { height: 300 })))
++  expect(node.source.editedFields).not.toContain('height')
++  graph.withLayoutMutations(() => graph.updateNode(node.id, { height: 890 }))
++  expect(node.source.editedFields).toContain('height')
++})

@@ -1,0 +1,99 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -3,6 +3,7 @@
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useLocalLayout } from '@/app/shell/local-layout'
++import { useLocalNoteFonts } from '@/app/document/local-note-fonts'
+ import { createLocalNote } from '@/app/document/local-note'
+ import { useLocalConnections } from '@/app/document/local-connections'
+ import EditorCanvas from '@/components/EditorCanvas.vue'
+@@ -16,6 +17,7 @@
+ import { osCanvasWorkspace } from '@/theme/os-canvas-workspace'
+ 
+ const store = useEditorStore()
++const { noteFontFailed, retryNoteFonts } = useLocalNoteFonts(store)
+ const { canConnect, connect, missing } = useLocalConnections(store)
+ const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
+ const editing = computed(() => store.state.showUI && store.state.play === null)
+@@ -49,6 +51,7 @@
+       <AppButton :aria-pressed="assetsOpen" @click="assetsOpen = !assetsOpen">资产面板</AppButton>
+       <AppButton :disabled="!editing" @click="addNote">新建便签</AppButton>
+       <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
++      <AppAlert v-if="noteFontFailed" heading="便签字体加载失败" description="文字已保留，可以重新加载字体。"><template #actions><AppButton @click="retryNoteFonts">重试便签字体</AppButton></template></AppAlert>
+       <span v-if="missing" role="status">{{ missing }} 条连接缺少端点</span>
+       <IconButton
+         label="图层面板"
+diff --git a/src/app/document/local-note-fonts.ts b/src/app/document/local-note-fonts.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-note-fonts.ts
+@@ -0,0 +1,67 @@
++import { computed, onScopeDispose, reactive } from 'vue'
++import { fontManager, fontResolver } from '@open-pencil/core/text'
++import type { Editor } from '@open-pencil/core/editor'
++import type { SceneNode } from '@open-pencil/scene-graph'
++import { ensureGraphFonts } from '@/app/editor/fonts'
++
++/** Prepare actual note content, including fallback fonts, after text/style changes. */
++export function useLocalNoteFonts(editor: Editor) {
++  const failed = reactive(new Set<string>())
++  let attempts = new WeakMap<SceneNode, string>()
++  const pending = new Set<string>()
++  let graph = editor.graph, queued = false, disposed = false
++  const signature = (node: SceneNode) => JSON.stringify([node.text, node.fontFamily, node.fontWeight, node.italic, node.fontSize, node.width, node.lineHeight, node.letterSpacing, node.styleRuns, node.textParagraphs])
++  function schedule() {
++    if (queued || disposed) return
++    queued = true
++    queueMicrotask(() => { queued = false; scan() })
++  }
++  function scan() {
++    if (disposed) return
++    if (graph !== editor.graph) { graph = editor.graph; attempts = new WeakMap(); pending.clear(); failed.clear() }
++    for (const node of graph.nodes.values()) {
++      if (node.type !== 'TEXT' || !node.text || !node.parentId) continue
++      const parent = graph.getNode(node.parentId)
++      if (!parent?.pluginData.some(item => item.pluginId === 'os.canvas' && item.key === 'os.canvas/note' && item.value === '1')) continue
++      const key = signature(node)
++      if (pending.has(node.id) || attempts.get(node) === key) continue
++      attempts.set(node, key); pending.add(node.id); failed.delete(node.id)
++      void prepare(node, key)
++    }
++    for (const id of failed) if (!graph.getNode(id)?.text) failed.delete(id)
++  }
++  async function prepare(node: SceneNode, key: string) {
++    const targetGraph = graph
++    const current = () => !disposed && editor.graph === targetGraph && targetGraph.getNode(node.id) === node && signature(node) === key
++    try {
++      await ensureGraphFonts(targetGraph, [node.id], editor.renderer)
++      if (current()) {
++        editor.updateTextEditNode(node.id, { text: node.text })
++        editor.requestRender()
++      }
++    } catch { if (current()) failed.add(node.id) }
++    finally {
++      if (graph === targetGraph) { pending.delete(node.id); schedule() }
++    }
++  }
++  const stops = [
++    editor.onEditorEvent('node:updated', schedule),
++    editor.onEditorEvent('node:previewUpdated', schedule),
++    editor.onEditorEvent('node:created', schedule),
++    editor.onEditorEvent('node:deleted', schedule),
++    editor.onEditorEvent('graph:replaced', schedule)
++  ]
++  onScopeDispose(() => { disposed = true; for (const stop of stops) stop() })
++  schedule()
++  return { noteFontFailed: computed(() => failed.size > 0), retryNoteFonts: () => {
++    for (const id of failed) {
++      const node = graph.getNode(id)
++      if (node) attempts.delete(node)
++      for (const [family, style] of fontManager.collectFontKeys(graph, [id])) {
++        fontManager.resetWebFontFailures(family, style)
++        fontResolver.reset(`face:${family.trim().toLocaleLowerCase()}:${style.toLocaleLowerCase()}`)
++      }
++    }
++    schedule()
++  } }
++}

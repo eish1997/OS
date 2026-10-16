@@ -1,0 +1,144 @@
+diff --git a/src/app/document/local-connection-data.ts b/src/app/document/local-connection-data.ts
+--- a/src/app/document/local-connection-data.ts
++++ b/src/app/document/local-connection-data.ts
+@@ -2,7 +2,17 @@
+ 
+ export const pluginId = 'os.canvas'
+ export const key = 'os.canvas/connection'
+-type Connection = { version: 1; source: string; target: string }
++export const anchorSides = ['top', 'right', 'bottom', 'left'] as const
++export type AnchorSide = typeof anchorSides[number]
++type Connection = { version: 1; source: string; target: string; sourceAnchor?: AnchorSide; targetAnchor?: AnchorSide }
++
++export function anchorPoint(node: SceneNode, requested: AnchorSide | undefined, fallback: AnchorSide = 'right'): [number, number] {
++  const side = requested ?? fallback
++  if (side === 'top') return [node.width / 2, 0]
++  if (side === 'bottom') return [node.width / 2, node.height]
++  if (side === 'left') return [0, node.height / 2]
++  return [node.width, node.height / 2]
++}
+ 
+ export function relation(node: SceneNode): Connection | undefined {
+   const raw = node.pluginData.find(item => item.pluginId === pluginId && item.key === key)?.value
+@@ -11,7 +21,12 @@
+     const value: unknown = JSON.parse(raw)
+     if (typeof value !== 'object' || value === null) return undefined
+     if ('version' in value && value.version === 1 && 'source' in value && typeof value.source === 'string' &&
+-      'target' in value && typeof value.target === 'string') return value as Connection
++      'target' in value && typeof value.target === 'string') {
++      for (const [field, anchor] of Object.entries(value)) {
++        if (['sourceAnchor', 'targetAnchor'].includes(field) && !anchorSides.some(side => side === anchor)) return undefined
++      }
++      return value as Connection
++    }
+   } catch { console.warn('关系连接元数据无法解析，原数据已保留。') }
+   return undefined
+ }
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+--- a/src/app/document/local-connections.ts
++++ b/src/app/document/local-connections.ts
+@@ -3,7 +3,7 @@
+ import { getWorldMatrix, getParentWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+ import Matrix from '@open-pencil/scene-graph/matrix'
+ import { localNodeId } from './local-identity'
+-import { pluginId, key, relation } from './local-connection-data'
++import { pluginId, key, relation, anchorPoint } from './local-connection-data'
+ 
+ /** Relations are ordinary vector artwork plus stable endpoint identities. */
+ export function useLocalConnections(editor: Editor) {
+@@ -28,8 +28,8 @@
+         // Preserve last geometry and metadata when an endpoint disappears. Undo
+         // restores the identity and reconnects; never delete someone else's work.
+         if (!source || !target) { absent++; continue }
+-        const from = Matrix.mapPoints(getWorldMatrix(source, editor.graph), [source.width, source.height / 2])
+-        const to = Matrix.mapPoints(getWorldMatrix(target, editor.graph), [0, target.height / 2])
++        const from = Matrix.mapPoints(getWorldMatrix(source, editor.graph), anchorPoint(source, link.sourceAnchor))
++        const to = Matrix.mapPoints(getWorldMatrix(target, editor.graph), anchorPoint(target, link.targetAnchor, 'left'))
+         const inverse = Matrix.invert(getParentWorldMatrix(editor.graph.getNode(line.parentId ?? ''), editor.graph))
+         if (!inverse) { absent++; continue }
+         const points = Matrix.mapPoints(inverse, [...from, ...to])
+diff --git a/src/app/document/local-connection-edit.ts b/src/app/document/local-connection-edit.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connection-edit.ts
+@@ -0,0 +1,33 @@
++import { computed } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import { key, pluginId, relation } from './local-connection-data'
++import type { AnchorSide } from './local-connection-data'
++
++export function useConnectionEdit(editor: Editor) {
++  const selected = computed(() => {
++    void editor.state.sceneVersion
++    if (editor.state.selectedIds.size !== 1) return undefined
++    const node = editor.graph.getNode([...editor.state.selectedIds][0])
++    const link = node && relation(node)
++    return node && link ? { id: node.id, locked: node.locked, link } : undefined
++  })
++  function setAnchor(endpoint: 'source' | 'target', side: AnchorSide) {
++    const current = selected.value
++    if (!current || current.locked) return
++    const node = editor.graph.getNode(current.id)
++    if (!node) return
++    const field = endpoint === 'source' ? 'sourceAnchor' : 'targetAnchor'
++    if ((current.link[field] ?? (endpoint === 'source' ? 'right' : 'left')) === side) return
++    const before = node.pluginData
++    const after = before.map(item => item.pluginId === pluginId && item.key === key
++      ? { ...item, value: JSON.stringify({ ...current.link, [field]: side }) } : item)
++    const apply = (data: typeof before) => {
++      if (!editor.graph.getNode(current.id)) return
++      editor.graph.updateNode(current.id, { pluginData: data })
++      editor.requestRender()
++    }
++    apply(after)
++    editor.undo.push({ label: 'Change connection anchor', forward: () => apply(after), inverse: () => apply(before) })
++  }
++  return { selected, setAnchor }
++}
+diff --git a/src/components/editor/LocalConnectionPanel.vue b/src/components/editor/LocalConnectionPanel.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/editor/LocalConnectionPanel.vue
+@@ -0,0 +1,23 @@
++<script setup lang="ts">
++import { useEditorStore } from '@/app/editor/active-store'
++import { useConnectionEdit } from '@/app/document/local-connection-edit'
++import { anchorSides } from '@/app/document/local-connection-data'
++import AppButton from '@/components/ui/button/AppButton.vue'
++
++const { selected, setAnchor } = useConnectionEdit(useEditorStore())
++const labels = { top: '上', right: '右', bottom: '下', left: '左' }
++const endpoints = ['source', 'target'] as const
++</script>
++
++<template>
++  <section v-if="selected" aria-label="连接锚点" class="border-b border-border p-3 text-xs">
++    <p class="mb-2">连接位置</p>
++    <div v-for="endpoint in endpoints" :key="endpoint" class="mb-1 flex items-center gap-1">
++      <span>{{ endpoint === 'source' ? '起点' : '终点' }}</span>
++      <AppButton v-for="side in anchorSides" :key="side" class="aria-pressed:bg-accent aria-pressed:text-on-accent" :disabled="selected.locked"
++        :aria-label="`${endpoint === 'source' ? '起点' : '终点'}连接${labels[side]}侧`"
++        :aria-pressed="(selected.link[endpoint === 'source' ? 'sourceAnchor' : 'targetAnchor'] ?? (endpoint === 'source' ? 'right' : 'left')) === side"
++        @click="setAnchor(endpoint, side)">{{ labels[side] }}</AppButton>
++    </div>
++  </section>
++</template>
+diff --git a/src/components/editor/LocalWorkspacePanel.vue b/src/components/editor/LocalWorkspacePanel.vue
+--- a/src/components/editor/LocalWorkspacePanel.vue
++++ b/src/components/editor/LocalWorkspacePanel.vue
+@@ -6,6 +6,7 @@
+ import AppButton from '@/components/ui/button/AppButton.vue'
+ import AppAlert from '@/components/ui/feedback/AppAlert.vue'
+ import AppInput from '@/components/ui/input/AppInput.vue'
++import LocalConnectionPanel from '@/components/editor/LocalConnectionPanel.vue'
+ import LocalFilterPanel from '@/components/editor/LocalFilterPanel.vue'
+ import LocalPackagePanel from '@/components/editor/LocalPackagePanel.vue'
+ import { localWorkspace } from '@/theme/local-workspace'
+@@ -27,6 +28,7 @@
+ 
+ <template>
+   <div :class="styles.root()" @pointerdown.stop @wheel.stop>
++    <LocalConnectionPanel />
+     <LocalFilterPanel />
+     <LocalPackagePanel />
+     <div :class="styles.actions()">

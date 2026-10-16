@@ -1,0 +1,20 @@
+diff --git a/src/app/document/local-note.ts b/src/app/document/local-note.ts
+--- a/src/app/document/local-note.ts
++++ b/src/app/document/local-note.ts
+@@ -10,13 +10,14 @@
+   const textId = editor.undo.runBatch('Create note', () => {
+     const frame = editor.createShape('FRAME', x, y, 240, 200, undefined, '便签')
+     editor.graph.updateNode(frame, {
+-      clipsContent: false,
++      clipsContent: false, layoutMode: 'VERTICAL', primaryAxisSizing: 'HUG', counterAxisSizing: 'FIXED',
++      minHeight: 200, paddingTop: 16, paddingRight: 16, paddingBottom: 16, paddingLeft: 16,
+       fills: [{ type: 'SOLID', color: { r: 238 / 255, g: 238 / 255, b: 234 / 255, a: 1 }, opacity: 1, visible: true }],
+       pluginData: [{ pluginId: 'os.canvas', key: 'os.canvas/note', value: '1' }]
+     })
+     const text = editor.createShape('TEXT', 16, 16, 208, 32, frame, '便签正文')
+     editor.graph.updateNode(text, {
+-      fontSize: 18, textAutoResize: 'HEIGHT', horizontalConstraint: 'STRETCH',
++      fontSize: 18, layoutAlignSelf: 'STRETCH', textAutoResize: 'HEIGHT', horizontalConstraint: 'STRETCH',
+       fills: [{ type: 'SOLID', color: { r: 36 / 255, g: 35 / 255, b: 31 / 255, a: 1 }, opacity: 1, visible: true }]
+     })
+     return text

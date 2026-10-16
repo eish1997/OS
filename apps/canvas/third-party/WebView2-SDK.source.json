@@ -1,0 +1,35 @@
+{
+  "url": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg",
+  "archiveSHA256": "56c9f26bdd07916a2d1949fb58a5c7e434dfa1173577dca879206050c4e718db",
+  "sdkVersion": "1.0.3800.47",
+  "bindingCommit": "edc2caf886175ccaebe86078c9cfe1ae2a187328",
+  "updateBindingsGitBlob": "1ac6cc0ae66ae6a2c8d59de89314c68c29cde86f",
+  "verifiedBinaries": [
+    {
+      "path": "x64/WebView2LoaderStatic.lib",
+      "sha256": "89c6b872783b8f6c3cedbff618adb42082d455c615453ae10cfc753f1e8f25d8",
+      "matchesInstalledCrate": true
+    },
+    {
+      "path": "x64/WebView2Loader.dll",
+      "sha256": "86545b66cdb0603bc26b626fb9ad610cb6e71f28d468f5ea66df23b03dda96d5",
+      "matchesInstalledCrate": true
+    }
+  ],
+  "files": [
+    {
+      "file": "WebView2-SDK-LICENSE.txt",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg",
+      "archiveEntry": "LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55",
+      "ref": "Microsoft.Web.WebView2 1.0.3800.47; x64 loader matches installed webview2-com-sys 0.39.1 byte for byte"
+    },
+    {
+      "file": "WebView2-SDK-NOTICE.txt",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg",
+      "archiveEntry": "NOTICE.txt",
+      "sha256": "106423785c5b7eba0a8e61d1837f2132e9c828e20ad530f565d981c1df60dd90",
+      "ref": "Microsoft.Web.WebView2 1.0.3800.47; x64 loader matches installed webview2-com-sys 0.39.1 byte for byte"
+    }
+  ]
+}

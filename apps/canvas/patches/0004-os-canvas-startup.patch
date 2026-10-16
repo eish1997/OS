@@ -1,0 +1,53 @@
+diff --git a/src/app/tabs/index.ts b/src/app/tabs/index.ts
+index 5ddf3a2..29f0639 100644
+--- a/src/app/tabs/index.ts
++++ b/src/app/tabs/index.ts
+@@ -32,6 +32,7 @@ import {
+   rememberRecentStorageDocument
+ } from '@/app/recent-files'
+ import { createDeferred } from '@/app/runtime/deferred'
++import { appRuntimeConfig } from '@/app/runtime/config'
+ import { toast } from '@/app/shell/ui'
+ import { getLocalCanvasStore } from '@/app/storage/local-store'
+ import { seedStorageCanvasFromRemote } from '@/app/storage/sync/persist'
+@@ -105,6 +106,7 @@ export function createTab(store?: EditorStore, initialGraph?: SceneGraph): Tab {
+ }
+ 
+ export function createHomeTab(): Tab {
++  if (appRuntimeConfig.osCanvas) return createTab()
+   const tab: Tab = { id: generateTabId(), store: createEditorStore(), kind: 'home' }
+   tabsRef.value = [...tabsRef.value, tab]
+   activateTab(tab)
+diff --git a/src/views/WorkspaceView.vue b/src/views/WorkspaceView.vue
+index e4008f5..cd404ad 100644
+--- a/src/views/WorkspaceView.vue
++++ b/src/views/WorkspaceView.vue
+@@ -56,6 +56,7 @@ const router = useRouter()
+ const createdInitialTab = tabCount() === 0
+ const shouldCreateHome =
+   route.path === '/' &&
++  !appRuntimeConfig.osCanvas &&
+   !appRuntimeConfig.test &&
+   !route.meta.demo &&
+   (isTauri() || appRuntimeConfig.recentFiles)
+@@ -90,7 +91,10 @@ function openFirstTab(): Tab {
+ 
+ // A first visit to the demo link is a first run too; the welcome there skips the tour offer.
+ const welcomeShown =
+-  createdInitialTab && (route.path === '/' || route.meta.demo) && !appRuntimeConfig.test
++  createdInitialTab &&
++  (route.path === '/' || route.meta.demo) &&
++  !appRuntimeConfig.osCanvas &&
++  !appRuntimeConfig.test
+     ? offerAISetupOnFirstRun({ inTour: route.meta.demo === true })
+     : false
+ const sharingStarted = startSharing()
+@@ -104,7 +108,7 @@ if (welcomeShown) {
+     },
+     { once: true }
+   )
+-} else {
++} else if (!appRuntimeConfig.osCanvas) {
+   void sharingStarted.then(() => offerUsageStatsPrompt('prompt'))
+ }
+ 

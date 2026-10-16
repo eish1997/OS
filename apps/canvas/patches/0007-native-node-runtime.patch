@@ -1,0 +1,14 @@
+diff --git a/desktop/src/os_workspace.rs b/desktop/src/os_workspace.rs
+index 84c935f..0952dd1 100644
+--- a/desktop/src/os_workspace.rs
++++ b/desktop/src/os_workspace.rs
+@@ -71,7 +71,8 @@ pub fn setup(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+     let stdout = child.stdout.take().ok_or("Service stdout unavailable")?;
+     let input = child.stdin.take();
+     let mut owned = OwnedChild { child, input };
+-    let config = serde_json::json!({ "directory": directory, "token": token, "origin": ORIGIN });
++    let config = serde_json::json!({ "directory": directory, "token": token, "origin": ORIGIN,
++        "enableNodeRuntime": resources.join("service/node-runtime/runtime.json").is_file() });
+     writeln!(owned.input.as_mut().ok_or("Service stdin unavailable")?, "{config}")?;
+     let (sender, receiver) = mpsc::channel();
+     std::thread::spawn(move || {

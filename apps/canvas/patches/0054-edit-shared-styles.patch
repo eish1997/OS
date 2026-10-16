@@ -1,0 +1,119 @@
+diff --git a/src/components/DesignPanel.vue b/src/components/DesignPanel.vue
+--- a/src/components/DesignPanel.vue
++++ b/src/components/DesignPanel.vue
+@@ -44,6 +44,7 @@
+ import StrokeSection from './properties/stroke/StrokeSection.vue'
+ import TypographySection from './properties/TypographySection.vue'
+ import VariablesSection from './properties/VariablesSection.vue'
++import SharedStylesSection from './properties/shared-style/SharedStylesSection.vue'
+ 
+ const store = useEditorStore()
+ const libraryService = useLibraryService()
+@@ -231,6 +232,7 @@
+   >
+     <PageSection />
+     <VariablesSection @open-dialog="openVariablesDialog(store)" />
++    <SharedStylesSection />
+     <ExportSection />
+   </div>
+ </template>
+diff --git a/packages/vue/src/index.ts b/packages/vue/src/index.ts
+--- a/packages/vue/src/index.ts
++++ b/packages/vue/src/index.ts
+@@ -462,3 +462,5 @@
+ 
+ /** Internationalization. */
+ export * from '#vue/i18n'
++
++export { sharedStylePatch } from '#vue/controls/shared-style/model'
+diff --git a/src/components/properties/shared-style/SharedStylesSection.vue b/src/components/properties/shared-style/SharedStylesSection.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/shared-style/SharedStylesSection.vue
+@@ -0,0 +1,86 @@
++<script setup lang="ts">
++import { computed, ref, watch } from 'vue'
++import { getNodeEditCapability, isEmptyDocumentChange } from '@open-pencil/core/editor'
++import { copyFills, sharedStyleRefKey, type SceneNode, type SharedStyleKind } from '@open-pencil/scene-graph'
++import { sharedStylePatch, useSceneComputed } from '@open-pencil/vue'
++import { useEditorStore } from '@/app/editor/active-store'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import PanelSection from '@/components/ui/panel/PanelSection.vue'
++import AppSelect from '@/components/ui/select/AppSelect.vue'
++
++const editor = useEditorStore()
++const selected = ref('')
++const name = ref('')
++const hex = ref('')
++const error = ref('')
++const definitions = useSceneComputed(() => [...editor.graph.getAllNodes()].filter(node => node.sharedStyleType && node.source.id))
++const options = computed(() => definitions.value.map(node => ({ value: node.id, label: node.name })))
++const style = computed(() => definitions.value.find(node => node.id === selected.value))
++const simpleColor = computed(() => style.value?.sharedStyleType === 'FILL' && style.value.fills.length === 1 && style.value.fills[0].type === 'SOLID')
++watch(definitions, nodes => {
++  if (!nodes.some(node => node.id === selected.value)) selected.value = nodes[0]?.id ?? ''
++}, { immediate: true })
++watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills]), () => {
++  name.value = style.value?.name ?? ''
++  const color = style.value?.fills[0]?.color
++  hex.value = color ? [color.r, color.g, color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase() : ''
++  error.value = ''
++}, { immediate: true })
++
++function updateReferences(definition: SceneNode) {
++  const kinds: SharedStyleKind[] = ['fill', 'stroke', 'text', 'effect', 'grid']
++  for (const node of editor.graph.getAllNodes()) {
++    if (node.sharedStyleType) continue
++    for (const kind of kinds) {
++      if (node[sharedStyleRefKey(kind)] !== definition.source.id) continue
++      editor.graph.updateNode(node.id, sharedStylePatch(kind, node, definition.source.id, definition))
++      editor.runLayoutForNode(node.id)
++    }
++  }
++}
++
++function save() {
++  const current = style.value
++  if (!current || !getNodeEditCapability(editor.graph, current.id).editable || current.locked) return
++  const nextName = name.value.trim()
++  if (!nextName) { error.value = '样式名称不能为空'; return }
++  const colorText = hex.value.trim().replace(/^#/, '')
++  if (simpleColor.value && !/^[0-9a-f]{6}$/i.test(colorText)) { error.value = '请输入六位十六进制颜色'; return }
++  const patch: Partial<SceneNode> = { name: nextName }
++  if (simpleColor.value) {
++    const fills = copyFills(current.fills)
++    fills[0].color = { ...fills[0].color, r: Number.parseInt(colorText.slice(0, 2), 16) / 255, g: Number.parseInt(colorText.slice(2, 4), 16) / 255, b: Number.parseInt(colorText.slice(4, 6), 16) / 255 }
++    patch.fills = fills
++  }
++  const finish = editor.captureDocumentChange(editor.state.currentPageId)
++  try {
++    editor.graph.updateNode(current.id, patch)
++    if (patch.fills) updateReferences(current)
++  } catch (cause) {
++    editor.restoreDocumentChange(finish(), 'before')
++    error.value = cause instanceof Error ? cause.message : '更新样式失败'
++    return
++  }
++  const change = finish()
++  if (!isEmptyDocumentChange(change)) editor.pushUndoStep({
++    label: 'Edit shared style',
++    forward: () => editor.restoreDocumentChange(change, 'after'),
++    inverse: () => editor.restoreDocumentChange(change, 'before')
++  })
++  error.value = ''
++  editor.requestRender()
++}
++</script>
++
++<template>
++  <PanelSection v-if="options.length" label="共享样式" data-test-id="shared-styles-editor">
++    <div class="flex flex-col gap-2">
++      <AppSelect v-model="selected" :options="options" label="选择共享样式" />
++      <label class="text-xs text-muted">名称<AppInput v-model="name" aria-label="样式名称" size="sm" /></label>
++      <label v-if="simpleColor" class="text-xs text-muted">填充颜色<AppInput v-model="hex" aria-label="样式颜色" size="sm" /></label>
++      <AppButton size="sm" @click="save">保存样式修改</AppButton>
++      <span v-if="error" role="alert" class="text-xs">{{ error }}</span>
++    </div>
++  </PanelSection>
++</template>

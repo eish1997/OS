@@ -1,0 +1,133 @@
+diff --git a/packages/core/src/editor/types.ts b/packages/core/src/editor/types.ts
+--- a/packages/core/src/editor/types.ts
++++ b/packages/core/src/editor/types.ts
+@@ -194,6 +194,7 @@
+   'tool:changed': (tool: Tool, previousTool: Tool) => void
+   'page:changed': (pageId: string, previousPageId: string) => void
+   'guides:changed': (ownerId: string, guides: readonly CanvasGuide[]) => void
++  'clipboard:nodes-copied': (copies: { source: SceneNode['pluginData']; targetId: string }[]) => void
+   'clipboard:images-missing': (resolution: ClipboardImageResolution) => void
+   'font:resolution-changed': (event: FontResolutionEvent, snapshot: FontResolutionSnapshot) => void
+   'viewport:changed': (
+diff --git a/packages/core/src/editor/clipboard.ts b/packages/core/src/editor/clipboard.ts
+--- a/packages/core/src/editor/clipboard.ts
++++ b/packages/core/src/editor/clipboard.ts
+@@ -28,7 +28,7 @@
+ } from './clipboard/placement'
+ import { acceptsChildren, prepareSlotEdits } from './components/slots'
+ import { collectSubtrees, restoreSubtree, snapshotSubtree } from './history/subtree'
+-import type { EditorContext } from './types'
++import type { EditorContext, EditorEvents } from './types'
+ 
+ type PasteOptions = {
+   replaceSelection?: boolean
+@@ -64,6 +64,14 @@
+     const parents = topLevel.map((node) => node.parentId ?? ctx.state.currentPageId)
+     if (!prepareSlotEdits(ctx, parents)) return
+ 
++    const copies: Parameters<EditorEvents['clipboard:nodes-copied']>[0] = []
++    function pair(source: SceneNode, target: SceneNode) {
++      copies.push({ source: source.pluginData, targetId: target.id })
++      for (let index = 0; index < source.childIds.length; index++) {
++        const a = ctx.graph.getNode(source.childIds[index]), b = ctx.graph.getNode(target.childIds[index])
++        if (a && b) pair(a, b)
++      }
++    }
+     const newRootIds: string[] = []
+     const allSnapshots = new Map<string, SceneNode>()
+     // The topmost layer each parent's copies came from.
+@@ -82,10 +90,14 @@
+       topSource.set(parentId, Math.max(topSource.get(parentId) ?? -1, sourceIndex))
+       placed.push(getAxisAlignedBoundsInParent([clone], parentId, ctx.graph))
+       newRootIds.push(clone.id)
+-      const subtree = snapshotSubtree(ctx.graph, clone.id)
+-      for (const [id, snap] of subtree) allSnapshots.set(id, snap)
+-    }
+-
++      pair(node, clone)
++    }
++
++    // Extensions remap their references before history captures the new nodes.
++    ctx.emitEditorEvent('clipboard:nodes-copied', copies)
++    for (const rootId of newRootIds) {
++      for (const [id, snap] of snapshotSubtree(ctx.graph, rootId)) allSnapshots.set(id, snap)
++    }
+     // Figma stacks the copies directly above the topmost layer they copy, in their own order,
+     // not on top of everything in the parent.
+     const stacked = new Map<string, number>()
+@@ -264,6 +276,7 @@
+     for (const [hash, bytes] of images) ctx.graph.images.set(hash, bytes)
+ 
+     const created: string[] = []
++    const copies: Parameters<EditorEvents['clipboard:nodes-copied']>[0] = []
+     const copiedIds = new Map<string, string>()
+     const createNodeTree = (source: SceneNode & { children?: SceneNode[] }, parentId: string) => {
+       const { id: _id, childIds: _childIds, children = [], parentId: _parentId, ...rest } = source
+@@ -272,6 +285,7 @@
+         childIds: []
+       })
+       copiedIds.set(source.id, node.id)
++      copies.push({ source: source.pluginData, targetId: node.id })
+       for (const child of children) createNodeTree(child, node.id)
+       return node.id
+     }
+@@ -307,6 +321,7 @@
+       }
+       ctx.graph.updateNode(id, { componentId: componentId ?? node.componentId, instanceOverrides })
+     }
++    ctx.emitEditorEvent('clipboard:nodes-copied', copies)
+     if (dependencyRootIds.length > 0) {
+       const snapshots = collectSubtrees(ctx.graph, dependencyRootIds)
+       ctx.undo.push({
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+--- a/src/app/document/local-connections.ts
++++ b/src/app/document/local-connections.ts
+@@ -71,6 +71,24 @@
+   }
+   const stops = [
+     editor.onEditorEvent('node:created', schedule),
++    editor.onEditorEvent('clipboard:nodes-copied', copies => {
++      const identities = new Map<string, string>()
++      for (const copy of copies) {
++        const previous = copy.source.find(item => item.pluginId === 'os.canvas' && item.key === 'os.canvas/nodeId')?.value
++        const next = localNodeId(editor.graph.getNode(copy.targetId))
++        if (previous && next) identities.set(previous, next)
++      }
++      for (const copy of copies) {
++        const node = editor.graph.getNode(copy.targetId)
++        const link = node ? relation(node) : undefined
++        if (!node || !link) continue
++        editor.graph.updateNode(node.id, { pluginData: node.pluginData.map(item =>
++          item.pluginId === pluginId && item.key === key ? { ...item, value: JSON.stringify({ ...link,
++            source: identities.get(link.source) ?? link.source,
++            target: identities.get(link.target) ?? link.target }) } : item) })
++      }
++      sync()
++    }),
+     editor.onEditorEvent('node:updated', schedule),
+     editor.onEditorEvent('node:previewUpdated', schedule),
+     editor.onEditorEvent('node:deleted', schedule),
+diff --git a/src/app/document/local-identity.ts b/src/app/document/local-identity.ts
+--- a/src/app/document/local-identity.ts
++++ b/src/app/document/local-identity.ts
+@@ -63,6 +63,20 @@
+   reset()
+   const stops = [
+     editor.onEditorEvent('node:created', ensure),
++    editor.onEditorEvent('clipboard:nodes-copied', copies => {
++      for (const copy of copies) {
++        const node = editor.graph.getNode(copy.targetId)
++        if (!node) continue
++        const sourceId = copy.source.find(entry => entry.pluginId === namespace && entry.key === key)?.value
++        // A paste into another document may not collide with an existing UUID,
++        // but is still a new instance, not the source document's identity.
++        if (sourceId && sourceId === localNodeId(node)) {
++          if (owners.get(sourceId) === node.id) owners.delete(sourceId)
++          assigned.set(node.id, crypto.randomUUID())
++          ensure(node)
++        }
++      }
++    }),
+     editor.onEditorEvent('node:updated', (id, changes) => {
+       if (!changes.pluginData) return
+       const node = editor.graph.getNode(id)

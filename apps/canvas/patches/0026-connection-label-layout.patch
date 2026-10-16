@@ -1,0 +1,18 @@
+diff --git a/src/app/document/local-connection-label.ts b/src/app/document/local-connection-label.ts
+--- a/src/app/document/local-connection-label.ts
++++ b/src/app/document/local-connection-label.ts
+@@ -1,4 +1,5 @@
+ import type { Editor } from '@open-pencil/core/editor'
++import { layoutAuthoredNodes } from '@open-pencil/core/layout'
+ import { ensureGraphFonts } from '@/app/editor/fonts'
+ import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+ 
+@@ -25,7 +26,7 @@
+     const id = child.id
+     const task = ensureGraphFonts(graph, [id], editor.renderer).then(() => {
+       if (editor.graph !== graph || graph.getNode(id)?.text !== text) return undefined
+-      editor.runLayoutForNode(id)
++      layoutAuthoredNodes(graph, [id])
+       editor.requestRender()
+       return undefined
+     }).catch(() => console.warn('连接标签字体加载失败，文字内容已保留。'))

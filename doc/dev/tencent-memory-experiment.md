@@ -1,6 +1,6 @@
 # 腾讯 Memory 实验现场
 
-033已补齐固定commit的[8份启动及相关文本](../../output/dev-evidence/memory-deployment-review/manifest.json)，包括_lib和三个服务脚本。未执行/拉镜像，文本捕获不等于完整镜像/运行审计。端口发布、latest、shell加载环境、后台提炼与清理路径已进入[部署方案](部署准备方案.md)；实际隔离环境及模型适配仍待落实。
+033已补齐固定commit的[8份启动及相关文本](../../output/dev-evidence/memory-deployment-review/manifest.json)，包括_lib和三个服务脚本。未执行/拉镜像，文本捕获不等于完整镜像/运行审计。端口发布、latest、shell加载环境、后台提炼与清理路径已进入部署方案（旧文档已移除，参见 Git 历史）；实际隔离环境及模型适配仍待落实。
 
 日期：2026-10-06（Asia/Shanghai）
 状态：资料与输入集已准备；尚未运行腾讯服务或完成同模型对照。

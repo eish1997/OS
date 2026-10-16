@@ -1,0 +1,135 @@
+diff --git a/src/components/properties/shared-style/SharedStylesSection.vue b/src/components/properties/shared-style/SharedStylesSection.vue
+--- a/src/components/properties/shared-style/SharedStylesSection.vue
++++ b/src/components/properties/shared-style/SharedStylesSection.vue
+@@ -1,7 +1,7 @@
+ <script setup lang="ts">
+ import { computed, reactive, ref, watch } from 'vue'
+ import { getNodeEditCapability, isEmptyDocumentChange } from '@open-pencil/core/editor'
+-import { copyFills, SHARED_TEXT_STYLE_FIELDS, sharedStyleRefKey, type SceneNode, type SharedStyleKind } from '@open-pencil/scene-graph'
++import { SHARED_TEXT_STYLE_FIELDS, sharedStyleRefKey, type SceneNode, type SharedStyleKind } from '@open-pencil/scene-graph'
+ import { sharedStylePatch, useSceneComputed } from '@open-pencil/vue'
+ import { useEditorStore } from '@/app/editor/active-store'
+ import AppInput from '@/components/ui/input/AppInput.vue'
+@@ -12,25 +12,27 @@
+ import EffectStyleFields from './EffectStyleFields.vue'
+ import { effectDrafts, readEffects, type EffectDraft } from './effect-draft'
+ 
++import FillStyleFields from './FillStyleFields.vue'
++import { fillDrafts, readFills, type FillDraft } from './fill-draft'
++
++const fills = ref<FillDraft[]>([])
+ const effects = ref<EffectDraft[]>([])
+ const editor = useEditorStore()
+ const selected = ref('')
+ const name = ref('')
+-const hex = ref('')
+ const error = ref('')
+ const text = reactive({ fontFamily: '', fontSize: '' as string | number, fontWeight: '' as string | number, lineHeight: '' as string | number, letterSpacing: '' as string | number })
+ const textFields = [{ key: 'fontSize', label: '字号' }, { key: 'fontWeight', label: '字重' }, { key: 'lineHeight', label: '行高（空白为自动）' }, { key: 'letterSpacing', label: '字间距' }] as const
+ const definitions = useSceneComputed(() => [...editor.graph.getAllNodes()].filter(node => node.sharedStyleType && node.source.id))
+ const options = computed(() => definitions.value.map(node => ({ value: node.id, label: node.name })))
+ const style = computed(() => definitions.value.find(node => node.id === selected.value))
+-const simpleColor = computed(() => style.value?.sharedStyleType === 'FILL' && style.value.fills.length === 1 && style.value.fills[0].type === 'SOLID')
+ watch(definitions, nodes => {
+   if (!nodes.some(node => node.id === selected.value)) selected.value = nodes[0]?.id ?? ''
+ }, { immediate: true })
+-watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills, style.value?.effects, ...SHARED_TEXT_STYLE_FIELDS.map(key => style.value?.[key])]), () => {
++const signature = useSceneComputed(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills, style.value?.effects, ...SHARED_TEXT_STYLE_FIELDS.map(key => style.value?.[key])]))
++watch(signature, () => {
+   name.value = style.value?.name ?? ''
+-  const color = style.value?.fills[0]?.color
+-  hex.value = color ? [color.r, color.g, color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase() : ''
++  fills.value = fillDrafts(style.value?.fills ?? [])
+   effects.value = effectDrafts(style.value?.effects ?? [])
+   text.fontFamily = style.value?.fontFamily ?? ''
+   for (const field of textFields) text[field.key] = style.value?.[field.key] ?? ''
+@@ -66,13 +68,10 @@
+   if (!current || !getNodeEditCapability(editor.graph, current.id).editable || current.locked) return
+   const nextName = name.value.trim()
+   if (!nextName) { error.value = '样式名称不能为空'; return }
+-  const colorText = hex.value.trim().replace(/^#/, '')
+-  if (simpleColor.value && !/^[0-9a-f]{6}$/i.test(colorText)) { error.value = '请输入六位十六进制颜色'; return }
+   const patch: Partial<SceneNode> = { name: nextName }
+-  if (simpleColor.value) {
+-    const fills = copyFills(current.fills)
+-    fills[0].color = { ...fills[0].color, r: Number.parseInt(colorText.slice(0, 2), 16) / 255, g: Number.parseInt(colorText.slice(2, 4), 16) / 255, b: Number.parseInt(colorText.slice(4, 6), 16) / 255 }
+-    patch.fills = fills
++  if (current.sharedStyleType === 'FILL') {
++    try { patch.fills = readFills(fills.value) }
++    catch (cause) { error.value = cause instanceof Error ? cause.message : '填充输入无效'; return }
+   }
+   if (current.sharedStyleType === 'TEXT') {
+     const typography = textPatch()
+@@ -108,11 +107,11 @@
+     <div class="flex flex-col gap-2">
+       <AppSelect v-model="selected" :options="options" label="选择共享样式" />
+       <label class="text-xs text-muted">名称<AppInput v-model="name" aria-label="样式名称" size="sm" /></label>
+-      <label v-if="simpleColor" class="text-xs text-muted">填充颜色<AppInput v-model="hex" aria-label="样式颜色" size="sm" /></label>
+       <template v-if="style?.sharedStyleType === 'TEXT'">
+         <label class="text-xs text-muted">字体<AppInput v-model="text.fontFamily" aria-label="样式字体" size="sm" /></label>
+         <label v-for="field in textFields" :key="field.key" class="text-xs text-muted">{{ field.label }}<AppInput v-model="text[field.key]" :aria-label="`样式${field.label}`" type="number" size="sm" /></label>
+       </template>
++      <FillStyleFields v-if="style?.sharedStyleType === 'FILL'" v-model="fills" />
+       <EffectStyleFields v-if="style?.sharedStyleType === 'EFFECT'" v-model="effects" />
+       <AppButton size="sm" @click="save">保存样式修改</AppButton>
+       <span v-if="error" role="alert" class="text-xs">{{ error }}</span>
+diff --git a/src/components/properties/shared-style/fill-draft.ts b/src/components/properties/shared-style/fill-draft.ts
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/shared-style/fill-draft.ts
+@@ -0,0 +1,20 @@
++import { copyFills, type Fill } from '@open-pencil/scene-graph'
++export interface FillDraft { source: Fill; hex: string; opacity: string | number; visible: boolean }
++export function fillDrafts(fills: Fill[]): FillDraft[] {
++  return copyFills(fills).map(source => ({ source, visible: source.visible, opacity: source.opacity * 100,
++    hex: [source.color.r, source.color.g, source.color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase()
++  }))
++}
++export function readFills(drafts: FillDraft[]): Fill[] {
++  return drafts.map((draft, index) => {
++    const hex = draft.hex.trim().replace(/^#/, '')
++    const opacity = Number(draft.opacity)
++    if (!String(draft.opacity).trim() || !Number.isFinite(opacity) || opacity < 0 || opacity > 100) throw new Error(`填充 ${index + 1}：透明度必须为 0–100`)
++    if (draft.source.type === 'SOLID' && !/^[0-9a-f]{6}$/i.test(hex)) throw new Error(`填充 ${index + 1}：请输入六位十六进制颜色`)
++    const fill = copyFills([draft.source])[0]
++    fill.opacity = opacity / 100
++    fill.visible = draft.visible
++    if (fill.type === 'SOLID') fill.color = { ...fill.color, r: Number.parseInt(hex.slice(0, 2), 16) / 255, g: Number.parseInt(hex.slice(2, 4), 16) / 255, b: Number.parseInt(hex.slice(4, 6), 16) / 255 }
++    return fill
++  })
++}
+diff --git a/src/components/properties/shared-style/FillStyleFields.vue b/src/components/properties/shared-style/FillStyleFields.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/shared-style/FillStyleFields.vue
+@@ -0,0 +1,30 @@
++<script setup lang="ts">
++import type { FillDraft } from './fill-draft'
++import { fillDrafts } from './fill-draft'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import AppCheckbox from '@/components/ui/toggle/AppCheckbox.vue'
++const fills = defineModel<FillDraft[]>({ required: true })
++function add() { fills.value.push(...fillDrafts([{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 1 }, opacity: 1, visible: true }])) }
++function move(index: number, direction: number) {
++  const next = index + direction
++  if (next < 0 || next >= fills.value.length) return
++  const [fill] = fills.value.splice(index, 1)
++  fills.value.splice(next, 0, fill)
++}
++</script>
++<template>
++  <div v-for="(fill, index) in fills" :key="index" class="flex flex-col gap-2" :data-style-fill="index">
++    <span class="text-xs text-muted">填充 {{ index + 1 }}</span>
++    <label v-if="fill.source.type === 'SOLID'" class="text-xs text-muted">颜色<AppInput v-model="fill.hex" :aria-label="index === 0 ? '样式颜色' : `填充 ${index + 1} 颜色`" size="sm" /></label>
++    <span v-else class="text-xs text-muted">保留原填充内容</span>
++    <label class="text-xs text-muted">透明度 %<AppInput v-model="fill.opacity" :aria-label="`填充 ${index + 1} 透明度`" type="number" size="sm" /></label>
++    <div class="flex items-center gap-2">
++      <AppCheckbox v-model="fill.visible" :aria-label="`填充 ${index + 1} 可见`" />
++      <AppButton size="xs" :disabled="index === 0" :aria-label="`上移填充 ${index + 1}`" @click="move(index, -1)">上移</AppButton>
++      <AppButton size="xs" :disabled="index === fills.length - 1" :aria-label="`下移填充 ${index + 1}`" @click="move(index, 1)">下移</AppButton>
++      <AppButton size="xs" :aria-label="`删除填充 ${index + 1}`" @click="fills.splice(index, 1)">删除</AppButton>
++    </div>
++  </div>
++  <AppButton size="sm" @click="add">添加样式填充</AppButton>
++</template>

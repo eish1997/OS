@@ -4,7 +4,7 @@
 
 ## 交付
 
-官方ChatGPT plan usage允许符合条件的应用经用户授权完成合格Responses请求，API密钥并非唯一途径。[官方说明](https://developers.openai.com/siwc/token-sharing-open-source)。已整理[解决计划](../接入与上线解决计划.md)：先接通真实AI，随后会话继续/恢复、手机入口、远程主服务、独立备份、腾讯对照实验，最后完整M0及M1。
+官方ChatGPT plan usage允许符合条件的应用经用户授权完成合格Responses请求，API密钥并非唯一途径。[官方说明](https://developers.openai.com/siwc/token-sharing-open-source)。已整理解决计划（旧文档已移除，参见 Git 历史）：先接通真实AI，随后会话继续/恢复、手机入口、远程主服务、独立备份、腾讯对照实验，最后完整M0及M1。
 
 新增工作台设置内独立的Continue with ChatGPT授权入口、取消、真实账户模型读取与固定Pi兼容过滤、累计调用/单任务超时、明确用量确认、断开。登录不启动模型任务。订阅模式显示实际执行方式与查看账户用量入口；不以API美元估算表示订阅费用，不从失败连接自动回退付费API。
 

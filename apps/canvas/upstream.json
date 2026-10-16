@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/open-pencil/open-pencil.git",
+  "commit": "78355fd3890cc9da9539235ee3b38beb917f2ed6",
+  "version": "0.16.0",
+  "license": "MIT",
+  "packageManager": "bun@1.4.2",
+  "checkout": ".runtime/open-pencil-upstream",
+  "appPort": 14220,
+  "mcpPort": 14221
+}

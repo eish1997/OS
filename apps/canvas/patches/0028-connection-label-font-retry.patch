@@ -1,0 +1,118 @@
+diff --git a/src/app/document/local-connection-label.ts b/src/app/document/local-connection-label.ts
+--- a/src/app/document/local-connection-label.ts
++++ b/src/app/document/local-connection-label.ts
+@@ -1,4 +1,6 @@
++import { reactive } from 'vue'
+ import type { Editor } from '@open-pencil/core/editor'
++import { fontManager, fontResolver } from '@open-pencil/core/text'
+ import { layoutAuthoredNodes } from '@open-pencil/core/layout'
+ import { ensureGraphFonts } from '@/app/editor/fonts'
+ import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+@@ -6,9 +8,16 @@
+ const pending = new WeakMap<SceneGraph, Map<string, Promise<void>>>()
+ export function waitForConnectionLabel(graph: SceneGraph, id: string) { return pending.get(graph)?.get(id) }
+ 
++const failures = new WeakMap<SceneGraph, Set<string>>()
++export function connectionLabelFailures(graph: SceneGraph) {
++  let state = failures.get(graph)
++  if (!state) { state = reactive(new Set<string>()); failures.set(graph, state) }
++  return state
++}
++
+ const labelKey = 'os.canvas/connectionLabel'
+ /** A real text child travels with the vector through copy, delete, history and FIG export. */
+-export function syncConnectionLabel(editor: Editor, line: SceneNode, text = '') {
++export function syncConnectionLabel(editor: Editor, line: SceneNode, text = '', retry = false) {
+   const graph = editor.graph
+   let child = graph.getChildren(line.id).find(node => node.pluginData.some(p => p.pluginId === 'os.canvas' && p.key === labelKey))
+   if (!child && !text) return
+@@ -19,17 +28,26 @@
+     pluginData: [{ pluginId: 'os.canvas', key: labelKey, value: '1' }]
+   })
+   const x = line.width / 2 - child.width / 2, y = -child.height - Math.max(6, line.strokeWeight / 2 + 4)
+-  if (child.text === text && child.visible === Boolean(text) && Math.abs(child.x - x) < 0.00001 && Math.abs(child.y - y) < 0.00001) return
++  if (!retry && child.text === text && child.visible === Boolean(text) && Math.abs(child.x - x) < 0.00001 && Math.abs(child.y - y) < 0.00001) return
+   const changedText = child.text !== text
++  if (!text) connectionLabelFailures(graph).delete(line.id)
+   graph.updateNode(child.id, { text, visible: Boolean(text), x, y })
+-  if (changedText && text) {
++  if ((changedText || retry) && text) {
+     const id = child.id
++    const errors = connectionLabelFailures(graph)
++    errors.delete(line.id)
++    if (retry) for (const [family, style] of fontManager.collectFontKeys(graph, [id])) {
++      fontManager.resetWebFontFailures(family, style)
++      fontResolver.reset(`face:${family.trim().toLocaleLowerCase()}:${style.toLocaleLowerCase()}`)
++    }
+     const task = ensureGraphFonts(graph, [id], editor.renderer).then(() => {
+       if (editor.graph !== graph || graph.getNode(id)?.text !== text) return undefined
+       layoutAuthoredNodes(graph, [id])
+       editor.requestRender()
+       return undefined
+-    }).catch(() => console.warn('连接标签字体加载失败，文字内容已保留。'))
++    }).catch(() => {
++      if (editor.graph === graph && graph.getNode(id)?.text === text) errors.add(line.id)
++    })
+     const tasks = pending.get(graph) ?? new Map<string, Promise<void>>()
+     tasks.set(line.id, task); pending.set(graph, tasks)
+     void task.then(() => tasks.get(line.id) === task && tasks.delete(line.id))
+diff --git a/src/app/document/local-connection-edit.ts b/src/app/document/local-connection-edit.ts
+--- a/src/app/document/local-connection-edit.ts
++++ b/src/app/document/local-connection-edit.ts
+@@ -1,6 +1,6 @@
+ import { computed, ref } from 'vue'
+ import type { Editor } from '@open-pencil/core/editor'
+-import { waitForConnectionLabel } from './local-connection-label'
++import { connectionLabelFailures, syncConnectionLabel, waitForConnectionLabel } from './local-connection-label'
+ import { key, pluginId, relation } from './local-connection-data'
+ import type { AnchorSide, Connection, ConnectionRoute } from './local-connection-data'
+ 
+@@ -13,6 +13,18 @@
+     const link = node && relation(node)
+     return node && link ? { id: node.id, locked: node.locked, link } : undefined
+   })
++  const labelError = computed(() => Boolean(selected.value && connectionLabelFailures(editor.graph).has(selected.value.id)))
++  async function retryLabel() {
++    const current = selected.value
++    if (!current || current.locked || labelBusy.value) return
++    const graph = editor.graph, node = graph.getNode(current.id)
++    if (!node) return
++    labelBusy.value = true
++    try {
++      syncConnectionLabel(editor, node, current.link.label ?? '', true)
++      await waitForConnectionLabel(graph, current.id)
++    } finally { labelBusy.value = false }
++  }
+   function change(patch: Partial<Connection>) {
+     const current = selected.value
+     if (!current || current.locked) return
+@@ -51,5 +63,5 @@
+       await waitForConnectionLabel(graph, current.id)
+     } finally { labelBusy.value = false }
+   }
+-  return { selected, setAnchor, setRoute, setLabel, labelBusy }
++  return { selected, setAnchor, setRoute, setLabel, labelBusy, labelError, retryLabel }
+ }
+diff --git a/src/components/editor/LocalConnectionPanel.vue b/src/components/editor/LocalConnectionPanel.vue
+--- a/src/components/editor/LocalConnectionPanel.vue
++++ b/src/components/editor/LocalConnectionPanel.vue
+@@ -6,7 +6,7 @@
+ import { anchorSides, connectionRoutes } from '@/app/document/local-connection-data'
+ import AppButton from '@/components/ui/button/AppButton.vue'
+ 
+-const { selected, setAnchor, setRoute, setLabel, labelBusy } = useConnectionEdit(useEditorStore())
++const { selected, setAnchor, setRoute, setLabel, labelBusy, labelError, retryLabel } = useConnectionEdit(useEditorStore())
+ const draftLabel = ref('')
+ watch(() => [selected.value?.id, selected.value?.link.label], () => { draftLabel.value = selected.value?.link.label ?? '' }, { immediate: true })
+ const routeLabels = { straight: '直线', elbow: '折线', curve: '曲线' }
+@@ -26,6 +26,10 @@
+       <AppInput v-model="draftLabel" aria-label="关系标签" placeholder="关系标签" :disabled="selected.locked" @keydown.enter.stop.prevent="setLabel(draftLabel)" />
+       <AppButton :disabled="selected.locked" :loading="labelBusy" @click="setLabel(draftLabel)">应用标签</AppButton>
+     </div>
++    <div v-if="labelError" role="alert" class="mb-2">
++      <p>标签字体加载失败，文字已保留。</p>
++      <AppButton :disabled="selected.locked" :loading="labelBusy" @click="retryLabel">重试标签字体</AppButton>
++    </div>
+     <p class="mb-2">连接位置</p>
+     <div v-for="endpoint in endpoints" :key="endpoint" class="mb-1 flex items-center gap-1">
+       <span>{{ endpoint === 'source' ? '起点' : '终点' }}</span>

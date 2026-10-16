@@ -1,0 +1,125 @@
+diff --git a/packages/vue/src/controls/layout/helpers.ts b/packages/vue/src/controls/layout/helpers.ts
+--- a/packages/vue/src/controls/layout/helpers.ts
++++ b/packages/vue/src/controls/layout/helpers.ts
+@@ -20,6 +20,7 @@
+   type SceneNode
+ } from '@open-pencil/scene-graph'
+ 
++import { useSizePreview } from '#vue/controls/layout/size-preview'
+ import { useNodePreview } from '#vue/controls/node-preview/use'
+ import { useSelectedNodeState } from '#vue/editor/selection-state/nodes'
+ import type { useI18n } from '#vue/i18n'
+@@ -256,18 +257,20 @@
+       : axisSizingPatchForNode(editor.graph, n, axis, 'FIXED')
+   }
+ 
++  const sizePreview = useSizePreview(editor)
++
+   // A locked layer keeps its ratio as either side is typed, as in Figma.
+   function updateAxisSize(axis: LayoutAxis, value: number) {
+     const n = node.value
+     if (!n) return
+     const ratio = enforcedAspectRatio(n)
+     if (ratio === null) {
+-      preview.update([n.id], { ...fixedAxisPatch(n, axis), [axis]: value }, `Change ${axis}`)
++      sizePreview.update(n.id, { ...fixedAxisPatch(n, axis), [axis]: value }, `Change ${axis}`)
+       return
+     }
+     const size = sizeKeepingAspectRatio(ratio, axis, value)
+     const patch = { ...fixedAxisPatch(n, 'width'), ...fixedAxisPatch(n, 'height'), ...size }
+-    preview.update([n.id], patch, `Change ${axis}`)
++    sizePreview.update(n.id, patch, `Change ${axis}`)
+   }
+ 
+   function toggleAspectRatioLock() {
+@@ -282,7 +285,7 @@
+   }
+ 
+   function commitAxisSize(_axis: LayoutAxis, _value: number, _previous: number) {
+-    preview.commit()
++    sizePreview.commit()
+   }
+ 
+   function setAlignment(primary: LayoutAlign, counter: LayoutCounterAlign) {
+@@ -314,7 +317,10 @@
+   }
+ 
+   return {
+-    cancelPreview: preview.cancel,
++    cancelPreview: () => {
++      preview.cancel()
++      sizePreview.cancel()
++    },
+     updateProp,
+     updateSizeLimit,
+     setSizeLimitToCurrent,
+diff --git a/packages/vue/src/controls/layout/size-preview.ts b/packages/vue/src/controls/layout/size-preview.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/vue/src/controls/layout/size-preview.ts
+@@ -0,0 +1,65 @@
++import { tryOnScopeDispose } from '@vueuse/core'
++import { getCurrentInstance, onDeactivated } from 'vue'
++
++import type { Editor, NodePreview } from '@open-pencil/core/editor'
++import type { SceneNode } from '@open-pencil/scene-graph'
++import {
++  computeConstrainedResizeChanges,
++  createResizeSnapshot,
++  type ResizeSnapshot
++} from '@open-pencil/scene-graph/resize'
++
++/** Numeric resizing owns a single baseline and one history entry for the whole subtree. */
++export function useSizePreview(editor: Editor) {
++  let preview: NodePreview | undefined
++  let rootId = ''
++  let before = { width: 0, height: 0 }
++  const originals = new Map<string, ResizeSnapshot>()
++
++  function capture(id: string) {
++    for (const child of editor.graph.getChildren(id)) {
++      originals.set(child.id, createResizeSnapshot(child))
++      capture(child.id)
++    }
++  }
++
++  function cancel() {
++    preview?.cancel()
++    preview = undefined
++    originals.clear()
++  }
++
++  function update(id: string, patch: Partial<SceneNode>, label: string) {
++    if (preview?.closed || (preview && rootId !== id)) cancel()
++    const node = editor.graph.getNode(id)
++    if (!node) return
++    if (!preview) {
++      rootId = id
++      before = { width: node.width, height: node.height }
++      capture(id)
++      preview = editor.beginNodePreview(label)
++    }
++    try {
++      preview.update(id, patch)
++      if (before.width > 0 && before.height > 0) {
++        const changes = computeConstrainedResizeChanges(
++          editor.graph, id, before, node, originals
++        )
++        for (const [childId, change] of changes) preview.update(childId, change)
++      }
++    } catch (error) {
++      cancel()
++      throw error
++    }
++  }
++
++  function commit() {
++    preview?.commit()
++    preview = undefined
++    originals.clear()
++  }
++
++  tryOnScopeDispose(cancel)
++  if (getCurrentInstance()) onDeactivated(cancel)
++  return { update, commit, cancel }
++}

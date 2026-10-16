@@ -1,0 +1,46 @@
+diff --git a/src/app/editor/session/create.ts b/src/app/editor/session/create.ts
+index 0d2dfbf..2c80140 100644
+--- a/src/app/editor/session/create.ts
++++ b/src/app/editor/session/create.ts
+@@ -6,6 +6,7 @@ import { SceneGraph } from '@open-pencil/scene-graph'
+ import { createShaderRasterizer } from '@open-pencil/vue'
+ 
+ import { recordPreparationOutcome } from '@/app/diagnostics'
++import { installCanvasDrawingDefaults } from '@/app/editor/session/drawing-defaults'
+ import { installLocalWorkspace } from '@/app/document/local-workspace'
+ import { appRuntimeConfig } from '@/app/runtime/config'
+ import {
+@@ -246,12 +247,12 @@ function buildEditorStore(initialGraph?: SceneGraph) {
+     }
+   }
+ 
++  if (appRuntimeConfig.osCanvas) installCanvasDrawingDefaults(store)
+   defineEditorStoreAccessors(store, editor)
+   if (appRuntimeConfig.osCanvas) installLocalWorkspace(store)
+ 
+   return store
+ }
+-
+ export const createEditorStore = scopedStoreFactory(buildEditorStore)
+ 
+ export type EditorStore = ReturnType<typeof createEditorStore>
+diff --git a/src/app/editor/session/drawing-defaults.ts b/src/app/editor/session/drawing-defaults.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/editor/session/drawing-defaults.ts
+@@ -0,0 +1,15 @@
++import type { Editor } from '@open-pencil/core/editor'
++
++/** Defaults for newly drawn bare-canvas text, without recoloring artwork. */
++export function installCanvasDrawingDefaults(store: Editor): void {
++  const createShape = store.createShape
++  store.createShape = (...args) => {
++    const id = createShape(...args)
++    const node = store.graph.getNode(id)
++    if (node?.type === 'TEXT' && node.parentId === store.state.currentPageId) {
++      store.graph.updateNode(id, { fills: [{ type: 'SOLID',
++        color: { r: 238 / 255, g: 238 / 255, b: 238 / 255, a: 1 }, opacity: 1, visible: true }] })
++    }
++    return id
++  }
++}

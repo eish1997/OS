@@ -18,4 +18,4 @@ AutomaticBackup保持原自动默认，新增固定后台backup-worker；调度�
 
 [88项工程测试、类型检查、生产构建和Pi离线探针](../../../output/dev-evidence/verification/report.json)全部通过。当前产品按身份认证停止旧PID23688并启动PID48304，创建2026-10-06T12:10:54.9637540Z，实例3ee0a995-12fa-401f-84cd-4dd1bddf36c0，启动40a4e813-c438-42cf-8aa9-c6f3c6eebce9；停止前无在途任务。ChatGPT连接/自动默认保留、最终文章导出字节不变、实际Chrome桌面/390及零页面异常通过。[产品更新验证](../../../output/dev-evidence/background-backup-production.json)。当前产品保留原最近备份时间，没有提前触发其下一次每日备份；三轮新维护来自独立临时源。用户浏览器登录保留，管理/探针临时登录均退出。
 
-M0-04c本地响应修复通过，但完整混合容量/启动扫描保持verifying；下一步Windows中文空格路径完整部署、剩余性能及现有外部门槛。以[开发现场](../current.md)和[台账](../backlog.md)恢复，不把M0/M1标为完成。
+M0-04c本地响应修复通过，但完整混合容量/启动扫描保持verifying；下一步Windows中文空格路径完整部署、剩余性能及现有外部门槛。以[开发现场](../current.md)和台账（旧文档已移除，参见 Git 历史）恢复，不把M0/M1标为完成。

@@ -1,0 +1,77 @@
+diff --git a/packages/core/src/canvas/text/font-families.ts b/packages/core/src/canvas/text/font-families.ts
+index e483047..3d2f277 100644
+--- a/packages/core/src/canvas/text/font-families.ts
++++ b/packages/core/src/canvas/text/font-families.ts
+@@ -12,17 +12,17 @@ export function resolveParagraphFontFamilies(
+   arabicFallbacks: readonly string[] = fontManager.getArabicFallbackFamilies(),
+   cjkFallbacks: readonly string[] = fontManager.getCJKFallbackFamilies()
+ ): string[] {
+-  const renderPrimary = fontManager.renderFamily(primary, style)
+-  const renderArabicFallbacks = arabicFallbacks.map((family) =>
+-    fontManager.renderFamily(family, 'Regular')
++  const renderPrimary = fontManager.renderFamilies(primary, style)
++  const renderArabicFallbacks = arabicFallbacks.flatMap((family) =>
++    fontManager.renderFamilies(family, 'Regular')
+   )
+-  const renderCJKFallbacks = cjkFallbacks.map((family) =>
+-    fontManager.renderFamily(family, 'Regular')
++  const renderCJKFallbacks = cjkFallbacks.flatMap((family) =>
++    fontManager.renderFamilies(family, 'Regular')
+   )
+-  const key = `${renderPrimary}\0${renderArabicFallbacks.join('\0')}\0${renderCJKFallbacks.join('\0')}`
++  const key = `${renderPrimary.join('\0')}\0${renderArabicFallbacks.join('\0')}\0${renderCJKFallbacks.join('\0')}`
+   const cached = familiesCache.peek(key)
+   if (cached) return cached
+-  const families = [renderPrimary]
++  const families = [...renderPrimary]
+   if (primary !== DEFAULT_FONT_FAMILY) families.push(DEFAULT_FONT_FAMILY)
+   families.push(...renderArabicFallbacks, ...renderCJKFallbacks)
+   const resolved = uniq(families)
+diff --git a/packages/core/src/text/fonts.ts b/packages/core/src/text/fonts.ts
+index 690f461..d9041b5 100644
+--- a/packages/core/src/text/fonts.ts
++++ b/packages/core/src/text/fonts.ts
+@@ -93,8 +93,8 @@ export class FontManager {
+       const separator = cacheKey.indexOf('|')
+       const family = cacheKey.slice(0, separator)
+       this.registerFontInProvider(provider, family, data)
+-      for (const supplemental of this.supplementalFamilyData.get(cacheKey) ?? []) {
+-        this.registerFontInProvider(provider, family, supplemental)
++      for (const [index, supplemental] of (this.supplementalFamilyData.get(cacheKey) ?? []).entries()) {
++        this.registerFontInProvider(provider, `${cacheKey}|subset:${index}`, supplemental)
+       }
+     }
+   }
+@@ -494,12 +494,20 @@ export class FontManager {
+   }
+ 
+   renderFamily(family: string, _style: string): string {
+-    // CanvasKit can shape metrics but paint no glyphs for some CJK/Arabic faces registered under a
+-    // synthetic alias. Keep every shard under the font's source family; character-aware remote
+-    // requests already fetch cumulative coverage before replacing the primary buffer.
++    // Keep the authored family name; supplemental render aliases never enter documents.
+     return family
+   }
+ 
++  renderFamilies(family: string, style: string): string[] {
++    const key = `${family}|${style}`
++    // Skia selects one face per family/style before testing character coverage.
++    // Distinct subset aliases let paragraph fallback try every downloaded shard.
++    return [
++      this.renderFamily(family, style),
++      ...(this.supplementalFamilyData.get(key) ?? []).map((_, index) => `${key}|subset:${index}`)
++    ]
++  }
++
+   collectFontKeys(graph: SceneGraph, nodeIds: string[]): Array<[string, string]> {
+     return collectGraphFontKeys(graph, nodeIds)
+   }
+@@ -695,7 +703,7 @@ export class FontManager {
+     if (supplemental.includes(buffer)) return
+     supplemental.push(buffer)
+     this.supplementalFamilyData.set(key, supplemental)
+-    this.registerFontInCanvasKit(family, buffer)
++    this.registerFontInCanvasKit(`${key}|subset:${supplemental.length - 1}`, buffer)
+     this.registerFontInBrowser(family, style, buffer)
+   }
+ 

@@ -1,0 +1,75 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -1,8 +1,9 @@
+ <script setup lang="ts">
+-import { computed } from 'vue'
++import { computed, nextTick, useTemplateRef } from 'vue'
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useLocalLayout } from '@/app/shell/local-layout'
++import { createLocalNote } from '@/app/document/local-note'
+ import { useLocalConnections } from '@/app/document/local-connections'
+ import EditorCanvas from '@/components/EditorCanvas.vue'
+ import LocalWorkspacePanel from '@/components/editor/LocalWorkspacePanel.vue'
+@@ -19,16 +20,26 @@
+ const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
+ const editing = computed(() => store.state.showUI && store.state.play === null)
+ const styles = osCanvasWorkspace()
++const workspace = useTemplateRef<HTMLDivElement>('workspace')
++async function addNote() {
++  const canvas = workspace.value?.querySelector<HTMLCanvasElement>('[data-test-id="canvas-element"]')
++  if (!canvas) return
++  const bounds = canvas.getBoundingClientRect()
++  createLocalNote(store, bounds.width, bounds.height)
++  await nextTick()
++  canvas.focus()
++}
+ </script>
+ 
+ <template>
+-  <div data-slot="os-canvas-workspace" :class="styles.root()">
++  <div ref="workspace" data-slot="os-canvas-workspace" :class="styles.root()">
+     <LocalWorkspacePanel />
+     <!-- The canvas stays mounted and full-size when panels or preview state change. -->
+     <div data-slot="os-canvas-layer" :class="styles.canvas()">
+       <EditorCanvas />
+     </div>
+     <div :class="styles.controls()" aria-label="画布面板">
++      <AppButton :disabled="!editing" @click="addNote">新建便签</AppButton>
+       <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
+       <span v-if="missing" role="status">{{ missing }} 条连接缺少端点</span>
+       <IconButton
+diff --git a/src/app/document/local-note.ts b/src/app/document/local-note.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-note.ts
+@@ -0,0 +1,28 @@
++import type { Editor } from '@open-pencil/core/editor'
++
++/** Notes are editable frame/text artwork, using the same graph and history as other objects. */
++export function createLocalNote(editor: Editor, viewportWidth: number, viewportHeight: number) {
++  editor.commitTextEdit()
++  editor.flushNudge()
++  const { zoom, panX, panY } = editor.state
++  const x = (viewportWidth / 2 - panX) / zoom - 120
++  const y = (viewportHeight / 2 - panY) / zoom - 100
++  const textId = editor.undo.runBatch('Create note', () => {
++    const frame = editor.createShape('FRAME', x, y, 240, 200, undefined, '便签')
++    editor.graph.updateNode(frame, {
++      clipsContent: false,
++      fills: [{ type: 'SOLID', color: { r: 238 / 255, g: 238 / 255, b: 234 / 255, a: 1 }, opacity: 1, visible: true }],
++      pluginData: [{ pluginId: 'os.canvas', key: 'os.canvas/note', value: '1' }]
++    })
++    const text = editor.createShape('TEXT', 16, 16, 208, 32, frame, '便签正文')
++    editor.graph.updateNode(text, {
++      fontSize: 18, textAutoResize: 'HEIGHT', horizontalConstraint: 'STRETCH',
++      fills: [{ type: 'SOLID', color: { r: 36 / 255, g: 35 / 255, b: 31 / 255, a: 1 }, opacity: 1, visible: true }]
++    })
++    return text
++  })
++  editor.setTool('SELECT')
++  editor.select([textId])
++  editor.startTextEditing(textId)
++  editor.requestRender()
++}

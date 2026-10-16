@@ -1,0 +1,171 @@
+diff --git a/desktop/Cargo.toml b/desktop/Cargo.toml
+--- a/desktop/Cargo.toml
++++ b/desktop/Cargo.toml
+@@ -24,7 +24,7 @@
+ 
+ [dependencies]
+ getrandom = "0.3.4"
+-tauri = { version = "2", features = ["devtools"] }
++tauri = { version = "2", features = ["devtools", "unstable"] }
+ tauri-plugin-opener = "2"
+ serde = { version = "1", features = ["derive"] }
+ serde_json = "1"
+diff --git a/desktop/src/lib.rs b/desktop/src/lib.rs
+--- a/desktop/src/lib.rs
++++ b/desktop/src/lib.rs
+@@ -1,4 +1,5 @@
+ mod os_workspace;
++mod os_web_preview;
+ mod agents;
+ mod credentials;
+ mod deep_link;
+@@ -364,6 +365,7 @@
+         .manage(ProxyHttpRequests::default())
+         .manage(PendingRooms(Mutex::new(Vec::new())))
+         .invoke_handler(tauri::generate_handler![
++            os_web_preview::web_preview,
+             agents::agent_lookup,
+             build_fig_file,
+             credential_read,
+diff --git a/desktop/src/os_web_preview.rs b/desktop/src/os_web_preview.rs
+new file mode 100644
+--- /dev/null
++++ b/desktop/src/os_web_preview.rs
+@@ -0,0 +1,137 @@
++use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, Webview, WebviewBuilder, WebviewUrl};
++
++const LABEL: &str = "os-web-preview";
++fn allowed(url: &url::Url) -> bool {
++    matches!(url.scheme(), "http" | "https")
++        && !matches!(url.host_str(), Some("tauri.localhost" | "osworkspace.localhost"))
++        && url.username().is_empty() && url.password().is_none()
++}
++
++// Validation-only command. Remote pages never receive the main webview's authority.
++#[tauri::command]
++pub async fn web_preview(app: AppHandle, webview: Webview, action: String,
++    url: Option<String>, bounds: Option<[f64; 4]>, zoom: Option<f64>, occlusions: Option<Vec<[f64; 4]>>) -> Result<(), String> {
++    if webview.label() != "main" || !app.config().identifier.starts_with("local.os.canvas.validation") {
++        return Err("Web preview is restricted to the main validation webview".into());
++    }
++    let rect = bounds.unwrap_or([350.0, 180.0, 500.0, 360.0]);
++    if rect.iter().any(|v| !v.is_finite())
++        || rect[2] < 1.0 || rect[3] < 1.0 || rect.iter().any(|v| v.abs() > 10000.0) {
++        return Err("Invalid webpage bounds".into());
++    }
++    if action == "create" {
++        if app.get_webview(LABEL).is_some() { return Err("Web preview already exists".into()); }
++        let target = url.ok_or("URL required")?.parse::<url::Url>().map_err(|_| "Invalid URL")?;
++        if !allowed(&target) { return Err("Only ordinary HTTP(S) pages are allowed".into()); }
++        let builder = WebviewBuilder::new(LABEL, WebviewUrl::External(target))
++            .incognito(true).on_navigation(allowed);
++        webview.window().add_child(builder, LogicalPosition::new(rect[0], rect[1]),
++            LogicalSize::new(rect[2], rect[3])).map_err(|e| e.to_string())?;
++        return Ok(());
++    }
++    let child = app.get_webview(LABEL).ok_or("Web preview missing")?;
++    if action == "occlude" || action == "layout" {
++        let holes = occlusions.ok_or("Occlusions required")?;
++        if holes.len() > 64 || holes.iter().any(|r| r.iter().any(|v| !v.is_finite() || v.abs() > 10000.0) || r[2] < 0.0 || r[3] < 0.0) {
++            return Err("Invalid occlusions".into());
++        }
++        let layout = if action == "layout" {
++            if bounds.is_none() { return Err("Layout bounds required".into()); }
++            let factor = zoom.ok_or("Layout zoom required")?;
++            if !factor.is_finite() || !(0.25..=4.0).contains(&factor) { return Err("Invalid webpage zoom".into()); }
++            Some((rect, factor))
++        } else { None };
++        return clip_webview(&child, holes, layout).await;
++    }
++    match action.as_str() {
++        "bounds" => child.set_bounds(tauri::Rect { position: LogicalPosition::new(rect[0], rect[1]).into(),
++            size: LogicalSize::new(rect[2], rect[3]).into() }),
++        "zoom" => {
++            let factor = zoom.ok_or("Zoom required")?;
++            if !factor.is_finite() || !(0.25..=4.0).contains(&factor) { return Err("Invalid webpage zoom".into()); }
++            child.set_zoom(factor)
++        },
++        "hide" => child.hide(),
++        "show" => child.show(),
++        "focus" => child.set_focus(),
++        "close" => child.close(),
++        _ => return Err("Unknown webpage action".into()),
++    }.map_err(|e| e.to_string())
++}
++
++// Prototype: holes are logical rectangles relative to this borderless child surface.
++// The caller recomputes them after movement, resize, DPI or panel changes.
++#[cfg(windows)]
++async fn clip_webview(child: &Webview, holes: Vec<[f64; 4]>, layout: Option<([f64; 4], f64)>) -> Result<(), String> {
++    use std::ffi::c_void;
++    type Handle = *mut c_void;
++    #[repr(C)] #[derive(Default)]
++    struct Rect { left: i32, top: i32, right: i32, bottom: i32 }
++    #[link(name = "user32")]
++    extern "system" {
++        fn GetClientRect(hwnd: Handle, rect: *mut Rect) -> i32;
++        fn GetParent(hwnd: Handle) -> Handle;
++        fn GetDpiForWindow(hwnd: Handle) -> u32;
++        fn SetWindowPos(hwnd: Handle, after: Handle, x: i32, y: i32, width: i32, height: i32, flags: u32) -> i32;
++        fn SetWindowRgn(hwnd: Handle, region: Handle, redraw: i32) -> i32;
++    }
++    #[link(name = "gdi32")]
++    extern "system" {
++        fn CreateRectRgn(left: i32, top: i32, right: i32, bottom: i32) -> Handle;
++        fn CombineRgn(dest: Handle, first: Handle, second: Handle, mode: i32) -> i32;
++        fn DeleteObject(object: Handle) -> i32;
++    }
++    let top = child.window().hwnd().map_err(|e| e.to_string())?.0 as usize;
++    let (send, receive) = tokio::sync::oneshot::channel();
++    child.with_webview(move |platform| {
++        let result = (|| -> Result<(), String> { unsafe {
++            let mut parent = Default::default();
++            platform.controller().ParentWindow(&mut parent).map_err(|e| e.to_string())?;
++            let hwnd = parent.0 as Handle;
++            // Never clip the application window or an unrelated surface.
++            if hwnd.is_null() || hwnd as usize == top || GetParent(hwnd) as usize != top {
++                return Err("Unexpected child surface parent".into());
++            }
++            let mut rect = Rect::default();
++            if GetClientRect(hwnd, &mut rect) == 0 { return Err("Cannot read child bounds".into()); }
++            let dpi = GetDpiForWindow(hwnd);
++            if dpi == 0 { return Err("Cannot read child DPI".into()); }
++            let scale = dpi as f64 / 96.0;
++            if let Some((bounds, zoom)) = layout {
++                if SetWindowPos(hwnd, std::ptr::null_mut(), (bounds[0]*scale).round() as i32,
++                    (bounds[1]*scale).round() as i32, (bounds[2]*scale).round() as i32,
++                    (bounds[3]*scale).round() as i32, 0x14) == 0 { // NOZORDER | NOACTIVATE
++                    return Err("Cannot update child position".into());
++                }
++                if GetClientRect(hwnd, &mut rect) == 0 { return Err("Cannot read updated bounds".into()); }
++                let controller = platform.controller();
++                let mut content = Default::default();
++                controller.Bounds(&mut content).map_err(|e| e.to_string())?;
++                content.left = 0; content.top = 0; content.right = rect.right; content.bottom = rect.bottom;
++                controller.SetBoundsAndZoomFactor(content, zoom).map_err(|e| e.to_string())?;
++            }
++            let region = CreateRectRgn(0, 0, rect.right, rect.bottom);
++            if region.is_null() { return Err("Cannot create child region".into()); }
++            for hole in holes {
++                let cut = CreateRectRgn((hole[0]*scale).floor() as i32, (hole[1]*scale).floor() as i32,
++                    ((hole[0]+hole[2])*scale).ceil() as i32, ((hole[1]+hole[3])*scale).ceil() as i32);
++                if cut.is_null() { DeleteObject(region); return Err("Cannot create occlusion".into()); }
++                let combined = CombineRgn(region, region, cut, 4); // RGN_DIFF
++                DeleteObject(cut);
++                if combined == 0 { DeleteObject(region); return Err("Cannot subtract occlusion".into()); }
++            }
++            // On success Windows owns the region; on failure the caller still owns it.
++            if SetWindowRgn(hwnd, region, 1) == 0 {
++                DeleteObject(region); return Err("Cannot apply child region".into());
++            }
++            Ok(())
++        } })();
++        let _ = send.send(result);
++    }).map_err(|e| e.to_string())?;
++    receive.await.map_err(|_| "Child clipping callback unavailable".to_string())?
++}
++
++#[cfg(not(windows))]
++async fn clip_webview(_child: &Webview, _holes: Vec<[f64; 4]>, _layout: Option<([f64; 4], f64)>) -> Result<(), String> {
++    Err("Native clipping prototype is Windows-only".into())
++}

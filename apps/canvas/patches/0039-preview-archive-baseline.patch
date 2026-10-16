@@ -1,0 +1,59 @@
+diff --git a/packages/fig/src/node-change/grid-layout.ts b/packages/fig/src/node-change/grid-layout.ts
+--- a/packages/fig/src/node-change/grid-layout.ts
++++ b/packages/fig/src/node-change/grid-layout.ts
+@@ -9,7 +9,7 @@
+ const span = v.pipe(index, v.minValue(1))
+ const track = v.object({ sizing: v.picklist(['FIXED', 'FR', 'AUTO']), value: nonnegative })
+ const grid = v.object({
+-  layoutMode: v.literal('GRID'),
++  layoutMode: v.picklist(['NONE', 'HORIZONTAL', 'VERTICAL', 'GRID']),
+   gridTemplateColumns: v.array(track), gridTemplateRows: v.array(track),
+   gridColumnGap: nonnegative, gridRowGap: nonnegative,
+   itemSpacing: number, counterAxisSpacing: nonnegative,
+@@ -24,7 +24,8 @@
+ }))
+ 
+ export function writeGridLayout(node: SceneNode): void {
+-  const settings = node.layoutMode === 'GRID' ? v.parse(grid, node) : null
++  const hasTracks = node.gridTemplateColumns.length > 0 || node.gridTemplateRows.length > 0
++  const settings = node.layoutMode === 'GRID' || hasTracks ? v.parse(grid, node) : null
+   node.pluginData = withPluginData(node.pluginData, gridLayoutField,
+     settings || node.gridPosition ? { version: 1, grid: settings, position: node.gridPosition } : undefined)
+ }
+diff --git a/packages/scene-graph/src/index.ts b/packages/scene-graph/src/index.ts
+--- a/packages/scene-graph/src/index.ts
++++ b/packages/scene-graph/src/index.ts
+@@ -673,6 +673,7 @@
+   }
+   updateNodePreview(id: string, changes: Partial<SceneNode>): void {
+     const appliedChanges = updateNodePreview(this, id, changes, (node, applied) => {
++      this.willChangeNode(node)
+       for (const observe of this.previewObservers) observe(node, applied)
+     })
+     if (appliedChanges) this.emitter.emit('node:previewUpdated', id, appliedChanges)
+diff --git a/packages/core/tests/io/formats/fig/session/preview-baseline.test.ts b/packages/core/tests/io/formats/fig/session/preview-baseline.test.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/core/tests/io/formats/fig/session/preview-baseline.test.ts
+@@ -0,0 +1,21 @@
++import { expect, test } from 'bun:test'
++import { exportFigFile, initCodec, parseFigFile, SceneGraph } from '@open-pencil/core'
++import { archiveBaseline, archiveChanges } from '#core/kiwi/fig/session/archive-changes'
++
++test('preview captures archive state before mutation without marking a canceled edit dirty', async () => {
++  await initCodec()
++  const original = new SceneGraph()
++  original.createNode('FRAME', original.getPages()[0].id, { name: 'Grid', layoutMode: 'GRID' })
++  const graph = await parseFigFile((await exportFigFile(original)).slice().buffer as ArrayBuffer)
++  const node = [...graph.nodes.values()].find(n => n.name === 'Grid')
++  if (!node) throw new Error('Grid missing')
++  graph.updateNodePreview(node.id, { layoutMode: 'HORIZONTAL' })
++  expect(archiveBaseline(graph)?.before.get(node.id)?.layoutMode).toBe('GRID')
++  graph.updateNodePreview(node.id, { layoutMode: 'GRID' })
++  expect(archiveChanges(graph)?.touched.size).toBe(0)
++  graph.updateNodePreview(node.id, { layoutMode: 'HORIZONTAL' })
++  graph.updateNode(node.id, { layoutMode: 'HORIZONTAL' })
++  expect(archiveBaseline(graph)?.before.get(node.id)?.layoutMode).toBe('GRID')
++  const restored = await parseFigFile((await exportFigFile(graph)).slice().buffer as ArrayBuffer)
++  expect([...restored.nodes.values()].find(n => n.name === 'Grid')?.layoutMode).toBe('HORIZONTAL')
++})

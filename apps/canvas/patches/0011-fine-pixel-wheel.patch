@@ -1,0 +1,44 @@
+diff --git a/packages/vue/src/shared/input/wheel.ts b/packages/vue/src/shared/input/wheel.ts
+--- a/packages/vue/src/shared/input/wheel.ts
++++ b/packages/vue/src/shared/input/wheel.ts
+@@ -102,6 +102,11 @@
+ /** Whole wheel notches in deltaY's direction, when this Windows event is a mouse wheel notch. */
+ function windowsNotches(event: WheelInput): WheelPanDelta | null {
+   if (!Number.isInteger(event.deltaX) || !Number.isInteger(event.deltaY)) return null
++  // Chromium may coalesce fractional pixel input into an integer while still
++  // reporting legacy wheelDelta multiples of 120. Small pixel deltas must not
++  // turn into accelerated notches merely because coalescing removed a fraction.
++  if (event.deltaMode === 0 && Math.max(Math.abs(event.deltaX), Math.abs(event.deltaY)) < MIN_WHEEL_NOTCH)
++    return null
+   const notches =
+     event.wheelDeltaX !== undefined && event.wheelDeltaY !== undefined
+       ? { dx: -event.wheelDeltaX, dy: -event.wheelDeltaY }
+diff --git a/tests/engine/vue/shared/wheel.test.ts b/tests/engine/vue/shared/wheel.test.ts
+--- a/tests/engine/vue/shared/wheel.test.ts
++++ b/tests/engine/vue/shared/wheel.test.ts
+@@ -143,3 +143,25 @@
+     expect(2 ** PINCH_SCALE_EXPONENT).toBeCloseTo(chromium)
+   })
+ })
++
++
++describe('Windows fine pixel input', () => {
++  test('coalesced fractional events retain pixel movement instead of becoming notches', () => {
++    const step = createWheelSteps('windows')
++    for (const [index, delta] of [0.5, 0.5, 1, 0.5, 2, -1, -0.5].entries()) {
++      const result = step(event(0, { deltaX: delta, wheelDeltaX: -Math.sign(delta) * 120,
++        wheelDeltaY: 0, timeStamp: index * 8 }))
++      expect(result).toEqual({ kind: 'pan', dx: delta * 2, dy: 0 })
++    }
++  })
++
++  test('small integer pixel movement and pinch do not use notch acceleration', () => {
++    const step = createWheelSteps('windows')
++    for (let i = 0; i < 5; i++) {
++      expect(panY(step(event(4, { wheelDeltaX: 0, wheelDeltaY: -120, timeStamp: i * 8 })))).toBe(8)
++    }
++    expect(zoomScale(step(event(1, { ctrlKey: true, wheelDeltaX: 0, wheelDeltaY: -240 })))).toBeCloseTo(
++      2 ** (-1 / 50)
++    )
++  })
++})

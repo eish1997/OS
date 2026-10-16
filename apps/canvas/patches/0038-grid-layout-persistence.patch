@@ -1,0 +1,115 @@
+diff --git a/packages/fig/src/node-change/serialize.ts b/packages/fig/src/node-change/serialize.ts
+--- a/packages/fig/src/node-change/serialize.ts
++++ b/packages/fig/src/node-change/serialize.ts
+@@ -4,6 +4,7 @@
+   OPEN_PENCIL_PLUGIN_DATA,
+   withPluginData
+ } from '@open-pencil/scene-graph'
++import { writeGridLayout } from './grid-layout'
+ import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
+ 
+ import { effectiveFigmaRawNodeFields } from '../source-metadata'
+@@ -298,6 +299,7 @@
+ }
+ 
+ function serializeLayoutProps(node: SceneNode, nc: KiwiNodeChange, graph: SceneGraph): void {
++  writeGridLayout(node)
+   if (!node.source.id) writeLayoutDirection(node)
+   serializeSizeConstraints(node, nc)
+   const figLayout = node.source.fig.layout
+diff --git a/packages/fig/src/node-change/convert.ts b/packages/fig/src/node-change/convert.ts
+--- a/packages/fig/src/node-change/convert.ts
++++ b/packages/fig/src/node-change/convert.ts
+@@ -1,4 +1,5 @@
+ import { clamp } from 'es-toolkit'
++import { readGridLayout } from './grid-layout'
+ 
+ import { guidToString, isUnsetGuid } from '@open-pencil/kiwi/fig/guid'
+ import {
+@@ -709,6 +710,7 @@
+     horizontalConstraint: mapConstraint(nc.horizontalConstraint as string),
+     verticalConstraint: mapConstraint(nc.verticalConstraint as string),
+     ...convertLayoutProps(nc),
++    ...readGridLayout(nc),
+     ...vectorAndStrokeProps,
+     minWidth: minimumSizeDimension(nc.minSize, 'x'),
+     maxWidth: maximumSizeDimension(nc.maxSize, 'x'),
+diff --git a/packages/fig/src/node-change/grid-layout.ts b/packages/fig/src/node-change/grid-layout.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/fig/src/node-change/grid-layout.ts
+@@ -0,0 +1,35 @@
++import * as v from 'valibot'
++import { jsonPluginDataField, withPluginData, type SceneNode } from '@open-pencil/scene-graph'
++import { readNodeChangePluginData } from './plugin-data'
++import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
++
++const number = v.pipe(v.number(), v.finite())
++const nonnegative = v.pipe(number, v.minValue(0))
++const index = v.pipe(nonnegative, v.integer())
++const span = v.pipe(index, v.minValue(1))
++const track = v.object({ sizing: v.picklist(['FIXED', 'FR', 'AUTO']), value: nonnegative })
++const grid = v.object({
++  layoutMode: v.literal('GRID'),
++  gridTemplateColumns: v.array(track), gridTemplateRows: v.array(track),
++  gridColumnGap: nonnegative, gridRowGap: nonnegative,
++  itemSpacing: number, counterAxisSpacing: nonnegative,
++  paddingTop: nonnegative, paddingRight: nonnegative, paddingBottom: nonnegative, paddingLeft: nonnegative,
++  primaryAxisSizing: v.picklist(['FIXED', 'HUG']), counterAxisSizing: v.picklist(['FIXED', 'HUG']),
++  primaryAxisAlign: v.picklist(['MIN', 'CENTER', 'MAX', 'SPACE_BETWEEN']),
++  counterAxisAlign: v.picklist(['MIN', 'CENTER', 'MAX', 'STRETCH', 'BASELINE'])
++})
++export const gridLayoutField = jsonPluginDataField('grid-layout-v1', 'format', v.object({
++  version: v.literal(1), grid: v.nullable(grid),
++  position: v.nullable(v.object({ column: index, row: index, columnSpan: span, rowSpan: span }))
++}))
++
++export function writeGridLayout(node: SceneNode): void {
++  const settings = node.layoutMode === 'GRID' ? v.parse(grid, node) : null
++  node.pluginData = withPluginData(node.pluginData, gridLayoutField,
++    settings || node.gridPosition ? { version: 1, grid: settings, position: node.gridPosition } : undefined)
++}
++
++export function readGridLayout(nc: NodeChange): Partial<SceneNode> {
++  const saved = readNodeChangePluginData(nc, gridLayoutField)
++  return saved ? { ...saved.grid, gridPosition: saved.position } : {}
++}
+diff --git a/packages/fig/tests/node-change/grid-layout.test.ts b/packages/fig/tests/node-change/grid-layout.test.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/fig/tests/node-change/grid-layout.test.ts
+@@ -0,0 +1,34 @@
++import { expect, test } from 'bun:test'
++import { SceneGraph } from '@open-pencil/scene-graph'
++import { sceneNodeToKiwi } from '#fig/node-change/serialize'
++import { nodeChangeToProps } from '#fig/node-change/convert'
++import { gridLayoutField } from '#fig/node-change/grid-layout'
++
++test('grid configuration and child spans survive repeated record export/import and clearing', () => {
++  const graph = new SceneGraph(), page = graph.getPages()[0]
++  const frame = graph.createNode('FRAME', page.id, {
++    layoutMode: 'GRID', gridTemplateColumns: [{ sizing: 'FIXED', value: 80 }, { sizing: 'FR', value: 2 }],
++    gridTemplateRows: [{ sizing: 'AUTO', value: 0 }], gridColumnGap: 17, gridRowGap: 23,
++    paddingTop: 4, paddingRight: 5, paddingBottom: 6, paddingLeft: 7, itemSpacing: 11
++  })
++  const child = graph.createNode('RECTANGLE', frame.id, { gridPosition: { column: 0, row: 1, columnSpan: 2, rowSpan: 3 } })
++  const roundtrip = (node: typeof frame) => nodeChangeToProps(sceneNodeToKiwi(node, { sessionID: 1, localID: 1 }, 0, { value: 2 }, graph, [])[0], [])
++  const first = roundtrip(frame)
++  expect(first).toMatchObject({layoutMode:'GRID',gridTemplateColumns:frame.gridTemplateColumns,gridTemplateRows:frame.gridTemplateRows,gridColumnGap:17,gridRowGap:23,paddingLeft:7,itemSpacing:11})
++  const restored = graph.createNode('FRAME', page.id, first)
++  graph.updateNode(restored.id, { gridColumnGap: 31 })
++  expect(roundtrip(restored).gridColumnGap).toBe(31)
++  graph.updateNode(restored.id, { layoutMode: 'HORIZONTAL' })
++  expect(roundtrip(restored).layoutMode).toBe('HORIZONTAL')
++  const childProps = roundtrip(child)
++  expect(childProps.gridPosition).toEqual(child.gridPosition)
++  const restoredChild = graph.createNode('RECTANGLE', frame.id, childProps)
++  graph.updateNode(restoredChild.id, { gridPosition: null })
++  expect(roundtrip(restoredChild).gridPosition).toBeUndefined()
++})
++
++test('invalid or future grid data is not applied', () => {
++  for (const value of ['{', '{"version":2,"grid":null,"position":null}', '{"version":1,"grid":null,"position":{"column":0,"row":0,"columnSpan":-1,"rowSpan":1}}']) {
++    expect(gridLayoutField.decode(value)).toBeUndefined()
++  }
++})

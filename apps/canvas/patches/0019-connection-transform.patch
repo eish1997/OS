@@ -1,0 +1,15 @@
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+--- a/src/app/document/local-connections.ts
++++ b/src/app/document/local-connections.ts
+@@ -39,9 +39,9 @@
+         const old = line.vectorNetwork?.vertices
+         if (Math.abs(line.x - x) < 0.00001 && Math.abs(line.y - y) < 0.00001 &&
+           Math.abs(line.width - width) < 0.00001 && Math.abs(line.height - height) < 0.00001 &&
+-          line.rotation === 0 && old?.length === 2 && vertices.every((v, i) =>
++          line.rotation === 0 && !line.flipX && !line.flipY && old?.length === 2 && vertices.every((v, i) =>
+             Math.abs(v.x - old[i].x) < 0.00001 && Math.abs(v.y - old[i].y) < 0.00001)) continue
+-        editor.graph.updateNode(line.id, { x, y, width, height, rotation: 0,
++        editor.graph.updateNode(line.id, { x, y, width, height, rotation: 0, flipX: false, flipY: false,
+           vectorNetwork: { vertices, segments: [{ start: 0, end: 1,
+             tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }], regions: [] } })
+       }

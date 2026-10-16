@@ -1,0 +1,60 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -1,5 +1,5 @@
+ <script setup lang="ts">
+-import { computed, nextTick, useTemplateRef } from 'vue'
++import { computed, nextTick, ref, useTemplateRef } from 'vue'
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useLocalLayout } from '@/app/shell/local-layout'
+@@ -20,6 +20,13 @@
+ const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
+ const editing = computed(() => store.state.showUI && store.state.play === null)
+ const styles = osCanvasWorkspace()
++const assetsOpen = ref(true)
++function toggleProperties() {
++  if (assetsOpen.value) {
++    assetsOpen.value = false
++    if (!propertiesOpen.value) toggle('properties')
++  } else toggle('properties')
++}
+ const workspace = useTemplateRef<HTMLDivElement>('workspace')
+ async function addNote() {
+   const canvas = workspace.value?.querySelector<HTMLCanvasElement>('[data-test-id="canvas-element"]')
+@@ -33,12 +40,13 @@
+ 
+ <template>
+   <div ref="workspace" data-slot="os-canvas-workspace" :class="styles.root()">
+-    <LocalWorkspacePanel />
++    <LocalWorkspacePanel v-show="assetsOpen" />
+     <!-- The canvas stays mounted and full-size when panels or preview state change. -->
+     <div data-slot="os-canvas-layer" :class="styles.canvas()">
+       <EditorCanvas />
+     </div>
+     <div :class="styles.controls()" aria-label="画布面板">
++      <AppButton :aria-pressed="assetsOpen" @click="assetsOpen = !assetsOpen">资产面板</AppButton>
+       <AppButton :disabled="!editing" @click="addNote">新建便签</AppButton>
+       <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
+       <span v-if="missing" role="status">{{ missing }} 条连接缺少端点</span>
+@@ -52,9 +60,9 @@
+       </IconButton>
+       <IconButton
+         label="属性面板"
+-        :active="propertiesOpen"
++        :active="propertiesOpen && !assetsOpen"
+         toggle
+-        @click="toggle('properties')"
++        @click="toggleProperties"
+       >
+         <icon-lucide-panel-right class="size-4" />
+       </IconButton>
+@@ -88,7 +96,7 @@
+       <LayersPanel />
+     </section>
+     <section
+-      v-show="editing && propertiesOpen"
++      v-show="editing && propertiesOpen && !assetsOpen"
+       data-slot="os-properties-overlay"
+       aria-label="属性"
+       :class="styles.properties()"

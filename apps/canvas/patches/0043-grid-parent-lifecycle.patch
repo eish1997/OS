@@ -1,0 +1,37 @@
+diff --git a/src/components/properties/layout/grid/GridPositionControls.vue b/src/components/properties/layout/grid/GridPositionControls.vue
+--- a/src/components/properties/layout/grid/GridPositionControls.vue
++++ b/src/components/properties/layout/grid/GridPositionControls.vue
+@@ -1,5 +1,5 @@
+ <script setup lang="ts">
+-import { computed, onScopeDispose, watch } from 'vue'
++import { computed, onScopeDispose, ref, watch } from 'vue'
+ import type { NodePreview } from '@open-pencil/core/editor'
+ import type { GridPosition } from '@open-pencil/scene-graph'
+ import { useLayoutControlsContext } from '@open-pencil/vue'
+@@ -7,8 +7,14 @@
+ import AppButton from '@/components/ui/button/AppButton.vue'
+ 
+ const ctx = useLayoutControlsContext()
+-const parent = computed(() => ctx.node?.parentId ? ctx.editor.graph.getNode(ctx.node.parentId) : undefined)
+-const enabled = computed(() => parent.value?.layoutMode === 'GRID' && ctx.node?.layoutPositioning !== 'ABSOLUTE')
++const parentRevision = ref(0)
++const refreshParent = (id: string) => { if (id === ctx.node?.parentId) parentRevision.value++ }
++const stops = [ctx.editor.onEditorEvent('node:updated', refreshParent), ctx.editor.onEditorEvent('node:previewUpdated', refreshParent)]
++const enabled = computed(() => {
++  void parentRevision.value
++  const parent = ctx.node?.parentId ? ctx.editor.graph.getNode(ctx.node.parentId) : undefined
++  return parent?.layoutMode === 'GRID' && ctx.node?.layoutPositioning !== 'ABSOLUTE'
++})
+ const position = computed(() => ctx.node?.gridPosition ?? { column: 1, row: 1, columnSpan: 1, rowSpan: 1 })
+ const fields: { key: keyof GridPosition; label: string }[] = [
+   { key: 'column', label: '起始列' }, { key: 'row', label: '起始行' },
+@@ -28,7 +34,8 @@
+   if (ctx.node) ctx.editor.updateNodeWithUndo(ctx.node.id, { gridPosition: null }, '自动排列网格')
+ }
+ watch(() => ctx.node?.id, cancel)
+-onScopeDispose(cancel)
++watch(enabled, (value) => { if (!value) cancel() })
++onScopeDispose(() => { cancel(); for (const stop of stops) stop() })
+ </script>
+ <template>
+   <section v-if="enabled" class="mt-2" aria-label="网格子项位置">

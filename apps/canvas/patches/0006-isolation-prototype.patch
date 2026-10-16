@@ -1,0 +1,120 @@
+diff --git a/src/components/EditorCanvas.vue b/src/components/EditorCanvas.vue
+index 779832d..1151c50 100644
+--- a/src/components/EditorCanvas.vue
++++ b/src/components/EditorCanvas.vue
+@@ -46,6 +46,7 @@ import { useFollowView } from '@/app/presence/follow-view'
+ import { appRuntimeConfig } from '@/app/runtime/config'
+ import CommentsLayer from '@/components/comments/CommentsLayer.vue'
+ import LocalFileBadges from '@/components/editor/LocalFileBadges.vue'
++import IsolationDraft from '@/components/editor/IsolationDraft.vue'
+ import IssueMarkerTooltip from '@/components/design-check/IssueMarkerTooltip.vue'
+ import PreparationOverlay from '@/components/preparation/canvas/Overlay.vue'
+ import FollowFrame from '@/components/presence/FollowFrame.vue'
+@@ -62,6 +63,7 @@ const { paneId } = defineProps<{
+   paneId?: string
+ }>()
+ 
++const isolationPrototype = (import.meta.env.DEV || import.meta.env.VITE_OS_CANVAS_NODE_PROTOTYPE === '1') && new URLSearchParams(location.search).has('isolation-prototype')
+ const store = useEditorStore()
+ const sceneCanvasRef = ref<HTMLCanvasElement | null>(null)
+ const canvasRef = ref<HTMLCanvasElement | null>(null)
+@@ -261,6 +263,7 @@ const cursor = computed(() =>
+           :style="{ cursor }"
+           class="absolute inset-0 block size-full touch-none outline-none"
+         />
++        <IsolationDraft v-if="isolationPrototype && appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <PlayIslands :view="paneView" :drawn="drawnView" :canvas="canvasRef" />
+         <LocalFileBadges v-if="appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <AppDropOverlay :visible="isDraggingOver" />
+diff --git a/src/components/editor/IsolationDraft.vue b/src/components/editor/IsolationDraft.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/editor/IsolationDraft.vue
+@@ -0,0 +1,87 @@
++<script setup lang="ts">
++import { computed, onMounted, onUnmounted, ref } from 'vue'
++import type { ViewportTransform } from '@open-pencil/core/geometry'
++import { useEditorStore } from '@/app/editor/active-store'
++import { workspaceFetch } from '@/app/document/workspace-fetch'
++
++const { drawn } = defineProps<{ drawn: ViewportTransform | null }>()
++const store = useEditorStore()
++const nodeId = ref('')
++const source = ref("return { type: 'text', text: '节点已运行' }")
++const status = ref('等待运行')
++const output = ref('')
++const running = ref(false)
++let jobId = ''
++let generation = 0
++let disposed = false
++const position = computed(() => {
++  void store.state.renderVersion
++  const node = store.graph.getNode(nodeId.value)
++  const view = drawn ?? store.state
++  return { left: `${(node?.x ?? 350) * view.zoom + view.panX}px`,
++    top: `${(node?.y ?? 180) * view.zoom + view.panY}px`, transform: `scale(${view.zoom})` }
++})
++onMounted(() => {
++  const node = store.graph.createNode('RECTANGLE', store.state.currentPageId,
++    { name: '隔离节点原型', x: 350, y: 180, width: 320, height: 320 })
++  nodeId.value = node.id
++  store.requestRepaint()
++})
++async function request(path: string, body?: unknown) {
++  const response = await workspaceFetch(`/os-workspace/node-runs${path}`, body === undefined ? { headers: { 'X-OS-Workspace': '1' } } : {
++    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-OS-Workspace': '1' }, body: JSON.stringify(body)
++  })
++  const value = await response.json()
++  if (!response.ok) throw new Error(value.message ?? value.error ?? '执行失败')
++  return value
++}
++async function run() {
++  const own = ++generation
++  running.value = true
++  status.value = '运行中'
++  output.value = ''
++  try {
++    let job = await request('', { source: source.value })
++    if (disposed || own !== generation) { await request(`/${job.id}/cancel`, {}); return }
++    jobId = job.id
++    while (job.status === 'running') {
++      await new Promise(resolve => { setTimeout(resolve, 50) })
++      job = await request(`/${job.id}`)
++      if (disposed || own !== generation) return
++    }
++    status.value = job.status
++    // Text interpolation only: generated output never becomes HTML or host code.
++    output.value = job.result?.value?.type === 'text' ? String(job.result.value.text)
++      : JSON.stringify(job.result)
++  } catch (error) {
++    if (!disposed && own === generation) { status.value = '执行失败'; output.value = String(error) }
++  } finally {
++    if (!disposed && own === generation) { running.value = false; jobId = '' }
++  }
++}
++async function cancel() {
++  ++generation
++  const id = jobId
++  jobId = ''
++  try { if (id) await request(`/${id}/cancel`, {}) }
++  catch (error) { output.value = String(error) }
++  running.value = false
++  status.value = '已取消'
++}
++onUnmounted(() => { disposed = true; void cancel() })
++</script>
++
++<template>
++  <section v-if="nodeId" data-slot="isolation-draft" :data-node-id="nodeId" :style="position"
++    class="absolute z-10 w-80 origin-top-left border border-[#30302e] bg-[#191919] p-3 text-xs text-[#eeeeee]"
++    @pointerdown.stop @keydown.stop @wheel.stop @dblclick.stop>
++    <div class="mb-2">隔离节点 · 开发原型</div>
++    <textarea v-model="source" aria-label="节点代码" class="h-36 w-full resize-none bg-[#101010] p-2 font-mono" />
++    <div class="my-2 flex gap-3">
++      <button :disabled="running" @click="run">运行节点</button>
++      <button :disabled="!running" @click="cancel">取消节点</button>
++    </div>
++    <div role="status" data-slot="isolation-status">{{ status }}</div>
++    <pre data-slot="isolation-result" class="mt-2 max-h-24 overflow-auto whitespace-pre-wrap">{{ output }}</pre>
++  </section>
++</template>

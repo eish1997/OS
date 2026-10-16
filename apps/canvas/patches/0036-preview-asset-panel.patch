@@ -1,0 +1,12 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -44,7 +44,7 @@
+ 
+ <template>
+   <div ref="workspace" data-slot="os-canvas-workspace" :class="styles.root()">
+-    <LocalWorkspacePanel v-show="assetsOpen" />
++    <LocalWorkspacePanel v-show="editing && assetsOpen" />
+     <!-- The canvas stays mounted and full-size when panels or preview state change. -->
+     <div data-slot="os-canvas-layer" :class="styles.canvas()">
+       <EditorCanvas />

@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T09:34:56.523Z",
+  "browser": "155.0.8059.40",
+  "checks": [
+    "4 spaces / 12 docked / 6 floating seeded and rendered",
+    "100 mixed browser operations; single SSE; elapsed 5501ms",
+    "floating pointer resize",
+    "invalid outside drop restores original floating bounds",
+    "icon pointer movement and expansion retain floating bounds",
+    "six-window collection restoration",
+    "Shift drag out and pointer edge docking preserve instance",
+    "nested divider respects both window minimum widths",
+    "split divider pointer resize with available space",
+    "small viewport window recovery",
+    "concurrent layouts conflict visibly and save-as retains both versions",
+    "failed save retains edit and explicit retry succeeds",
+    "corrupt server layout falls back without overwriting original",
+    "import creates new spaces; unknown types remain closable",
+    "default/blank/undo/export/delete preserve global windows",
+    "legacy UI and new default entry retain separate state and CSS",
+    "HTTP service restart retains saved layouts and browser login",
+    "real Chrome 150% page zoom: window recovery and modal interaction ({\"width\":949,\"outer\":1440,\"dpr\":1.5})"
+  ],
+  "errors": [],
+  "modelRequests": 0
+}

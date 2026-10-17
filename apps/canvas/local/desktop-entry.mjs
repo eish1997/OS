@@ -38,7 +38,7 @@ process.stdin.on('data', async chunk => {
         workerURL: new URL('sandbox-worker.mjs', runtimeURL) }
     }
     service = await startWorkspaceServer({ directory: config.directory, origin: config.origin,
-      token: config.token, port: 0, nodeSandbox })
+      token: config.token, port: 0, nodeSandbox, storage: config.storage })
     if (closing) { await service.close(); return }
     process.stdout.write(JSON.stringify({ type: 'ready', protocolVersion: 1, url: service.url }) + '\n')
   } catch {

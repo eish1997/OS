@@ -1,0 +1,43 @@
+diff --git a/src/components/properties/shared-style/EffectStyleFields.vue b/src/components/properties/shared-style/EffectStyleFields.vue
+--- a/src/components/properties/shared-style/EffectStyleFields.vue
++++ b/src/components/properties/shared-style/EffectStyleFields.vue
+@@ -20,7 +20,7 @@
+       <label v-for="field in fields" :key="field.key" class="text-xs text-muted">{{ field.label }}<AppInput v-model="effect[field.key]" :aria-label="`效果 ${index + 1} ${field.label}`" type="number" size="sm" /></label>
+     </div>
+     <div class="flex items-center gap-2">
+-      <AppCheckbox v-model="effect.visible" :aria-label="`效果 ${index + 1} 可见`" />
++      <AppCheckbox v-model="effect.visible" :ariaLabel="`效果 ${index + 1} 可见`" />
+       <span class="text-xs text-muted">可见</span>
+       <AppButton size="xs" :aria-label="`删除效果 ${index + 1}`" @click="effects.splice(index, 1)">删除</AppButton>
+     </div>
+diff --git a/src/components/properties/shared-style/FillStyleFields.vue b/src/components/properties/shared-style/FillStyleFields.vue
+--- a/src/components/properties/shared-style/FillStyleFields.vue
++++ b/src/components/properties/shared-style/FillStyleFields.vue
+@@ -20,7 +20,7 @@
+     <span v-else class="text-xs text-muted">保留原填充内容</span>
+     <label class="text-xs text-muted">透明度 %<AppInput v-model="fill.opacity" :aria-label="`填充 ${index + 1} 透明度`" type="number" size="sm" /></label>
+     <div class="flex items-center gap-2">
+-      <AppCheckbox v-model="fill.visible" :aria-label="`填充 ${index + 1} 可见`" />
++      <AppCheckbox v-model="fill.visible" :ariaLabel="`填充 ${index + 1} 可见`" />
+       <AppButton size="xs" :disabled="index === 0" :aria-label="`上移填充 ${index + 1}`" @click="move(index, -1)">上移</AppButton>
+       <AppButton size="xs" :disabled="index === fills.length - 1" :aria-label="`下移填充 ${index + 1}`" @click="move(index, 1)">下移</AppButton>
+       <AppButton size="xs" :aria-label="`删除填充 ${index + 1}`" @click="fills.splice(index, 1)">删除</AppButton>
+diff --git a/src/components/properties/shared-style/SharedStylesSection.vue b/src/components/properties/shared-style/SharedStylesSection.vue
+--- a/src/components/properties/shared-style/SharedStylesSection.vue
++++ b/src/components/properties/shared-style/SharedStylesSection.vue
+@@ -40,12 +40,14 @@
+ }, { immediate: true })
+ 
+ function updateReferences(definition: SceneNode) {
++  const sourceId = definition.source.id
++  if (!sourceId) return
+   const kinds: SharedStyleKind[] = ['fill', 'stroke', 'text', 'effect', 'grid']
+   for (const node of editor.graph.getAllNodes()) {
+     if (node.sharedStyleType) continue
+     for (const kind of kinds) {
+       if (node[sharedStyleRefKey(kind)] !== definition.source.id) continue
+-      editor.graph.updateNode(node.id, sharedStylePatch(kind, node, definition.source.id, definition))
++      editor.graph.updateNode(node.id, sharedStylePatch(kind, node, sourceId, definition))
+       editor.runLayoutForNode(node.id)
+     }
+   }

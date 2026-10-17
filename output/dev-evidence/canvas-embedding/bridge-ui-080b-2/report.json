@@ -1,0 +1,41 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-CN7l17",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "initialRenderMs": 1535.0999999046326,
+  "emptyDraftStayedUnsaved": true,
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "b3598dcc-5c28-4c32-834f-c99c1e5b133f",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "saveAckWaitedForPersistence": true,
+  "passed": false,
+  "step": "host-drag-over-canvas",
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  [\n    {\n      height: 120,\n      text: '',\n      type: 'RECTANGLE',\n...\n      width: 74,\n+     x: 501,\n-     x: 500,\n      y: 520\n    }\n  ]\n"
+}

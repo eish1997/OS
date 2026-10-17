@@ -1,0 +1,173 @@
+--- a/src/app/document/workspace-fetch.ts
++++ b/src/app/document/workspace-fetch.ts
+@@ -1,12 +1,17 @@
+ import { convertFileSrc } from '@tauri-apps/api/core'
+ import { isTauri } from '@/app/tauri/env'
+ import { osEmbedded } from '@/app/runtime/embedding'
++let activeProject: string | null = null
++export function setWorkspaceProject(projectId: string | null) { activeProject = projectId }
+ 
+ // The native protocol keeps the service address and token out of the renderer.
+ // Browser development continues to use the authenticated Vite host proxy.
+ export function workspaceFetch(path: string, init?: RequestInit): Promise<Response> {
+   if (!path.startsWith('/os-workspace/')) throw new Error('Invalid workspace request path')
+   const url = isTauri() ? new URL(path, convertFileSrc('', 'osworkspace')).href
+-    : osEmbedded ? path.replace('/os-workspace/', '/api/canvas/workspace/') : path
+-  return fetch(url, init)
++    : (osEmbedded ? path.replace('/os-workspace/', '/api/canvas/workspace/') : path)
++  if (!osEmbedded) return fetch(url, init)
++  const headers = new Headers(init?.headers)
++  if (!headers.has('X-Canvas-Project')) headers.set('X-Canvas-Project', activeProject ?? 'personal')
++  return fetch(url, { ...init, headers })
+ }
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -67,8 +67,10 @@
+   constructor(readonly status: number, message: string) { super(message); this.name = 'WorkspaceRequestError' }
+ }
+ async function request(path: string, init?: RequestInit) {
++  const headers = new Headers(init?.headers)
++  headers.set('X-OS-Workspace', '1'); headers.set('Content-Type', 'application/json')
+   const response = await workspaceFetch(`/os-workspace${path}`, {
+-    ...init, headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
++    ...init, headers,
+     signal: AbortSignal.timeout(30000)
+   })
+   if (!response.ok) throw new WorkspaceRequestError(response.status, response.status === 409
+@@ -87,6 +89,9 @@
+   let bridgeProjectId: string | null = null
+   let bridgeOpening = false
+   let bridgeBeforeCommit: (() => void) | undefined
++  let bridgeReadProject: string | null | undefined
++  const targetReadOptions = () => bridgeReadProject === undefined
++    ? undefined : { headers: { 'X-Canvas-Project': bridgeReadProject ?? 'personal' } }
+   const error = ref('')
+   const status = ref('尚未保存到本机')
+   const documents = ref<StoredDocument[]>([])
+@@ -387,7 +392,8 @@
+     const previousView = { panX: store.state.panX, panY: store.state.panY,
+       zoom: store.state.zoom, pageId: store.state.currentPageId }
+     try {
+-      const response = await request(`/canvases/${document.canvasId}/scene?revision=${document.revision}`)
++      const response = await request(`/canvases/${document.canvasId}/scene?revision=${document.revision}`,
++        targetReadOptions())
+       const file = new File([await response.arrayBuffer()], `${metadata.name}.fig`)
+       const imported = await readFigDocument(file)
+       const savedPageIndex = metadata.pages?.findIndex(page => page.id === metadata.view?.pageId) ?? -1
+@@ -479,7 +485,7 @@
+     }
+     return bridgeSnapshot()
+   }
+-  async function openFromBridge(targetId: string, beforeCommit?: () => void, draft = false) {
++  async function openFromBridge(targetId: string, beforeCommit?: () => void, draft = false, projectId: string | null = bridgeProjectId) {
+     if (draft) {
+       const graph = new SceneGraph()
+       opening = true
+@@ -496,30 +502,38 @@
+       } finally { opening = false }
+       return bridgeSnapshot()
+     }
+-    const response = await request(`/canvases/${targetId}`)
++    const response = await request(`/canvases/${targetId}`, { headers: { 'X-Canvas-Project': projectId ?? 'personal' } })
+     const document = v.parse(v.pipe(v.string(), v.parseJson(), documentSchema), await response.text())
+     if (document.canvasId !== targetId) throw new Error('Canvas identity mismatch')
+-    bridgeOpening = true; bridgeBeforeCommit = beforeCommit
++    bridgeOpening = true; bridgeBeforeCommit = beforeCommit; bridgeReadProject = projectId
+     try { if (!await open(document)) throw new Error(error.value || 'Canvas did not open') }
+-    finally { bridgeOpening = false; bridgeBeforeCommit = undefined }
++    finally { bridgeOpening = false; bridgeBeforeCommit = undefined; bridgeReadProject = undefined }
+     return bridgeSnapshot()
+   }
+-  async function importForBridge(scene: Uint8Array, name: string, source: Uint8Array = scene) {
++  async function importForBridge(scene: Uint8Array, name: string, source: Uint8Array = scene, projectId = bridgeProjectId) {
+     if (!requestOpen) throw new Error('工作台连接尚未就绪')
++    const sameProject = () => {
++      if (projectId !== bridgeProjectId) throw new Error('导入期间已切换项目，原项目中已提交的副本保留，请回原项目重试。')
++    }
++    sameProject()
+     // Imported bytes are a new document; never mutate the live graph before the
+     // host's normal save/open transaction has completed.
+     const saved = await saveForBridge()
++    sameProject()
+     if (saved.dirty) throw new Error('原画板尚未保存，导入未开始')
+-    const key = await canvasImportKey(source, name, bridgeProjectId)
++    const key = await canvasImportKey(source, name, projectId)
+     return navigator.locks.request(key, async () => {
+       const prepared = await prepareCanvasImport(key, scene)
++      sameProject()
+       const { receipt } = prepared
+-      const response = await request(`/canvases/${receipt.canvasId}`, { method: 'POST',
++      const response = await request(`/canvases/${receipt.canvasId}`, { method: 'POST', headers: { 'X-Canvas-Project': projectId ?? 'personal' },
+         body: JSON.stringify({ operationId: receipt.operationId, expectedRevision: 0,
+           sceneBase64: fromUint8Array(prepared.scene), metadata: { formatVersion: 1, name } }) })
+       const result = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
+       if (result.canvasId !== receipt.canvasId) throw new Error('导入身份未确认')
++      sameProject()
+       await refresh()
++      sameProject()
+       if (!requestOpen) throw new Error('工作台连接已关闭，导入副本已保留')
+       await requestOpen(receipt.canvasId)
+       await finishCanvasImport(prepared)
+@@ -544,7 +558,13 @@
+     disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
+   }
+   return { bridgeSnapshot, saveForBridge, openFromBridge, importForBridge, pauseForBridge,
++    rememberForBridge: async () => {
++      if (!revision) return
++      try { await request('/context/opened', { method: 'POST', body: JSON.stringify({ canvasId }) }) }
++      catch { error.value = '最近打开的画板未能记录，请保存后重试。' }
++    },
+     setBridgeProject: (projectId: string | null) => { bridgeProjectId = projectId },
++    getBridgeProject: () => bridgeProjectId,
+     newForBridge: async () => {
+       if (!requestOpen) throw new Error('工作台连接尚未就绪')
+       await requestOpen(crypto.randomUUID(), true)
+--- a/src/app/runtime/workbench-bridge.ts
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -2,9 +2,10 @@
+ import { onScopeDispose, watch } from 'vue'
+ import { osEmbedded } from './embedding'
+ import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { setWorkspaceProject } from '@/app/document/workspace-fetch'
+ import { CanvasBridgeEndpoint, CanvasBridgeError, type CanvasContext, type CanvasEnvelope } from '#workbench/canvas-bridge'
+ 
+-const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch']
++const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch', 'project-scope']
+ 
+ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0]) {
+   if (!osEmbedded) return
+@@ -54,8 +55,16 @@
+           if (typeof deadline !== 'number' || deadline > Date.now() + 120000) throw new CanvasBridgeError('invalid-switch', '切换截止时间无效')
+           checkSwitch(message.payload.switchId, deadline)
+           if (target.contextEpoch <= context.contextEpoch || !target.canvasId) throw new CanvasBridgeError('invalid-context', '画板上下文无效')
+-          const state = await workspace.openFromBridge(target.canvasId, () => { checkSwitch(message.payload.switchId, deadline) }, message.payload.draft === true)
++          const state = await workspace.openFromBridge(target.canvasId, () => {
++            checkSwitch(message.payload.switchId, deadline)
++            setWorkspaceProject(target.projectId); workspace.setBridgeProject(target.projectId)
++          }, message.payload.draft === true, target.projectId).catch(error => {
++            setWorkspaceProject(context.projectId); workspace.setBridgeProject(context.projectId)
++            throw error
++          })
+           context = { ...target }
++          void workspace.rememberForBridge()
++          void workspace.refresh(); void workspace.refreshMounts()
+           return { document: state, context }
+         }
+         case 'SET_INTERACTION':
+--- a/src/app/document/embedded-import.ts
++++ b/src/app/document/embedded-import.ts
+@@ -8,6 +8,7 @@
+ 
+ const io = new IORegistry(BUILTIN_IO_FORMATS)
+ export async function importEmbeddedFile(store: EditorStore, file: File) {
++    const workspace = getLocalWorkspace(store), projectId = workspace.getBridgeProject()
+     const name = file.name.replace(/\.[^.]+$/i, '')
+     let scene: Uint8Array
+     if (file.name.toLowerCase().endsWith('.fig')) {
+@@ -21,5 +22,5 @@
+             data: new Uint8Array(await file.arrayBuffer()) })).graph
+       scene = await exportFigFile(graph)
+     }
+-    await getLocalWorkspace(store).importForBridge(scene, name, new Uint8Array(await file.arrayBuffer()))
++    await workspace.importForBridge(scene, name, new Uint8Array(await file.arrayBuffer()), projectId)
+ }

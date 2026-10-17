@@ -9,12 +9,15 @@ if (existsSync('.env')) for (const line of readFileSync('.env', 'utf8').split(/\
 const number = (name: string, fallback: number) => {
   const n = Number(process.env[name] ?? fallback); if (!Number.isFinite(n) || n < 0) throw new Error(`Invalid ${name}`); return n;
 };
-const storageEnv: Record<keyof typeof defaultStorageLimits, string> = { totalBytes:'DATA_MAX_BYTES', databaseBytes:'DATABASE_MAX_BYTES', assetsBytes:'ASSET_MAX_BYTES', uploadsBytes:'UPLOAD_TEMP_MAX_BYTES', sessionsBytes:'SESSION_MAX_BYTES', workspacesBytes:'WORKSPACE_MAX_BYTES', logsBytes:'LOG_MAX_BYTES', minFreeBytes:'STORAGE_MIN_FREE_BYTES', controlReserveBytes:'STORAGE_CONTROL_RESERVE_BYTES' };
+const storageEnv: Record<keyof typeof defaultStorageLimits, string> = { totalBytes:'DATA_MAX_BYTES', databaseBytes:'DATABASE_MAX_BYTES', assetsBytes:'ASSET_MAX_BYTES', uploadsBytes:'UPLOAD_TEMP_MAX_BYTES', sessionsBytes:'SESSION_MAX_BYTES', workspacesBytes:'WORKSPACE_MAX_BYTES', logsBytes:'LOG_MAX_BYTES', pluginsBytes:'PLUGIN_MAX_BYTES', canvasBytes:'CANVAS_MAX_BYTES', minFreeBytes:'STORAGE_MIN_FREE_BYTES', controlReserveBytes:'STORAGE_CONTROL_RESERVE_BYTES' };
 const storageLimits = { ...defaultStorageLimits };
+if (process.env.CANVAS_ENABLED !== undefined && !['0','1'].includes(process.env.CANVAS_ENABLED)) throw new Error('CANVAS_ENABLED must be 0 or 1');
+if (process.env.CANVAS_ENABLED === '1' && !process.env.CANVAS_PACKAGE_DIR) throw new Error('CANVAS_PACKAGE_DIR is required when canvas is enabled');
 const offsitePaths=[process.env.OFFSITE_BINARY,process.env.OFFSITE_CONFIG,process.env.OFFSITE_WORK_DIR];
 if(offsitePaths.some(Boolean)&&!offsitePaths.every(Boolean))throw new Error('Offsite deployment paths must be configured together');
 for (const key of Object.keys(storageLimits) as (keyof typeof storageLimits)[]) storageLimits[key] = number(storageEnv[key], storageLimits[key]);
 export const config = {
+  canvasPackageDir: process.env.CANVAS_ENABLED === '1' ? resolve(process.env.CANVAS_PACKAGE_DIR!) : undefined,
   port: number('PORT', 4310), dataDir: resolve(process.env.DATA_DIR || 'data'), backupDir:process.env.BACKUP_DIR||undefined,
   offsite:offsitePaths.every(Boolean)?{binary:resolve(offsitePaths[0]!),configFile:resolve(offsitePaths[1]!),workRoot:resolve(offsitePaths[2]!)}:undefined,
   password: process.env.WORKBENCH_PASSWORD || '', origin: process.env.PUBLIC_ORIGIN || 'http://127.0.0.1:4310',

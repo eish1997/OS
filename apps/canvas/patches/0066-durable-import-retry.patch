@@ -1,0 +1,95 @@
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -1,4 +1,5 @@
+ import type { CanvasDocumentState } from '#workbench/canvas-bridge'
++import { canvasImportKey, prepareCanvasImport, finishCanvasImport } from '#workbench/canvas-import'
+ import { workspaceFetch } from '@/app/document/workspace-fetch'
+ import { fromUint8Array } from 'js-base64'
+ import * as v from 'valibot'
+@@ -83,6 +84,7 @@
+   const bridgePaused = ref(false)
+   const failureStatus = ref(0)
+   let requestOpen: ((canvasId: string, draft?: boolean) => Promise<void>) | undefined
++  let bridgeProjectId: string | null = null
+   let bridgeOpening = false
+   let bridgeBeforeCommit: (() => void) | undefined
+   const error = ref('')
+@@ -502,21 +504,27 @@
+     finally { bridgeOpening = false; bridgeBeforeCommit = undefined }
+     return bridgeSnapshot()
+   }
+-  async function importForBridge(scene: Uint8Array, name: string) {
++  async function importForBridge(scene: Uint8Array, name: string, source: Uint8Array = scene) {
+     if (!requestOpen) throw new Error('工作台连接尚未就绪')
+     // Imported bytes are a new document; never mutate the live graph before the
+     // host's normal save/open transaction has completed.
+     const saved = await saveForBridge()
+     if (saved.dirty) throw new Error('原画板尚未保存，导入未开始')
+-    const targetId = crypto.randomUUID()
+-    const response = await request(`/canvases/${targetId}`, { method: 'POST',
+-      body: JSON.stringify({ operationId: crypto.randomUUID(), expectedRevision: 0,
+-        sceneBase64: fromUint8Array(scene), metadata: { formatVersion: 1, name } }) })
+-    const result = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
+-    if (result.canvasId !== targetId) throw new Error('导入身份未确认')
+-    await refresh()
+-    await requestOpen(targetId)
+-    return targetId
++    const key = await canvasImportKey(source, name, bridgeProjectId)
++    return navigator.locks.request(key, async () => {
++      const prepared = await prepareCanvasImport(key, scene)
++      const { receipt } = prepared
++      const response = await request(`/canvases/${receipt.canvasId}`, { method: 'POST',
++        body: JSON.stringify({ operationId: receipt.operationId, expectedRevision: 0,
++          sceneBase64: fromUint8Array(prepared.scene), metadata: { formatVersion: 1, name } }) })
++      const result = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
++      if (result.canvasId !== receipt.canvasId) throw new Error('导入身份未确认')
++      await refresh()
++      if (!requestOpen) throw new Error('工作台连接已关闭，导入副本已保留')
++      await requestOpen(receipt.canvasId)
++      await finishCanvasImport(prepared)
++      return receipt.canvasId
++    })
+   }
+   function pauseForBridge(paused: boolean) {
+     bridgePaused.value = paused
+@@ -536,6 +544,7 @@
+     disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
+   }
+   return { bridgeSnapshot, saveForBridge, openFromBridge, importForBridge, pauseForBridge,
++    setBridgeProject: (projectId: string | null) => { bridgeProjectId = projectId },
+     newForBridge: async () => {
+       if (!requestOpen) throw new Error('工作台连接尚未就绪')
+       await requestOpen(crypto.randomUUID(), true)
+--- a/src/app/document/embedded-import.ts
++++ b/src/app/document/embedded-import.ts
+@@ -21,5 +21,5 @@
+             data: new Uint8Array(await file.arrayBuffer()) })).graph
+       scene = await exportFigFile(graph)
+     }
+-    await getLocalWorkspace(store).importForBridge(scene, name)
++    await getLocalWorkspace(store).importForBridge(scene, name, new Uint8Array(await file.arrayBuffer()))
+ }
+--- a/src/app/tabs/index.ts
++++ b/src/app/tabs/index.ts
+@@ -109,6 +109,10 @@
+ }
+ 
+ export function createHomeTab(): Tab {
++  if (osEmbedded && activeTab.value) {
++    showNewTab()
++    return activeTab.value
++  }
+   if (appRuntimeConfig.osCanvas) return createTab()
+   const tab: Tab = { id: generateTabId(), store: createEditorStore(), kind: 'home' }
+   tabsRef.value = [...tabsRef.value, tab]
+@@ -170,6 +174,10 @@
+  * asking, as automation must: nobody may be there to answer.
+  */
+ export async function closeTab(tabId: string, unsaved?: 'save' | 'discard'): Promise<void> {
++  if (osEmbedded && activeTab.value?.id === tabId) {
++    await getLocalWorkspace(activeTab.value.store).newForBridge()
++    return
++  }
+   const idx = tabsRef.value.findIndex((t) => t.id === tabId)
+   if (idx === -1) return
+ 

@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "checks": [
+    "empty layout forwards native click/drag/wheel to canvas",
+    "docked window interior padding forwards clicks",
+    "floating and pinned window padding forwards clicks",
+    "editor and title retain input",
+    "modal backdrop blocks canvas"
+  ],
+  "errors": []
+}

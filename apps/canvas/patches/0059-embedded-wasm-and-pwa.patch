@@ -1,0 +1,23 @@
+diff --git a/packages/core/src/canvaskit.ts b/packages/core/src/canvaskit.ts
+--- a/packages/core/src/canvaskit.ts
++++ b/packages/core/src/canvaskit.ts
+@@ -17,7 +17,7 @@
+       const ckPath = import.meta.resolve('canvaskit-wasm')
+       return decodeURIComponent(new URL(file, ckPath).pathname)
+     }
+-    const base = 'env' in import.meta ? import.meta.env.BASE_URL : '/'
++    const base = import.meta.env?.BASE_URL ?? '/'
+     const prefix = base === '/' ? '' : base.replace(/\/$/, '')
+     return `${prefix}/${file}`
+   }
+diff --git a/vite/pwa.ts b/vite/pwa.ts
+--- a/vite/pwa.ts
++++ b/vite/pwa.ts
+@@ -3,6 +3,7 @@
+ export function openPencilPwaPlugin() {
+   return VitePWA({
+     registerType: 'autoUpdate',
++    injectRegister: process.env.OS_CANVAS_EMBEDDED_BUILD === '1' ? false : 'auto',
+     devOptions: { enabled: false },
+     workbox: {
+       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,

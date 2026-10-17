@@ -1,0 +1,77 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-pVxOui",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "initialRenderMs": 1332.2000002861023,
+  "emptyDraftStayedUnsaved": true,
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "34b2ac16-8d4a-4cdd-9286-f5cef1d1e234",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "modalControlledDuringPendingSave": true,
+  "saveAckWaitedForPersistence": true,
+  "afterConfirmedSave": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "themeAndLineWidthPreservedArtwork": true,
+  "beforeReopen": [
+    {
+      "type": "RECTANGLE",
+      "x": 764,
+      "y": 281,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "passed": true
+}

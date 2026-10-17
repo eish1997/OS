@@ -1,0 +1,20 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-qMOmMB",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:4400/api/canvas/workspace/canvases/c39af15e-e2f1-4071-b039-ab02af140ea2",
+      "status": 503
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "reloadRecoveryInspection": {
+    "records": [],
+    "path": "/canvas/",
+    "route": "/",
+    "dialogs": 0
+  },
+  "passed": false,
+  "failure": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '恢复', exact: true })\u001b[22m\n"
+}

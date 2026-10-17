@@ -1,0 +1,89 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-5oQF8n",
+  "errors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+    "Failed to open revision-2.fig: WorkspaceRequestError: 本机保存服务不可用，内容仍保留在画布中。\n    at JM (http://127.0.0.1:12234/canvas/assets/tabs-CStCMfkN.js:5630:100110)\n    at async http://127.0.0.1:12234/canvas/assets/tabs-CStCMfkN.js:5630:110030"
+  ],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:12234/api/canvas/workspace/canvases/a31e8f87-7d58-4a8c-8793-662741f69628",
+      "status": 503
+    }
+  ],
+  "initialRenderMs": 1246.7999997138977,
+  "emptyDraftStayedUnsaved": true,
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "18367838-2b58-4728-9240-2160a05154d4",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "modalControlledDuringPendingSave": true,
+  "saveAckWaitedForPersistence": true,
+  "afterConfirmedSave": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "themeAndLineWidthPreservedArtwork": true,
+  "beforeReopen": [
+    {
+      "type": "RECTANGLE",
+      "x": 764,
+      "y": 281,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "uncertainImportRetriedAfterReload": true,
+  "importReusedEditorAndCreatedManagedCopy": true,
+  "explicitNewReusedEditorAndStayedDraft": true,
+  "keyboardNewAndMenuCloseKeptEditor": true,
+  "passed": true
+}

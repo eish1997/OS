@@ -57,6 +57,11 @@ export class OutputStore {
   }
   close() { this.db.close() }
   row(id) { return this.db.prepare('SELECT * FROM outputs WHERE id=?').get(id) }
+  get(operationId) {
+    const row = this.row(operationId)
+    if (!row) throw new WorkspaceError('not-found', 'Output operation is not registered')
+    return this.describe(row)
+  }
   describe(row) {
     return { operationId: row.id, canvasId: row.canvas_id, nodeId: row.node_id,
       sourceRevision: row.source_revision, mountId: row.mount_id, path: row.name,

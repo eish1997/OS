@@ -1,7 +1,11 @@
 /* Three visual layers. Transparent wrappers never own input; content explicitly opts in. */
 .wb-surface{isolation:isolate;background:transparent}
 .wb-canvas-layer{position:absolute;inset:0;z-index:0;background:var(--bg-canvas);overflow:hidden;touch-action:none}
+.wb-canvas-frame{display:block;width:100%;height:100%;border:0;background:var(--bg-canvas)}
 .wb-dock-scroll{z-index:1}
+.wb-root.canvas-focus :is(.wb-dock-scroll,.wb-floating,.wb-floating-icon,.wb-collection){visibility:hidden;pointer-events:none}
+/* Host drag/resize barrier: only while a gesture is live; keeps iframe from eating pointerup. */
+.wb-gesture-barrier{position:absolute;inset:0;z-index:900;pointer-events:auto;touch-action:none;background:transparent}
 .wb-dock-scroll,.wb-dock,.wb-split,.wb-split>div,.wb-region,.wb-panel,.wb-window-body,
 .wb-empty,.wb-demo,.wb-assets-pane,.wb-assets-content,.wb-files,.wb-preview,.wb-chat-pane,.wb-chat-history,.wb-chat-runs,
 .wb-welcome,.wb-welcome-content,.wb-start-options,.wb-start-options>div,.wb-start-layouts{pointer-events:none}
@@ -27,3 +31,4 @@
 .wb-region-tools button{pointer-events:auto}
 .wb-surface:has(.wb-welcome) .wb-dock-scroll{visibility:hidden}
 /* Modal backdrops deliberately block the canvas; dialogs are not workspace windows. */
+.wb-canvas-error{position:absolute;left:16px;bottom:16px;max-width:420px;padding:12px;background:var(--bg-surface);color:var(--text-primary);border:var(--line-width,1px) solid var(--border);pointer-events:auto;z-index:2}

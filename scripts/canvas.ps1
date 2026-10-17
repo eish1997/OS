@@ -13,8 +13,15 @@ $bunBin = Join-Path $toolchain 'node_modules/bun/bin/bun.exe'
 
 function Invoke-Checked {
     param([string]$Program, [string[]]$Arguments)
-    & $Program @Arguments
-    if ($LASTEXITCODE -ne 0) { throw "$Program failed with exit code $LASTEXITCODE" }
+    # Windows PowerShell wraps redirected native stderr in ErrorRecord objects.
+    # Bun and Git write normal progress there: judge failure by the exit code.
+    $previousPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $Program @Arguments
+        $nativeExitCode = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $previousPreference }
+    if ($nativeExitCode -ne 0) { throw "$Program failed with exit code $nativeExitCode" }
 }
 
 Push-Location $workspaceRoot

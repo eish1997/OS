@@ -1,0 +1,14 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-kTBv56",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:3740/api/canvas/workspace/canvases/e95754d3-038a-43b2-bfaf-5fc502a6ffbb",
+      "status": 503
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "passed": false,
+  "failure": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '恢复', exact: true })\u001b[22m\n"
+}

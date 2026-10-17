@@ -1,0 +1,211 @@
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -82,7 +82,7 @@
+   const busy = ref(false)
+   const bridgePaused = ref(false)
+   const failureStatus = ref(0)
+-  let requestOpen: ((canvasId: string) => void) | undefined
++  let requestOpen: ((canvasId: string, draft?: boolean) => Promise<void>) | undefined
+   let bridgeOpening = false
+   let bridgeBeforeCommit: (() => void) | undefined
+   const error = ref('')
+@@ -355,7 +355,11 @@
+   }
+ 
+   async function open(document: StoredDocument, restore = false): Promise<boolean> {
+-    if (requestOpen && !bridgeOpening && !restore) { requestOpen(document.canvasId); return false }
++    if (requestOpen && !bridgeOpening && !restore) {
++      try { await requestOpen(document.canvasId) }
++      catch (cause) { error.value = cause instanceof Error ? cause.message : '打开失败' }
++      return false
++    }
+     return openDocument(document, restore)
+   }
+   async function openDocument(document: StoredDocument, restore: boolean): Promise<boolean> {
+@@ -473,7 +477,23 @@
+     }
+     return bridgeSnapshot()
+   }
+-  async function openFromBridge(targetId: string, beforeCommit?: () => void) {
++  async function openFromBridge(targetId: string, beforeCommit?: () => void, draft = false) {
++    if (draft) {
++      const graph = new SceneGraph()
++      opening = true
++      try {
++        await applyImportedDocument(store, graph, undefined, beforeCommit)
++        canvasId = targetId; revision = 0; pending = undefined; generation++
++        retainedMetadata = undefined; currentMountId.value = ''; scanStatus.value = ''
++        history.value = []; stagedRestore.value = false
++        viewVersion.value = 0; savedViewVersion.value = 0
++        store.state.documentName = 'Untitled'; store.setDocumentSource('Untitled.fig', 'fig')
++        store.setZoomAroundPoint(1, 0, 0); store.pan(-store.state.panX, -store.state.panY)
++        changes.markSaved(); store.markDocumentSaved()
++        status.value = '尚未保存到本机'; error.value = ''
++      } finally { opening = false }
++      return bridgeSnapshot()
++    }
+     const response = await request(`/canvases/${targetId}`)
+     const document = v.parse(v.pipe(v.string(), v.parseJson(), documentSchema), await response.text())
+     if (document.canvasId !== targetId) throw new Error('Canvas identity mismatch')
+@@ -481,6 +501,22 @@
+     try { if (!await open(document)) throw new Error(error.value || 'Canvas did not open') }
+     finally { bridgeOpening = false; bridgeBeforeCommit = undefined }
+     return bridgeSnapshot()
++  }
++  async function importForBridge(scene: Uint8Array, name: string) {
++    if (!requestOpen) throw new Error('工作台连接尚未就绪')
++    // Imported bytes are a new document; never mutate the live graph before the
++    // host's normal save/open transaction has completed.
++    const saved = await saveForBridge()
++    if (saved.dirty) throw new Error('原画板尚未保存，导入未开始')
++    const targetId = crypto.randomUUID()
++    const response = await request(`/canvases/${targetId}`, { method: 'POST',
++      body: JSON.stringify({ operationId: crypto.randomUUID(), expectedRevision: 0,
++        sceneBase64: fromUint8Array(scene), metadata: { formatVersion: 1, name } }) })
++    const result = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
++    if (result.canvasId !== targetId) throw new Error('导入身份未确认')
++    await refresh()
++    await requestOpen(targetId)
++    return targetId
+   }
+   function pauseForBridge(paused: boolean) {
+     bridgePaused.value = paused
+@@ -499,8 +535,12 @@
+     clearTimeout(scanTimer); stopMountWatch()
+     disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
+   }
+-  return { bridgeSnapshot, saveForBridge, openFromBridge, pauseForBridge,
+-    setOpenRequest: (handler?: (canvasId: string) => void) => { requestOpen = handler },
++  return { bridgeSnapshot, saveForBridge, openFromBridge, importForBridge, pauseForBridge,
++    newForBridge: async () => {
++      if (!requestOpen) throw new Error('工作台连接尚未就绪')
++      await requestOpen(crypto.randomUUID(), true)
++    },
++    setOpenRequest: (handler?: (canvasId: string, draft?: boolean) => Promise<void>) => { requestOpen = handler },
+     packages, filter, output, mountRelink, relink, replacement, busy, mountBusy, mounts, refreshMounts, addMount, openMount, openSelectedFolder, currentMountId, scanBusy, scanStatus, scanFiles, error, status: visibleStatus, documents, history, save, refresh, open, showHistory, restoreVersion, dispose,
+     hasUnsavedChanges: () => contentDirty() || viewDirty.value || Boolean(pending) || stagedRestore.value }
+ }
+--- a/src/app/runtime/workbench-bridge.ts
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -27,7 +27,7 @@
+     if (canvasId !== context.canvasId) return
+     endpoint.notify('DOCUMENT_STATE', state)
+   }
+-  const endpoint = new CanvasBridgeEndpoint({ instanceId, origin: location.origin,
++  const endpoint = new CanvasBridgeEndpoint({ instanceId, origin: location.origin, timeoutMs: 60000,
+     peer: () => window.parent, context: () => context,
+     send: (message, origin) => window.parent.postMessage(message, origin),
+     onCommand: async message => {
+@@ -54,7 +54,7 @@
+           if (typeof deadline !== 'number' || deadline > Date.now() + 120000) throw new CanvasBridgeError('invalid-switch', '切换截止时间无效')
+           checkSwitch(message.payload.switchId, deadline)
+           if (target.contextEpoch <= context.contextEpoch || !target.canvasId) throw new CanvasBridgeError('invalid-context', '画板上下文无效')
+-          const state = await workspace.openFromBridge(target.canvasId, () => { checkSwitch(message.payload.switchId, deadline) })
++          const state = await workspace.openFromBridge(target.canvasId, () => { checkSwitch(message.payload.switchId, deadline) }, message.payload.draft === true)
+           context = { ...target }
+           return { document: state, context }
+         }
+@@ -92,7 +92,10 @@
+     }
+   }
+   const focus = () => { if (initialized) endpoint.notify('FOCUS_CHANGED', { focused: document.hasFocus() }) }
+-  workspace.setOpenRequest(canvasId => { if (initialized) endpoint.notify('REQUEST_OPEN', { canvasId }) })
++  workspace.setOpenRequest(async (canvasId, draft = false) => {
++    if (!initialized) throw new CanvasBridgeError('not-ready', '工作台连接尚未就绪')
++    await endpoint.request('REQUEST_CONTEXT_OPEN', { canvasId, draft })
++  })
+   const stop = watch(() => workspace.bridgeSnapshot(), publish, { deep: true })
+   window.addEventListener('message', receive)
+   document.addEventListener('pointerdown', pointer, true)
+--- a/src/app/tabs/index.ts
++++ b/src/app/tabs/index.ts
+@@ -37,6 +37,9 @@
+ import { getLocalCanvasStore } from '@/app/storage/local-store'
+ import { seedStorageCanvasFromRemote } from '@/app/storage/sync/persist'
+ import { createFileOpenCoordinator } from '@/app/tabs/open/coordinator'
++import { importEmbeddedFile } from '@/app/document/embedded-import'
++import { osEmbedded } from '@/app/runtime/embedding'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
+ import { findTabByFileIdentity } from '@/app/tabs/open/identity'
+ 
+ export type TabKind = 'home' | 'document'
+@@ -129,6 +132,12 @@
+ }
+ 
+ export function showNewTab(): void {
++  if (osEmbedded) {
++    void getLocalWorkspace(getActiveStore()).newForBridge().catch(error => {
++      toast.error(error instanceof Error ? error.message : '新建画板失败，原内容已保留')
++    })
++    return
++  }
+   const homeTab = tabsRef.value.find((tab) => tab.kind === 'home')
+   if (homeTab) {
+     switchTab(homeTab.id)
+@@ -410,6 +419,10 @@
+   handle?: FileSystemFileHandle,
+   path?: string
+ ): Promise<void> {
++  if (osEmbedded) {
++    await importEmbeddedFile(getActiveStore(), file)
++    return
++  }
+   const identity: DocumentSourceIdentity = {
+     handle: handle ?? null,
+     path: path ?? null
+@@ -524,6 +537,13 @@
+ export async function restoreRecoverySnapshot(id: string): Promise<void> {
+   const snapshot = await getRecoveryStore().read(id)
+   if (!snapshot) throw new Error('Recovery snapshot is no longer available')
++
++  if (osEmbedded) {
++    // Keep the recovery source until the managed copy is confirmed. Recovery is
++    // never allowed to silently replace a remote revision or create another tab.
++    await getLocalWorkspace(getActiveStore()).importForBridge(new Uint8Array(snapshot.figBytes), snapshot.documentName)
++    return
++  }
+ 
+   const { store } = reusableTabStore()
+   const load = store.preparationController.begin({
+--- a/src/app/shell/menu/app-menu.ts
++++ b/src/app/shell/menu/app-menu.ts
+@@ -168,7 +168,10 @@
+ 
+   const actions: Partial<Record<string, () => void>> = {
+     new: () => {
+-      void import('@/app/tabs').then((m) => m.createTab())
++      void import('@/app/tabs').then(async (m) => {
++        const { osEmbedded } = await import('@/app/runtime/embedding')
++        return osEmbedded ? m.showNewTab() : m.createTab()
++      })
+     },
+     open: () => void openFileDialog(),
+     'open-storage-workspace': () => openStorageWorkspace(router),
+--- /dev/null
++++ b/src/app/document/embedded-import.ts
+@@ -0,0 +1,25 @@
++import { BUILTIN_IO_FORMATS, IORegistry } from '@open-pencil/core/io'
++import { exportFigFile } from '@open-pencil/core/io/formats/fig'
++import { sceneGraphFromStyledHTML } from '@open-pencil/core/io/formats/html/layers'
++import { browserHTMLToDesignDocument } from '@open-pencil/dom-css/browser'
++import { readFigDocument } from '@/app/document/io/fig'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import type { EditorStore } from '@/app/editor/session'
++
++const io = new IORegistry(BUILTIN_IO_FORMATS)
++export async function importEmbeddedFile(store: EditorStore, file: File) {
++    const name = file.name.replace(/\.[^.]+$/i, '')
++    let scene: Uint8Array
++    if (file.name.toLowerCase().endsWith('.fig')) {
++      // Decode first so corrupt files never become an active document.
++      await readFigDocument(file)
++      scene = new Uint8Array(await file.arrayBuffer())
++    } else {
++      const graph = /\.(html?|xhtml)$/i.test(file.name)
++        ? sceneGraphFromStyledHTML(await browserHTMLToDesignDocument(await file.text()), { pageName: name })
++        : (await io.readDocument({ name: file.name, mimeType: file.type || undefined,
++            data: new Uint8Array(await file.arrayBuffer()) })).graph
++      scene = await exportFigFile(graph)
++    }
++    await getLocalWorkspace(store).importForBridge(scene, name)
++}

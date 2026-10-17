@@ -77,7 +77,13 @@ export class FileIndex {
     this.running.set(mountId, task)
     return task
   }
-  async openChild(mountId, assetId) {
+  async openChild(mountId, assetId, expectedCanvasId = undefined) {
+    const preview = await this.previewChild(mountId, assetId)
+    const expected = expectedCanvasId === undefined ? preview.canvasId : expectedCanvasId
+    if (expected !== preview.canvasId) throw new WorkspaceError('conflict', 'Folder canvas does not match the current registration')
+    return this.mounts.adopt(preview.path, expected)
+  }
+  async previewChild(mountId, assetId) {
     await this.scan(mountId)
     const mount = this.mounts.get(mountId)
     const row = this.db.prepare('SELECT * FROM files WHERE id=? AND mount_id=?').get(assetId, mountId)
@@ -95,7 +101,8 @@ export class FileIndex {
     if (info.isSymbolicLink() || !info.isDirectory() || `${info.dev}:${info.ino}:${info.birthtimeNs}` !== row.identity) {
       throw new WorkspaceError('conflict', 'Folder changed before opening')
     }
-    return this.mounts.add(path)
+    const existing = this.mounts.findByIdentity(`${info.dev}:${info.ino}`)
+    return { path, canvasId: existing?.canvasId ?? null }
   }
   replacementTarget(mountId, assetId) {
     const mount = this.mounts.get(mountId)
@@ -129,7 +136,8 @@ export class FileIndex {
     }
     this.replacements.set(token, { ...candidate, childRelink, expires: now + 300000 })
     return { token, mountId, assetId, path: join(candidate.mount.path, candidate.row.path),
-      kind: candidate.row.kind, size: candidate.size, revision: candidate.row.revision }
+      kind: candidate.row.kind, size: candidate.size, revision: candidate.row.revision,
+      ...(childRelink ? { childMountId: childRelink.mountId, childCanvasId: childRelink.canvasId } : {}) }
   }
   async confirmReplacement(mountId, assetId, token) {
     const expected = this.replacements.get(token)
@@ -137,6 +145,9 @@ export class FileIndex {
       throw new WorkspaceError('conflict', 'Confirmation expired; inspect the replacement again')
     }
     await this.scan(mountId)
+    return this.commitReplacement(mountId, assetId, expected)
+  }
+  commitReplacement(mountId, assetId, expected) {
     const current = this.replacementTarget(mountId, assetId)
     if (current.mount.path !== expected.mount.path || current.row.path !== expected.row.path ||
         current.identity !== expected.identity || current.signature !== expected.signature) {
@@ -185,6 +196,9 @@ export class FileIndex {
     if (after.availability !== 'available' || after.path !== mount.path || this.mounts.identity(mountId) !== mountIdentity) {
       return { ...this.list(mountId), scanStatus: 'changed' }
     }
+    return this.applyObserved(mountId, observed)
+  }
+  applyObserved(mountId, observed) {
     const previous = this.db.prepare('SELECT * FROM files WHERE mount_id=?').all(mountId)
     const oldCounts = countByIdentity(previous), newCounts = countByIdentity(observed)
     const used = new Set(), assigned = new Map()

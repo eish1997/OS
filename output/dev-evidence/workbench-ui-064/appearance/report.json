@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T08:48:25.963Z",
+  "checks": [
+    "global light palette and 3px floating/dialog/divider borders; bounds and input retained",
+    "appearance restored after reload and in fresh browser context",
+    "all presets selectable; navigation mode persists; Escape closes settings",
+    "reset appearance preserves layout and restores defaults",
+    "settings remain operable at 800x600 with scrollable dialog"
+  ],
+  "errors": [],
+  "modelRequests": 0
+}

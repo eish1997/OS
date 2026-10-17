@@ -1,0 +1,162 @@
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -84,6 +84,7 @@
+   const failureStatus = ref(0)
+   let requestOpen: ((canvasId: string) => void) | undefined
+   let bridgeOpening = false
++  let bridgeBeforeCommit: (() => void) | undefined
+   const error = ref('')
+   const status = ref('尚未保存到本机')
+   const documents = ref<StoredDocument[]>([])
+@@ -383,22 +384,26 @@
+       const response = await request(`/canvases/${document.canvasId}/scene?revision=${document.revision}`)
+       const file = new File([await response.arrayBuffer()], `${metadata.name}.fig`)
+       const imported = await readFigDocument(file)
++      const savedPageIndex = metadata.pages?.findIndex(page => page.id === metadata.view?.pageId) ?? -1
++      const targetPage = savedPageIndex >= 0 ? imported.getPages()[savedPageIndex]?.id : undefined
+       await applyImportedDocument(store, imported, undefined, () => {
++        bridgeBeforeCommit?.()
+         const viewChanged = store.state.panX !== previousView.panX || store.state.panY !== previousView.panY ||
+           store.state.zoom !== previousView.zoom || store.state.currentPageId !== previousView.pageId
+         if (viewChanged) viewVersion.value++
+         if (disposed || store.graph !== previousGraph || changes.capture() !== previousVersion || viewChanged) {
+           throw new Error('打开期间发生新编辑，已保留当前内容，请重试。')
+         }
+-      })
++      }, { pageId: targetPage, prepare: staging => {
++        const stagedIdentity = createLocalIdentity(staging)
++        try { if (metadata.pages) stagedIdentity.restorePages(metadata.pages) }
++        finally { stagedIdentity.dispose() }
++      } })
+       store.state.documentName = metadata.name
+       store.setDocumentSource(file.name, 'fig')
+-      if (metadata.pages) identity.restorePages(metadata.pages)
+       const appliedVersion = changes.capture()
+       const view = metadata.view
+       if (view) {
+-        const page = store.graph.getPages().find(page => localNodeId(page) === view.pageId)
+-        if (page && page.id !== store.state.currentPageId) await store.switchPage(page.id)
+         store.setZoomAroundPoint(view.zoom, 0, 0)
+         store.pan(view.panX - store.state.panX, view.panY - store.state.panY)
+       }
+@@ -468,13 +473,13 @@
+     }
+     return bridgeSnapshot()
+   }
+-  async function openFromBridge(targetId: string) {
++  async function openFromBridge(targetId: string, beforeCommit?: () => void) {
+     const response = await request(`/canvases/${targetId}`)
+     const document = v.parse(v.pipe(v.string(), v.parseJson(), documentSchema), await response.text())
+     if (document.canvasId !== targetId) throw new Error('Canvas identity mismatch')
+-    bridgeOpening = true
++    bridgeOpening = true; bridgeBeforeCommit = beforeCommit
+     try { if (!await open(document)) throw new Error(error.value || 'Canvas did not open') }
+-    finally { bridgeOpening = false }
++    finally { bridgeOpening = false; bridgeBeforeCommit = undefined }
+     return bridgeSnapshot()
+   }
+   function pauseForBridge(paused: boolean) {
+--- a/src/app/runtime/workbench-bridge.ts
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -4,7 +4,7 @@
+ import { getLocalWorkspace } from '@/app/document/local-workspace'
+ import { CanvasBridgeEndpoint, CanvasBridgeError, type CanvasContext, type CanvasEnvelope } from '#workbench/canvas-bridge'
+ 
+-const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context']
++const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch']
+ 
+ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0]) {
+   if (!osEmbedded) return
+@@ -12,10 +12,19 @@
+   const instanceId = crypto.randomUUID()
+   let context: CanvasContext = { contextEpoch: 0, projectId: null, canvasId: workspace.bridgeSnapshot().canvasId }
+   let initialized = false, modalBlocked = false, switchBlocked = false, disposed = false
++  let switchLease: { id: string; cancelled: boolean } | undefined
++  const checkSwitch = (id: unknown, deadline?: number) => {
++    if (!switchLease || switchLease.id !== id || switchLease.cancelled || (deadline !== undefined && Date.now() >= deadline)) {
++      throw new CanvasBridgeError('switch-cancelled', '画板切换已取消，原画板保留')
++    }
++  }
+   const applyInteraction = () => { document.body.inert = !initialized || modalBlocked || switchBlocked }
+   const publish = () => {
+     if (!initialized || disposed) return
+-    const { canvasId: _canvasId, ...state } = workspace.bridgeSnapshot()
++    const { canvasId, ...state } = workspace.bridgeSnapshot()
++    // Graph preparation/commit and context publication have separate microtasks.
++    // Never label a new graph's state with the previous document's identity.
++    if (canvasId !== context.canvasId) return
+     endpoint.notify('DOCUMENT_STATE', state)
+   }
+   const endpoint = new CanvasBridgeEndpoint({ instanceId, origin: location.origin,
+@@ -31,13 +40,21 @@
+         }
+         case 'SAVE': return { document: await workspace.saveForBridge() }
+         case 'PREPARE_SWITCH':
++          if (typeof message.payload.switchId !== 'string') throw new CanvasBridgeError('invalid-switch', '缺少切换操作身份')
++          switchLease = { id: message.payload.switchId, cancelled: false }
+           switchBlocked = true; workspace.pauseForBridge(true); applyInteraction()
+-          return { document: await workspace.saveForBridge() }
++          { const document = await workspace.saveForBridge(); checkSwitch(message.payload.switchId); return { document } }
++        case 'CANCEL_SWITCH':
++          if (switchLease && switchLease.id === message.payload.switchId) switchLease.cancelled = true
++          return { context, document: workspace.bridgeSnapshot() }
+         case 'OPEN_CONTEXT': {
+           if (!switchBlocked) throw new CanvasBridgeError('switch-not-prepared', '切换前必须确认保存')
+           const target = message.payload.target as CanvasContext
++          const deadline = message.payload.deadline
++          if (typeof deadline !== 'number' || deadline > Date.now() + 120000) throw new CanvasBridgeError('invalid-switch', '切换截止时间无效')
++          checkSwitch(message.payload.switchId, deadline)
+           if (target.contextEpoch <= context.contextEpoch || !target.canvasId) throw new CanvasBridgeError('invalid-context', '画板上下文无效')
+-          const state = await workspace.openFromBridge(target.canvasId)
++          const state = await workspace.openFromBridge(target.canvasId, () => { checkSwitch(message.payload.switchId, deadline) })
+           context = { ...target }
+           return { document: state, context }
+         }
+--- a/src/app/document/io/imported-document.ts
++++ b/src/app/document/io/imported-document.ts
+@@ -8,10 +8,11 @@
+   editor: Editor,
+   imported: SceneGraph,
+   load?: DocumentLoadSession,
+-  beforeCommit?: () => void
++  beforeCommit?: () => void,
++  options: { pageId?: string; prepare?: (staging: Editor) => void } = {}
+ ) {
+   const firstPage = imported.getPages()[0] as SceneNode | undefined
+-  const pageId = firstPage?.id ?? imported.rootId
++  const pageId = options.pageId ?? firstPage?.id ?? imported.rootId
+   const stagingEditor = createEditor({
+     graph: imported,
+     loadFont,
+@@ -26,8 +27,9 @@
+     load?.signal.throwIfAborted()
+     if (!prepared) throw new Error('Imported page preparation was superseded')
+ 
++    options.prepare?.(stagingEditor)
+     beforeCommit?.()
+-    editor.replaceGraph(imported)
++    editor.replaceGraph(imported, { pageId })
+     editor.undo.clear()
+     editor.clearSelection()
+   } finally {
+--- a/packages/core/src/editor/create.ts
++++ b/packages/core/src/editor/create.ts
+@@ -336,14 +336,16 @@
+     if (_renderers.size === 0) releaseTextMeasurer()
+   }
+ 
+-  function replaceGraph(newGraph: SceneGraph) {
++  function replaceGraph(newGraph: SceneGraph, options: { pageId?: string } = {}) {
++    const pageId = options.pageId ?? newGraph.getPages().at(0)?.id ?? newGraph.rootId
++    if (options.pageId && newGraph.getNode(pageId)?.type !== 'CANVAS') throw new Error('Prepared page is not in the new document')
+     nodes.cancelNodePreviews()
+     undo.discardBatches()
+     _graph = newGraph
+     pendingTextLayout.clear()
+     subscribeToGraph()
+     const previousPageId = state.currentPageId
+-    state.currentPageId = _graph.getPages()[0]?.id ?? _graph.rootId
++    state.currentPageId = pageId
+     setSelectedIds(new Set())
+     state.hoveredNodeId = null
+     state.transforming = false

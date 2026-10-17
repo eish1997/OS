@@ -1,0 +1,15 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-k4lCMZ",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:5674/api/canvas/workspace/canvases/c0d35c71-8810-4c41-8d8f-5b0865978b24",
+      "status": 503
+    }
+  ],
+  "offlineVisible": true,
+  "recoveredSameCanvas": true,
+  "beforeRevision": 1,
+  "afterRevision": 2,
+  "passed": true
+}

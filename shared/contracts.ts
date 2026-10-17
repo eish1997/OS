@@ -1,6 +1,8 @@
 export type RunStatus = 'queued' | 'running' | 'waiting_node' | 'waiting_user' | 'completed' | 'failed' | 'cancelled' | 'interrupted';
 export type Acceptance = 'pending' | 'passed' | 'failed' | 'needs_review';
 export interface Entity { id: string; revision: number; createdAt: string; updatedAt: string; projectId?: string }
+export interface Run { pluginManifest?: import('./plugins.js').PluginRunManifest; pluginTools?: { name: string; source: string }[] }
+export interface SessionBinding { pluginSignature?: string }
 export interface Project extends Entity { name: string; description: string; archived: boolean }
 export interface Conversation extends Entity { projectId: string; title: string }
 export interface ResearchRequest { url: string; purpose: string }

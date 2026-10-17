@@ -34,7 +34,16 @@ function removeWindow(node: DockNode, windowId: string): DockNode | undefined {
 }
 export function activeWorkspace(layout: WorkbenchLayout) { return layout.workspaces.find(w => w.id === layout.activeWorkspaceId)!; }
 export function mutateLayout(layout: WorkbenchLayout, fn: (next: WorkbenchLayout) => void): WorkbenchLayout {
-  const next = structuredClone(layout); fn(next); validateLayout(next); return next;
+  const next = structuredClone(layout); fn(next); normalizePluginWindow(next); validateLayout(next); return next;
+}
+/** Preserve region geometry when copies/imports contain the instance-wide manager. */
+export function normalizePluginWindow(layout: WorkbenchLayout) {
+  const managers = Object.values(layout.windows).filter(w => w.type === 'plugins');
+  if (managers[0]) managers[0].binding = {};
+  const duplicateIds = new Set(managers.slice(1).map(w => w.id));
+  for (const id of duplicateIds) delete layout.windows[id];
+  for (const space of layout.workspaces) for (const region of leaves(space.root)) if (region.windowId && duplicateIds.has(region.windowId)) delete region.windowId;
+  layout.floating = layout.floating.filter(f => !duplicateIds.has(f.windowId));
 }
 function detach(next: WorkbenchLayout, windowId: string) {
   next.floating = next.floating.filter(w => w.windowId !== windowId);

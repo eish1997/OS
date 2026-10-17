@@ -1,0 +1,13 @@
+﻿{
+    "checkedAt":  "2026-10-16T09:46:29.1939456Z",
+    "unexpectedChanges":  [
+
+                          ],
+    "allowedIncrementalChanges":  [
+                                      ".gitignore",
+                                      "server/app.ts",
+                                      "src/workbench/app.tsx",
+                                      "doc/dev/backlog.md",
+                                      "doc/dev/current.md"
+                                  ]
+}

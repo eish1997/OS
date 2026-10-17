@@ -1,4 +1,8 @@
+import { createCanvasAdmission } from './storage-admission.mjs'
+import { AppError } from '../../../shared/app-error.ts'
+import { mkdirSync } from 'node:fs'
 import { createServer } from 'node:http'
+import { acquireWorkspaceOwner } from './workspace-owner.mjs'
 import { timingSafeEqual } from 'node:crypto'
 import { WorkspaceStore, WorkspaceError } from './workspace-store.mjs'
 import { LayoutStore } from './layout-store.mjs'
@@ -37,37 +41,43 @@ async function readBytes(request, limit) {
 }
 
 export async function startWorkspaceServer({ directory, token, port = 14222,
-  origin = 'http://localhost:14220', bodyLimit = DEFAULT_LIMIT, nodeSandbox }) {
+  origin = 'http://localhost:14220', bodyLimit = DEFAULT_LIMIT, nodeSandbox, storage }) {
   if (typeof token !== 'string' || token.length < 32) throw new Error('A session token of at least 32 characters is required')
   const secret = Buffer.from(`Bearer ${token}`)
+  mkdirSync(directory, { recursive: true })
+  const admission = createCanvasAdmission(directory, storage)
+  const initialize = (fn) => admission ? admission.initialize(fn) : fn()
+  const guard = (value, methods) => admission ? admission.guard(value, methods) : value
+  const owner = initialize(() => acquireWorkspaceOwner(directory))
+  try {
   const nodeRuns = nodeSandbox ? createNodeRuns(nodeSandbox) : null
-  const store = new WorkspaceStore(directory)
+  const store = guard(initialize(() => new WorkspaceStore(directory)), ['save', 'importHistory', 'writeScene'])
   let layout
   let layoutFailure
-  try { layout = new LayoutStore(directory) } catch (error) { layoutFailure = error }
+  try { layout = guard(initialize(() => new LayoutStore(directory)), ['save', 'importPreset']) } catch (error) { layoutFailure = error }
   let mounts
   let mountFailure
-  try { mounts = new MountStore(directory) } catch (error) { mountFailure = error }
+  try { mounts = guard(initialize(() => new MountStore(directory)), ['add', 'confirmRelink', 'importReferences']) } catch (error) { mountFailure = error }
   let outputs
   let outputFailure = mountFailure
-  if (mounts) try { outputs = new OutputStore(directory, mounts) } catch (error) { outputFailure = error }
+  if (mounts) try { outputs = guard(initialize(() => new OutputStore(directory, mounts)), ['prepare', 'cancel', 'replacePending', 'writeTemporary', 'cleanupFinished', 'commit']) } catch (error) { outputFailure = error }
   let files
   let fileFailure = mountFailure
   if (mounts) try {
-    files = new FileIndex(directory, mounts, { ignoredNames: id => {
+    files = guard(initialize(() => new FileIndex(directory, mounts, { ignoredNames: id => {
       if (outputFailure) throw outputFailure
       return outputs.temporaryNames(id)
     }, outputOrigins: (id, rows) => {
       if (outputFailure) throw outputFailure
       return outputs.origins(id, rows)
-    } })
+    } })), ['importReferences', 'applyObserved', 'commitReplacement'])
   } catch (error) { fileFailure = error }
   const observer = files ? new DirectoryObserver(files, mounts) : undefined
   const targets = files ? new FileTargets(files, mounts) : undefined
   let imports
   let importFailure = fileFailure ?? layoutFailure
   if (!importFailure) try {
-    imports = new PackageImportStore(directory, { workspace: store, mounts, files, layout })
+    imports = guard(initialize(() => new PackageImportStore(directory, { workspace: store, mounts, files, layout })), ['prepare', 'resume'])
   } catch (error) { importFailure = error }
   const server = createServer(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store')
@@ -152,6 +162,10 @@ export async function startWorkspaceServer({ directory, token, port = 14222,
         }
         send(200, outputs.prepare({ ...body, content })); return
       }
+      if (parts[0] === 'outputs' && parts.length === 2 && request.method === 'GET') {
+        if (outputFailure) throw outputFailure
+        send(200, outputs.get(parts[1])); return
+      }
       if (parts[0] === 'outputs' && parts.length === 3 && parts[2] === 'commit' && request.method === 'POST') {
         if (outputFailure) throw outputFailure
         send(200, outputs.commit(parts[1])); return
@@ -192,9 +206,19 @@ export async function startWorkspaceServer({ directory, token, port = 14222,
         if (fileFailure) throw fileFailure
         send(200, await observer.poll(parts[1])); return
       }
+      if (parts[0] === 'mounts' && parts.length === 5 && parts[2] === 'files' && parts[4] === 'open-preview' && request.method === 'POST') {
+        if (fileFailure) throw fileFailure
+        send(200, await files.previewChild(parts[1], parts[3])); return
+      }
       if (parts[0] === 'mounts' && parts.length === 5 && parts[2] === 'files' && parts[4] === 'open' && request.method === 'POST') {
         if (fileFailure) throw fileFailure
-        send(200, await files.openChild(parts[1], parts[3])); return
+        let expected
+        if (request.headers['content-type']?.split(';')[0] === 'application/json') {
+          const raw = await readBytes(request, 64 * 1024)
+          const body = raw.length ? JSON.parse(raw.toString('utf8')) : undefined
+          if (body && Object.hasOwn(body, 'expectedCanvasId')) expected = body.expectedCanvasId
+        }
+        send(200, await files.openChild(parts[1], parts[3], expected)); return
       }
       if (parts[0] === 'mounts' && parts.length === 5 && parts[2] === 'files' && request.method === 'POST' &&
           ['replacement-preview', 'replacement-confirm'].includes(parts[4])) {
@@ -253,7 +277,8 @@ export async function startWorkspaceServer({ directory, token, port = 14222,
       send(404, { error: 'not-found', message: 'Route not found' })
     } catch (error) {
       if (response.destroyed || response.headersSent) return
-      if (error instanceof WorkspaceError) send(statusFor[error.code] ?? 500, { error: error.code, message: error.message })
+      if (error instanceof AppError && [423, 507].includes(error.status)) send(error.status, { error: 'storage-unavailable', message: error.message })
+      else if (error instanceof WorkspaceError) send(statusFor[error.code] ?? 500, { error: error.code, message: error.message })
       else send(500, { error: 'storage-failure', message: 'Workspace operation failed; saved revisions are retained' })
     }
   })
@@ -265,16 +290,19 @@ export async function startWorkspaceServer({ directory, token, port = 14222,
       server.listen(port, '127.0.0.1', resolve)
     })
   } catch (error) { observer?.close(); imports?.close(); store.close(); layout?.close(); await files?.close(); outputs?.close(); mounts?.close(); throw error }
+  let closing
   return { url: `http://127.0.0.1:${server.address().port}`,
-    close: async () => {
-      await nodeRuns?.close()
-      await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
-      observer?.close()
-      imports?.close()
-      store.close()
-      layout?.close()
-      await files?.close()
-      outputs?.close()
-      mounts?.close()
-    } }
+    close: () => closing ??= (async () => {
+      const errors = []
+      for (const stop of [
+        () => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())),
+        () => nodeRuns?.close(), () => observer?.close(), () => imports?.close(),
+        () => files?.close(), () => outputs?.close(), () => mounts?.close(),
+        () => layout?.close(), () => store.close()
+      ]) { try { await stop() } catch (error) { errors.push(error) } }
+      // If shutdown is uncertain, keep ownership until process exit releases the OS lock.
+      if (errors.length) throw new AggregateError(errors, 'Canvas service could not stop all writers')
+      owner.close()
+    })() }
+  } catch (error) { owner.close(); throw error }
 }

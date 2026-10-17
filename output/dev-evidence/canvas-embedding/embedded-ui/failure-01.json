@@ -1,0 +1,34 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-XjNdpj",
+  "errors": [
+    "Failed to register a ServiceWorker for scope ('http://127.0.0.1:13301/canvas/') with script ('http://127.0.0.1:13301/canvas/sw.js'): A bad HTTP response code (404) was received when fetching the script.",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0). Build with -sASSERTIONS for more info.",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0). Build with -sASSERTIONS for more info.",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0). Build with -sASSERTIONS for more info.",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0). Build with -sASSERTIONS for more info."
+  ],
+  "consoleErrors": [
+    "A bad HTTP response code (404) was received when fetching the script.",
+    "Connecting to 'https://api.fontsource.org/v1/fonts' violates the following Content Security Policy directive: \"connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com\". The action has been blocked.",
+    "Fetch API cannot load https://api.fontsource.org/v1/fonts. Refused to connect because it violates the document's Content Security Policy.",
+    "wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.",
+    "falling back to ArrayBuffer instantiation",
+    "wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.",
+    "falling back to ArrayBuffer instantiation",
+    "failed to asynchronously prepare wasm: CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0)",
+    "failed to asynchronously prepare wasm: CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0",
+    "Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0)",
+    "Connecting to 'https://api.fontsource.org/v1/fonts' violates the following Content Security Policy directive: \"connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com\". The action has been blocked.",
+    "Fetch API cannot load https://api.fontsource.org/v1/fonts. Refused to connect because it violates the document's Content Security Policy.",
+    "Connecting to 'https://api.fontsource.org/v1/fonts' violates the following Content Security Policy directive: \"connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com\". The action has been blocked.",
+    "Fetch API cannot load https://api.fontsource.org/v1/fonts. Refused to connect because it violates the document's Content Security Policy.",
+    "Connecting to 'https://api.fontsource.org/v1/fonts' violates the following Content Security Policy directive: \"connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com\". The action has been blocked.",
+    "Fetch API cannot load https://api.fontsource.org/v1/fonts. Refused to connect because it violates the document's Content Security Policy.",
+    "Could not initialize provider `fontsource`. `unifont` will not be able to process fonts provided by this provider. FetchError: [GET] \"https://api.fontsource.org/v1/fonts\": <no response> Failed to fetch\n    at async o (http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:10:159524)\n    at async Object.getItem (http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:11:3478)\n    at async http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:10:168069\n    at async http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:11:4105\n    at async Promise.all (index 0)\n    at async Oh (http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:11:4007)\n    at async Gh.withFetchProxy (http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:11:9380)\n    at async Gh.loadFamilies (http://127.0.0.1:13301/canvas/assets/text-measurement-CCwXTlpc.js:11:9753)"
+  ],
+  "failedRequests": [],
+  "passed": false,
+  "step": "frame-load",
+  "failure": "TimeoutError: locator.waitFor: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-test-id=\"canvas-element\"][data-ready=\"1\"]') to be visible\u001b[22m\n"
+}

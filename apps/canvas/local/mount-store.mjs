@@ -148,8 +148,39 @@ export class MountStore {
       }
       let row = this.db.prepare('SELECT * FROM mounts WHERE identity=?').get(directory.identity)
       if (row) {
-        this.db.prepare('UPDATE mounts SET canonical=? WHERE id=?').run(directory.canonical, row.id)
-        row = { ...row, canonical: directory.canonical }
+        if (row.canonical !== directory.canonical) throw new WorkspaceError('conflict', 'Directory already belongs to another canvas; canvases are not merged')
+      } else {
+        row = { id: randomUUID(), canvas_id: randomUUID(), canonical: directory.canonical, identity: directory.identity }
+        this.db.prepare('INSERT INTO mounts VALUES (?, ?, ?, ?)').run(row.id, row.canvas_id, row.canonical, row.identity)
+      }
+      this.db.exec('COMMIT')
+      return this.describe(row)
+    } catch (error) { this.db.exec('ROLLBACK'); throw error }
+  }
+  /** Relocate an existing canvas only when the caller names that canvas. A new
+   * identity is created only when no canvas is expected. Mismatches do not write. */
+  adopt(path, expectedCanvasId) {
+    let directory
+    try { directory = inspect(path) }
+    catch (error) {
+      if (error instanceof WorkspaceError) throw error
+      throw new WorkspaceError('invalid', 'Directory is missing or inaccessible')
+    }
+    this.db.exec('BEGIN IMMEDIATE')
+    try {
+      const atPath = this.db.prepare('SELECT * FROM mounts WHERE canonical=?').get(directory.canonical)
+      if (atPath && atPath.identity !== directory.identity) {
+        throw new WorkspaceError('conflict', 'This path now points to another directory; retain the original association')
+      }
+      let row = this.db.prepare('SELECT * FROM mounts WHERE identity=?').get(directory.identity)
+      if (row) {
+        if (row.canvas_id !== expectedCanvasId) throw new WorkspaceError('conflict', 'Directory already belongs to another canvas; canvases are not merged')
+        if (row.canonical !== directory.canonical) {
+          this.db.prepare('UPDATE mounts SET canonical=? WHERE id=?').run(directory.canonical, row.id)
+          row = { ...row, canonical: directory.canonical }
+        }
+      } else if (expectedCanvasId) {
+        throw new WorkspaceError('conflict', 'Folder registration changed before opening')
       } else {
         row = { id: randomUUID(), canvas_id: randomUUID(), canonical: directory.canonical, identity: directory.identity }
         this.db.prepare('INSERT INTO mounts VALUES (?, ?, ?, ?)').run(row.id, row.canvas_id, row.canonical, row.identity)

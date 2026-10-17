@@ -1,0 +1,249 @@
+﻿{
+    "install":  "frozen-lockfile, exit 0, 2076 installs across 2443 packages",
+    "patches":  [
+                    {
+                        "sha256":  "12AC194C48305D350717733E07C32F929C1C85B35DF2B18E197005F0336529BB",
+                        "name":  "0001-windows-headless-wasm.patch"
+                    },
+                    {
+                        "sha256":  "5E7361025DAC5AAC28E23BB2EB8B34E458A06AE872668E6A239EEC82107B8FFE",
+                        "name":  "0002-full-window-canvas.patch"
+                    },
+                    {
+                        "sha256":  "DD6F00EB44A1E962290552E0C42E7C28464FB2B7BAE7B5F12584411B65CD3B05",
+                        "name":  "0003-font-subset-fallback.patch"
+                    },
+                    {
+                        "sha256":  "483994B1D82E8402003E7161EF2AD429D1AD57FBF86ED3BFD4167F9E4895106E",
+                        "name":  "0004-os-canvas-startup.patch"
+                    },
+                    {
+                        "sha256":  "B98D1253F10EE0525EF2048E198EEFA1F5E37B660E014424282947BF7F588CC6",
+                        "name":  "0005-input-render-frame.patch"
+                    },
+                    {
+                        "sha256":  "BACC4F76B1E564847E22879FF0A291C9674AB469CC4B5E1AD9F82F7690DEEBF3",
+                        "name":  "0006-isolation-prototype.patch"
+                    },
+                    {
+                        "sha256":  "67AAB30ADBEAE9E1AC08BC0A47C4ECACD04B11F75EF72CF30804A0CBF7D1DD53",
+                        "name":  "0007-native-node-runtime.patch"
+                    },
+                    {
+                        "sha256":  "924268377FB1DDA81652AF3425E1B2F43386CAD86A4F79868F1DD97A913ED658",
+                        "name":  "0008-native-web-preview.patch"
+                    },
+                    {
+                        "sha256":  "ADCBFCF93D90D8D764D93A0775237ACC20AF0485F4B1C8A549A435670BD74461",
+                        "name":  "0009-desktop-prototype.patch"
+                    },
+                    {
+                        "sha256":  "22B3FAC17F82F572A3307EA1BA6C76EF9A6E24A951F13ACDD0FFCB4C1C2093A2",
+                        "name":  "0010-transparent-renderer.patch"
+                    },
+                    {
+                        "sha256":  "09F8A566E170447B072804DBB8FDC3D94BD23022B8939B59E9E093E0B088D025",
+                        "name":  "0011-fine-pixel-wheel.patch"
+                    },
+                    {
+                        "sha256":  "CAF4215869A6A6EC0213346984F5F239B441EC9D670955229028262847A4CD8E",
+                        "name":  "0012-perf-log-lint.patch"
+                    },
+                    {
+                        "sha256":  "2494FE620E2AEA132A2E3F22CB9D715600A1E66CC37AAF5FF9A9AB56926A5ECB",
+                        "name":  "0013-factory-theme.patch"
+                    },
+                    {
+                        "sha256":  "67248EB349582C0060360994FE2EA493A717790C6D2D22A428EDECD863722BB5",
+                        "name":  "0014-canvas-text-default.patch"
+                    },
+                    {
+                        "sha256":  "8BEE2F1273B253759D777CEA6063D94206E0EFF3A8A2913AC96F16DAF4E22A76",
+                        "name":  "0015-local-connections.patch"
+                    },
+                    {
+                        "sha256":  "398CA1D52F2954C74C2BBC5337795A14B6FCA5385F04DB755206FF779DB57B6F",
+                        "name":  "0016-connection-copy.patch"
+                    },
+                    {
+                        "sha256":  "D53C0D1A5311FEB34F480962CE26B871CFFE02C887BD745C81116966E4038361",
+                        "name":  "0017-connection-filter.patch"
+                    },
+                    {
+                        "sha256":  "6DC6E837C0EE15002A39F1E1934159E6FFFA35CB25298DB277A77B6E4A980F7F",
+                        "name":  "0018-save-pending-nudge.patch"
+                    },
+                    {
+                        "sha256":  "933D576AB0F5CA165E278173AF707C128A958CA368FAB92BC522154A024FC42E",
+                        "name":  "0019-connection-transform.patch"
+                    },
+                    {
+                        "sha256":  "945B9575660479E03C6FB5E09568330A8E8B9E7D97DFC72600C6D3C94836E03D",
+                        "name":  "0020-fig-connection-copy.patch"
+                    },
+                    {
+                        "sha256":  "29656F88D5433C1FFF37D4B8E67F3EC7BE7E7B3381534A327C92C721E66F76C8",
+                        "name":  "0021-connection-anchors.patch"
+                    },
+                    {
+                        "sha256":  "D1A131D6E3976ABBA6D4AF8D537F361AE5216EAB4F73AD4E0B8A6E66AEF99748",
+                        "name":  "0022-connection-drag.patch"
+                    },
+                    {
+                        "sha256":  "3934D4645F63D7E25F5C68C1F5A78D3F541CD52DC8FF835C10D2A736547801E4",
+                        "name":  "0023-connection-drag-visibility.patch"
+                    },
+                    {
+                        "sha256":  "05E5127ADB35247AA03D763D38D02419423C640B3A9EAA89F7E7892E0B839827",
+                        "name":  "0024-connection-routes.patch"
+                    },
+                    {
+                        "sha256":  "FC089063B27E9F3CA2311A9ED0F5DB886C659D3DCA7DA2E2FA7105C3E36649E5",
+                        "name":  "0025-connection-labels.patch"
+                    },
+                    {
+                        "sha256":  "AB4E051D6CD491C8CAFAFD43BBB7B174CA7B157C87F60585C4841ED2D670A4BB",
+                        "name":  "0026-connection-label-layout.patch"
+                    },
+                    {
+                        "sha256":  "006067BCDB5F77109379AE0695CB4264B575C688B8909E4B5AB78A26913F12C5",
+                        "name":  "0027-connection-label-clearance.patch"
+                    },
+                    {
+                        "sha256":  "60100DC2A5A406E9ED54DC6E270C00CD9FE7071E58926EDD31AFF03E6B7E6F53",
+                        "name":  "0028-connection-label-font-retry.patch"
+                    },
+                    {
+                        "sha256":  "CE80744DD0E9A3A8BE22278C3CBCA8DAB560E73E66EDB7B73DA4247CF21342F6",
+                        "name":  "0029-local-notes.patch"
+                    },
+                    {
+                        "sha256":  "80AEEAC87A07F776421DCCF4AC51EEE80E8EEE2878E4511C8CDD86D251D1D019",
+                        "name":  "0030-note-auto-layout.patch"
+                    },
+                    {
+                        "sha256":  "675EDBB421E186CBC40B12E6ABC13365E05033F71A0E7F646B1E71D31A4D48E4",
+                        "name":  "0031-authored-layout-source.patch"
+                    },
+                    {
+                        "sha256":  "7683A3595E2D0D9DA95BF770F04DF745020ACBBAF631B92EEEA194750957DF15",
+                        "name":  "0032-workspace-panel-switch.patch"
+                    },
+                    {
+                        "sha256":  "55DD5EB67D94D99827318A88DCC17905EEC3E5DC6F794683C023302804D26EA0",
+                        "name":  "0033-note-live-fonts.patch"
+                    },
+                    {
+                        "sha256":  "C10F07C800C40CE846F07A3F84F824BEF3A765226B3035E6CABD98939881B324",
+                        "name":  "0034-note-layout-and-title.patch"
+                    },
+                    {
+                        "sha256":  "7712DE89F9A1E9C424F35F17FDFAD3E0114691975B68384556EA6190A987ECBC",
+                        "name":  "0035-canvas-title-fonts.patch"
+                    },
+                    {
+                        "sha256":  "0D29721D523945CB4BB49DFCE1488E975D0FC1368E2454AF5B68DBC816377544",
+                        "name":  "0036-preview-asset-panel.patch"
+                    },
+                    {
+                        "sha256":  "D7445188D34F64AF280396A879D7AE27FF529DD6198877AF70115026E1C75099",
+                        "name":  "0037-canvas-search.patch"
+                    },
+                    {
+                        "sha256":  "763C51B90EEDBA7F1B7149CA9217EB21B7DCD43046EFAE42110679F4CBBCD30C",
+                        "name":  "0038-grid-layout-persistence.patch"
+                    },
+                    {
+                        "sha256":  "94C4A18657AAE2A81B50352D2BFF7A6DAA377D9105ACC844CFFC41FA9630117C",
+                        "name":  "0039-preview-archive-baseline.patch"
+                    },
+                    {
+                        "sha256":  "D2B9B7F13856FEDF8B38825114F9D5B6ED537FF0CD985940F23518B9DF92D65E",
+                        "name":  "0040-grid-gap-labels.patch"
+                    },
+                    {
+                        "sha256":  "F68A69CC9D14F223E7B5346D2FBB961C4AAAC56756179C632E9FDD999ED93B50",
+                        "name":  "0041-grid-track-labels.patch"
+                    },
+                    {
+                        "sha256":  "6656A6A66167F962EAAF6F0014B492A62D049614A2B063FBF6AA487D9A3BB901",
+                        "name":  "0042-grid-position-controls.patch"
+                    },
+                    {
+                        "sha256":  "99DF7F0ACE937369DC396E854C8B984EC07F8A6EDB54A773D3795F5DD46CA8A7",
+                        "name":  "0043-grid-parent-lifecycle.patch"
+                    },
+                    {
+                        "sha256":  "0229BB752DD1C58D5E0AAA9A4C796007943247011200E8E14200B806B2130651",
+                        "name":  "0044-size-constraint-preview.patch"
+                    },
+                    {
+                        "sha256":  "2CBD06C29A40D6319D7E4DC927664B4608C01B2917528AE28CBAAC88E61454A5",
+                        "name":  "0045-boolean-keyboard-shortcuts.patch"
+                    },
+                    {
+                        "sha256":  "62879275AC60A4FC6EBBFB79095B6AC6F2684F8D49E43D613570663EEA5FD3BA",
+                        "name":  "0046-vector-history-sync.patch"
+                    },
+                    {
+                        "sha256":  "857D3728B9C61B393D1CA7BADDC74AC52E736E9509211F2A89E76947FEAB6943",
+                        "name":  "0047-vector-session-history.patch"
+                    },
+                    {
+                        "sha256":  "09C23CE0AAAC387139CB65CB9D7D290135E617073593B6D4E5E1E81FF124A95D",
+                        "name":  "0048-detach-instance-save.patch"
+                    },
+                    {
+                        "sha256":  "EB22BDA5A99FB707C4C19F9EB4E7133E1059B2782A29DD477BD44B7CC958B0BB",
+                        "name":  "0049-instance-reset-action.patch"
+                    },
+                    {
+                        "sha256":  "042DCAA01904EA46911FEE11607E4FA3CEA5D8AD699B91B1CD5135CE1160CAE5",
+                        "name":  "0050-instance-reset-availability.patch"
+                    },
+                    {
+                        "sha256":  "0594FB9346D9CBFC9F8A68E81C8A05D835A4D3B078C9B13494CC42C53DB95BFB",
+                        "name":  "0051-instance-reset-retry-selection.patch"
+                    },
+                    {
+                        "sha256":  "64A48360DE296C0DD9EAF63DE7BC429F40F69DCF243D1E247BFA6B1A95FE1D18",
+                        "name":  "0052-variable-number-input.patch"
+                    },
+                    {
+                        "sha256":  "2870A796D08E28CCCA543D220733A0A2CEA63E7738DE7AB87230D204498A1C23",
+                        "name":  "0053-create-shared-style.patch"
+                    },
+                    {
+                        "sha256":  "66ADE57AD78EFD19345562ED7F2475EEA5D01AC4EDC485E165D73CA5E6D70C50",
+                        "name":  "0054-edit-shared-styles.patch"
+                    },
+                    {
+                        "sha256":  "58417DCD2429F271AB724D846707A0BCEF417F98075B851BDBC10B9CBCC92AE3",
+                        "name":  "0055-text-style-editor.patch"
+                    },
+                    {
+                        "sha256":  "413B97FD84A9FDC3412B076163C10E0DA81DDEFBCC03D5CD6B42B2AED90CE84D",
+                        "name":  "0056-effect-style-editor.patch"
+                    },
+                    {
+                        "sha256":  "409B10601B4D2FA7704833C8B8AE52C3083B9BE31274106D9B1FD938EF706421",
+                        "name":  "0057-multi-fill-style-editor.patch"
+                    }
+                ],
+    "capturedAt":  "2026-10-16T09:15:08.9735370Z",
+    "upstream":  "78355fd3890cc9da9539235ee3b38beb917f2ed6",
+    "node":  "v24.19.0",
+    "packagesExit":  0,
+    "bun":  "1.4.2",
+    "localTests":  {
+                       "pass":  58,
+                       "fail":  0,
+                       "exit":  0
+                   },
+    "head":  "1a9a44eb7ae987ce64b89acc20d9ddf9046d7824",
+    "fullBuildExit":  0,
+    "embeddedBuildExit":  0,
+    "standaloneBrowserReport":  "standalone/report.json",
+    "staticRouteTestsExit":  0,
+    "hostTypecheckExit":  0
+}

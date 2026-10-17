@@ -12,9 +12,10 @@ export const palettes = {
 export function appearanceStyle(value:WorkbenchAppearance):React.CSSProperties {
   return {...Object.fromEntries(Object.entries(palettes[value.theme].colors).map(([key,color])=>['--'+key,color])),'--line-width':`${value.lineWidth}px`,colorScheme:value.theme==='light'?'light':'dark'} as React.CSSProperties;
 }
-export function AppearanceSettings({value,onChange,onClose,status}:{value:WorkbenchAppearance;onChange:(value:WorkbenchAppearance)=>void;onClose:()=>void;status:string}){
+export function AppearanceSettings({value,onChange,onClose,status,onPlugins}:{value:WorkbenchAppearance;onChange:(value:WorkbenchAppearance)=>void;onClose:()=>void;status:string;onPlugins?:()=>void}){
   return <div className="wb-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section className="wb-modal wb-appearance" role="dialog" aria-modal="true" aria-label="外观设置">
     <header><div><p className="wb-caption">设置 / 外观</p><h2>让工作台适合你</h2></div><button aria-label="关闭设置" onClick={onClose}><Icon name="close"/></button></header>
+    {onPlugins&&<button onClick={onPlugins}>打开插件管理 →</button>}
     <fieldset><legend>整体配色</legend><div className="wb-theme-grid">{Object.entries(palettes).map(([key,palette])=><label key={key} className={`wb-theme-option ${value.theme===key?'selected':''}`}><input type="radio" name="workbench-theme" value={key} checked={value.theme===key} onChange={()=>onChange({...value,theme:key as WorkbenchAppearance['theme']})}/><span className="wb-theme-swatch" aria-hidden="true">{['bg-canvas','bg-surface','bg-selected','text-primary'].map(token=><i key={token} style={{background:palette.colors[token as keyof typeof base]}}/>)}</span><strong>{palette.name}</strong><small>{palette.description}</small></label>)}</div></fieldset>
     <div className="wb-setting-row"><label htmlFor="wb-line-width">线条粗细<small>窗口边框、分隔线、菜单与控件边界</small></label><output htmlFor="wb-line-width">{value.lineWidth} px</output></div>
     <input id="wb-line-width" type="range" min="0.5" max="3" step="0.5" value={value.lineWidth} onChange={e=>onChange({...value,lineWidth:Number(e.target.value)})}/><div className="wb-range-labels"><span>细 · 0.5 px</span><span>粗 · 3 px</span></div>

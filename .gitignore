@@ -7,5 +7,7 @@ data/
 .runtime/
 output/dev-evidence/private/
 /output/workbench-build/
+/output/plugin-build/
+/output/canvas-workbench-build/
 *.log
 /打开工作台.lnk

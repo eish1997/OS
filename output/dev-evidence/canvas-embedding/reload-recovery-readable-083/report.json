@@ -1,0 +1,30 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-gvp6v1",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:5369/api/canvas/workspace/canvases/3c4aeafd-251e-4425-9fb0-f468b5151940",
+      "status": 503
+    }
+  ],
+  "recoveryDeletions": [
+    {
+      "key": "4f9d7820-9f02-48ae-aaae-e7e3f6946d07",
+      "store": "meta",
+      "time": 1792149499102,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5369/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5369/canvas/assets/tabs-CHYGMhcR.js:5630:65115)\n    at async http://127.0.0.1:5369/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    },
+    {
+      "key": "4f9d7820-9f02-48ae-aaae-e7e3f6946d07",
+      "store": "fig",
+      "time": 1792149499103,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5369/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5369/canvas/assets/tabs-CHYGMhcR.js:5630:65146)\n    at async http://127.0.0.1:5369/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "offlineSnapshotObservedAt": 1792149499282,
+  "beforeReloadRecords": [],
+  "passed": false,
+  "failure": "AssertionError [ERR_ASSERTION]: Automatic snapshot must remain readable before reload"
+}

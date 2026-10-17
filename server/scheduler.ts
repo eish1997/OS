@@ -9,12 +9,16 @@ import type { ModelAccess } from './model-access.js';
 import { Service } from './service.js';
 import { config, modelConfigured } from './config.js';
 import { continuationFor } from './native-session.js';
+import type { Plugins } from './plugins.js';
+import type { PluginDiscovery } from '../shared/plugins.js';
 export class Scheduler {
   readonly owner = randomUUID(); private timer?: ReturnType<typeof setInterval>;
   private children = new Map<string, ChildProcess>(); private ticking = false;
-  constructor(private service: Service, private reportFailure = () => console.error('Scheduler: execution state update failed'), private modelAccess?: ModelAccess) {}
+  constructor(private service: Service, private reportFailure = () => console.error('Scheduler: execution state update failed'), private modelAccess?: ModelAccess, private plugins?: Plugins) {}
+  pluginMaintenanceBlocked() { return this.ticking || this.children.size > 0 || this.service.store.list<Run>('run').some(r => r.status === 'running' || (r.status === 'interrupted' && !r.error?.includes('已对账'))); }
   start() { this.timer = setInterval(() => this.tick(), 750); this.tick(); }
   async withIdleMaintenance(action: (owner: string, signal: AbortSignal) => Promise<void>): Promise<boolean> {
+    if (this.plugins && (this.plugins.state.pending().length || this.plugins.gate.status().writer)) return false;
     if (this.ticking || this.children.size) return false;
     const {store}=this.service;
     if (store.list<Run>('run').some(r=>['running','queued','waiting_node','waiting_user'].includes(r.status)||(r.status==='interrupted'&&!r.error?.includes('已对账')))) return false;
@@ -30,6 +34,7 @@ export class Scheduler {
     finally{clearInterval(renewal);try{store.release('scheduler',this.owner);}finally{this.ticking=false;}}
   }
   tick() {
+    if (this.plugins?.mutating) return;
     if (this.ticking) return; this.ticking = true;
     try {
       const { store } = this.service;
@@ -79,6 +84,22 @@ export class Scheduler {
     finally { this.ticking = false; }
   }
   private launch(run: Run) {
+    if (run.mode !== 'pi' || !this.plugins) return this.launchWorker(run);
+    if (this.plugins.state.pending().length) return;
+    if (!this.plugins.gate.acquireRead(run.id)) return;
+    try {
+      const manifest = this.plugins.state.manifest();
+      const sourceId = run.parentRunId || run.continuation?.runId;
+      if (sourceId) this.plugins.state.assertCompatible(this.service.store.get<Run>('run', sourceId).pluginManifest, manifest);
+      const frozen = this.service.store.update<Run>('run', run.id, run.revision, { pluginManifest: manifest });
+      this.launchWorker(frozen);
+    } catch (error) {
+      const current = this.service.store.get<Run>('run', run.id);
+      if (current.status === 'queued') this.service.transition(run.id, 'failed', { endedAt: new Date().toISOString(), error: error instanceof Error ? error.message : '插件环境无法使用' });
+      else throw error;
+    } finally { if (!this.children.has(run.id)) this.plugins.gate.releaseRead(run.id); }
+  }
+  private launchWorker(run: Run) {
     const dataDir = dirname(this.service.store.path);
     let continuationPath:string|undefined;
     if(run.continuation)try {
@@ -98,8 +119,33 @@ export class Scheduler {
     this.children.set(run.id, child);
     this.service.transition(run.id, 'running', { leaseOwner: this.owner, leaseUntil: Date.now() + 10_000, startedAt: new Date().toISOString(), workerStartedAt: new Date().toISOString(), workerPid: child.pid });
     child.on('message', async (raw: unknown) => {
-      const msg = raw as { type: string; requestId?: string; operationId?: string; name?: string; phase?: string; args?: Record<string, unknown>; text?: string; error?: string; cost?: number; usage?: ModelUsage; callNumber?:number;sessionPath?: string; sessionId?: string };
+      const msg = raw as { type: string; requestId?: string; operationId?: string; name?: string; source?: string; tools?: {name:string;source:string}[]; resources?: PluginDiscovery['resources']; diagnostics?: PluginDiscovery['diagnostics']; phase?: string; args?: Record<string, unknown>; text?: string; error?: string; cost?: number; usage?: ModelUsage; callNumber?:number;sessionPath?: string; sessionId?: string };
       try {
+        if (msg.type === 'plugin_failed' && run.pluginManifest) {
+          this.plugins?.state.recordLoad(run.pluginManifest, run.id, run.projectId, msg.error?.slice(0, 500));
+          if (child.connected) child.send({ type: 'reply', requestId: msg.requestId, result: { recorded: true } });
+        }
+        if (msg.type === 'plugin_loaded') {
+          const manifest = run.pluginManifest; if (!manifest) throw new Error('缺少插件运行清单');
+          const allowedSource = (source: string) => manifest.resources.some(r => r.kind === 'extensions' && resolve(r.path) === resolve(source));
+          if (!Array.isArray(msg.tools) || msg.tools.some(t => typeof t.name !== 'string' || typeof t.source !== 'string' || !allowedSource(t.source) || isNativePiTool(t.name) || run.policy.toolNames.includes(t.name))) throw new Error('插件工具来源或名称无效');
+          const current = this.service.store.get<Run>('run', run.id);
+          this.service.store.update<Run>('run', run.id, current.revision, { pluginTools: msg.tools });
+          this.plugins?.state.recordLoad(manifest, run.id, run.projectId);
+          this.service.store.create<PluginDiscovery>('plugin_discovery', { runId: run.id, projectId: run.projectId, resources: (msg.resources ?? []).slice(0, 500), diagnostics: (msg.diagnostics ?? []).slice(0, 100) });
+          if (child.connected) child.send({ type: 'reply', requestId: msg.requestId, result: { loaded: true } });
+        }
+        if (msg.type === 'plugin_registered') {
+          if (typeof msg.name !== 'string' || typeof msg.source !== 'string' || isNativePiTool(msg.name) || run.policy.toolNames.includes(msg.name) || !run.pluginManifest?.resources.some(r => r.kind === 'extensions' && resolve(r.path) === resolve(msg.source!))) throw new Error('动态插件工具来源或名称无效');
+          const current = this.service.store.get<Run>('run', run.id);
+          const existing = current.pluginTools?.find(t => t.name === msg.name);
+          if (existing && existing.source !== msg.source) throw new Error('动态插件工具来源冲突');
+          if (!existing) this.service.store.update<Run>('run', run.id, current.revision, { pluginTools: [...(current.pluginTools ?? []), { name: msg.name, source: msg.source }] });
+          this.service.store.event('plugin.registered', { name: msg.name, source: msg.source }, { projectId: run.projectId, runId: run.id });
+        }
+        if (msg.type === 'plugin_tool' && msg.name && msg.source && !isNativePiTool(msg.name) && !run.policy.toolNames.includes(msg.name) && run.pluginManifest?.resources.some(r => r.kind === 'extensions' && resolve(r.path) === resolve(msg.source!)) && ['started', 'completed', 'failed'].includes(msg.phase ?? '')) {
+          this.service.store.event('plugin.tool', { name: msg.name, source: msg.source, phase: msg.phase, toolCallId: msg.operationId?.slice(0,200) }, { projectId: run.projectId, runId: run.id });
+        }
         if (msg.type === 'tool') { const result = await this.service.executeOperation(run.id, msg.operationId ?? msg.requestId!, msg.name!, msg.args ?? {}); if (child.connected) child.send({ type: 'reply', requestId: msg.requestId, result }); }
         if (msg.type === 'credential') { const result = this.modelAccess ? await this.modelAccess.credential(run.id) : {apiKey:config.apiKey};if(child.connected)child.send({type:'reply',requestId:msg.requestId,result}); }
         if (msg.type === 'reserve') { const result = this.modelAccess ? await this.modelAccess.reserve(this.service,run.id) : (this.service.reserveCall(run.id, config.maxCalls, config.budgetUsd),{apiKey:config.apiKey}); if(child.connected)child.send({ type: 'reply', requestId: msg.requestId, result }); }
@@ -114,7 +160,7 @@ export class Scheduler {
           const bind=()=>this.service.store.transaction(()=>{
           const current = this.service.store.get<Run>('run', run.id); this.service.store.update<Run>('run', run.id, current.revision, { sessionPath: msg.sessionPath, sessionId: msg.sessionId });
           const existing = this.service.store.list<SessionBinding>('session_binding').find(b => b.runId === run.id);
-          if (!existing&&msg.sessionId&&msg.sessionPath) this.service.store.create<SessionBinding>('session_binding', { id:`session:${run.id}`, projectId: run.projectId,runId: run.id, taskId: run.taskId, sessionId: msg.sessionId, sessionPath: msg.sessionPath, worker: this.owner, pid: child.pid, cwd, piVersion: '1.0.3', policyVersion: run.policy.version, model: run.policy.modelBinding?.model ?? config.model, authKind:run.policy.modelBinding?.kind ?? 'api', node: process.version });
+          if (!existing&&msg.sessionId&&msg.sessionPath) this.service.store.create<SessionBinding>('session_binding', { id:`session:${run.id}`, projectId: run.projectId,runId: run.id, taskId: run.taskId, sessionId: msg.sessionId, sessionPath: msg.sessionPath, worker: this.owner, pid: child.pid, cwd, pluginSignature: run.pluginManifest?.signature, piVersion: '1.0.3', policyVersion: run.policy.version, model: run.policy.modelBinding?.model ?? config.model, authKind:run.policy.modelBinding?.kind ?? 'api', node: process.version });
           });
           const capacity=this.service.store.capacity;if(capacity)capacity.exclusive(bind,1000);else bind();
           if(msg.requestId&&child.connected)child.send({type:'reply',requestId:msg.requestId,result:{bound:true}});
@@ -130,7 +176,7 @@ export class Scheduler {
     // Child stderr is intentionally not persisted: provider errors can contain credentials.
     child.stderr?.on('data', () => {}); child.stdout?.on('data', () => {});
     child.on('error', () => this.finish(run.id, false, '执行进程无法启动'));
-    child.on('exit', () => { this.children.delete(run.id); const current = this.service.store.get<Run>('run', run.id); if (current.status === 'running') { this.service.transition(run.id, 'interrupted', { endedAt: new Date().toISOString(), error: '执行进程意外退出；需要对账' }); this.service.reconcileInterruptedOperations(run.id); } });
+    child.on('exit', () => { this.children.delete(run.id); this.plugins?.gate.releaseRead(run.id); const current = this.service.store.get<Run>('run', run.id); if (current.status === 'running') { this.service.transition(run.id, 'interrupted', { endedAt: new Date().toISOString(), error: '执行进程意外退出；需要对账' }); this.service.reconcileInterruptedOperations(run.id); } });
     child.send({ type: 'start', run, goal: task.goal, cwd, sessionDir,continuationPath, context: task.context, assetIds: task.context.assetIds, memories: this.service.memories(run.projectId), storage: this.service.store.capacity ? {dataDir,limits:this.service.store.capacity.limits} : undefined, model: run.mode === 'pi' ? { provider: run.policy.modelBinding?.provider ?? config.provider, id: run.policy.modelBinding?.model ?? config.model } : undefined });
   }
   finish(id: string, success: boolean, error?: string) {

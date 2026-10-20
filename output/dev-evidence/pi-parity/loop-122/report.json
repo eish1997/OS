@@ -1,0 +1,12 @@
+{
+  "loop": 122,
+  "status": "completed",
+  "fixture": "tests/fixtures/pi-1.0.3",
+  "sessionId": "01a152c9-0003-74cb-b610-1b7e193f95b0",
+  "entryCount": 4,
+  "contextMarkers": ["ORIGINAL_USER", "SIBLING"],
+  "bytesUnchanged": true,
+  "productChange": false,
+  "externalModel": false,
+  "deploy": false
+}

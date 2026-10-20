@@ -4,12 +4,14 @@ import { createHash, randomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { Store, AppError } from './store.js';
 import type { Asset, Run } from '../shared/contracts.js';
+import {closeInteractions} from './plugin-interaction.js';
+import {StorageCapacity} from './storage.js';
 function safePath(path:string){for(let p=resolve(path);;p=dirname(p)){if(existsSync(p)&&lstatSync(p).isSymbolicLink())throw new AppError(400,'备份路径包含链接');if(dirname(p)===p)break;}}
 function files(root: string, path = root): string[] { safePath(path);return readdirSync(path).flatMap(name => { const child = join(path, name);safePath(child); if (statSync(child).isDirectory()) return files(root, child); return [relative(root, child).replaceAll('\\', '/')]; }); }
 const hash = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 const canvasSqlite=new Set(['workspace.sqlite','mounts.sqlite','files.sqlite','outputs.sqlite','package-imports.sqlite','layout.sqlite']);
 function allowedBackupPath(path:string,schema:number){
-  if(path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(path)||/^sessions\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(path))return true;
+  if(path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(path)||/^sessions\/(?:[a-zA-Z0-9_.-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(path))return true;
   if(schema<2)return false;
   return /^canvas\/(?:workspace|mounts|files|outputs|package-imports|layout)\.sqlite$/.test(path)||/^canvas\/scenes\/[a-f0-9]{64}\.fig$/.test(path);
 }
@@ -50,6 +52,10 @@ export function backupRelativePath(sourceRoot: string, value?: string): string |
   return windows?child.replaceAll('\\','/'):child;
 }
 export function backup(store: Store, dataDir: string, destination: string, leaseOwner?: string) {
+  // Freeze import records and file prefixes together, without blocking scheduler lease renewals.
+  return new StorageCapacity(dataDir,{},0,'.native-import-write.lock').exclusive(()=>backupSnapshot(store,dataDir,destination,leaseOwner));
+}
+function backupSnapshot(store: Store, dataDir: string, destination: string, leaseOwner?: string) {
   const target = resolve(destination); if (existsSync(target)) throw new AppError(409, '备份目录必须是新目录');
   safePath(dataDir);safePath(target);
   if (target === resolve(dataDir) || target.startsWith(resolve(dataDir) + (process.platform === 'win32' ? '\\' : '/'))) throw new AppError(400, '备份不能放在数据目录中');
@@ -57,7 +63,7 @@ export function backup(store: Store, dataDir: string, destination: string, lease
   if(leaseOwner){const current=store.db.prepare("SELECT owner,until_ms FROM locks WHERE name='scheduler'").get();if(current?.owner!==leaseOwner||Number(current.until_ms)<=Date.now())throw new AppError(409,'调用方的备份租约已失效');}
   else if (!store.lease('scheduler', owner, 120_000)) throw new AppError(409, '调度正在运行；停止服务后执行离线备份');
   try {
-    if (store.list<Run>('run').some(r => r.status === 'running')) throw new AppError(409, '在途任务需先停止或完成');
+    if (store.list<Run>('run').some(r => r.status === 'running' || r.status === 'waiting_interaction')) throw new AppError(409, '在途任务需先停止或完成');
     mkdirSync(target, { recursive: true });
     const dbPath = join(target, 'workbench.sqlite'); store.db.exec(`VACUUM INTO '${dbPath.replaceAll("'", "''")}'`);
     const copy = new Store(dbPath); let assetList:Asset[]; let hasCanvas=false;
@@ -92,7 +98,10 @@ export function restore(source: string, destination: string, protectDestination?
   const store = new Store(join(target, 'workbench.sqlite'));
   const remap = (path?: string) => { const child=backupRelativePath(manifest.sourceRoot,path);return child===undefined?undefined:join(target,...child.split('/')); };
   store.db.exec('DELETE FROM sessions; DELETE FROM node_tokens; DELETE FROM locks;');
+  // Restored data belongs to a new execution environment; require a fresh import confirmation.
+  for(const confirmation of store.list('native_import_confirmation'))store.update('native_import_confirmation',confirmation.id,confirmation.revision,{...({expiresAt:0} as object)});
   for (const run of store.list<Run>('run')) {
+    closeInteractions(store,run.id,'restored');
     const sessionPath = remap(run.sessionPath);
     store.update<Run>('run', run.id, run.revision, { sessionPath, workerPid: undefined, leaseOwner: undefined, leaseUntil: undefined });
   }

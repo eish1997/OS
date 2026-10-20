@@ -1,0 +1,16 @@
+{
+  "answered": {
+    "status": "completed",
+    "sawWaiting": true,
+    "sawRunningAfter": true,
+    "dialogs": 2,
+    "calls": 0
+  },
+  "cancelled": {
+    "status": "cancelled",
+    "sawWaiting": true,
+    "cancelRequestedPersisted": true
+  },
+  "distinctFromWaitingUser": true,
+  "totalTimeoutStillApplies": true
+}

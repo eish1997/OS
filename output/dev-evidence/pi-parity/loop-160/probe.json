@@ -1,0 +1,75 @@
+{
+  "catalog": [
+    {
+      "id": "deepseek-flash",
+      "name": "DeepSeek V4.1 Flash",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "thinkingLevelMap": {
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "max": "max"
+      },
+      "cost": {
+        "input": 0.3,
+        "output": 1.2,
+        "cacheRead": 0.006,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 384000,
+      "baseUrl": "https://api.deepseek.com"
+    },
+    {
+      "id": "deepseek-v4-pro",
+      "name": "DeepSeek V4 Pro",
+      "reasoning": true,
+      "input": [
+        "text"
+      ],
+      "thinkingLevelMap": {
+        "minimal": null,
+        "low": null,
+        "medium": null,
+        "high": "high",
+        "max": "max"
+      },
+      "cost": {
+        "input": 1.32,
+        "output": 3.96,
+        "cacheRead": 0.044,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 384000,
+      "baseUrl": "https://api.deepseek.com"
+    }
+  ],
+  "live": [
+    {
+      "id": "deepseek-flash",
+      "status": 200,
+      "ok": false,
+      "usage": {
+        "prompt_tokens": 37,
+        "completion_tokens": 16,
+        "total_tokens": 53,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 16
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 37
+      }
+    }
+  ],
+  "keyPresent": true,
+  "keyLength": 35
+}

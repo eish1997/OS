@@ -1,0 +1,136 @@
+{
+  "purpose": "re-verify original multi-file with usage + independent check; explain assistantTurns:0",
+  "prior": {
+    "calls": 11,
+    "usd": 0.004505508
+  },
+  "caps": {
+    "totalCalls": 20,
+    "totalUsd": 0.65,
+    "thisCallCap": 6,
+    "remainingCalls": 9,
+    "remainingUsd": 0.645494492
+  },
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "thinking": "high",
+  "assistantTurnsExplanation": "LOOP-160 counted buildSessionContext().messages; correct surface is session.state.messages and SessionManager entries with usage. Zero there was a meter bug.",
+  "stage": {
+    "name": "original-multi-file-reverify",
+    "elapsedMs": 19861,
+    "assistantFromState": 13,
+    "assistantEntries": 13,
+    "estimatedModelCalls": 13,
+    "usageFromEntries": [
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 2645,
+        "costTotal": 0.0005323799999999999
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 3008,
+        "costTotal": 0.00027396
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 3177,
+        "costTotal": 0.000158664
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 3261,
+        "costTotal": 0.00016766399999999999
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 3817,
+        "costTotal": 0.00041473199999999996
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 4604,
+        "costTotal": 0.000552672
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 5048,
+        "costTotal": 0.00037548000000000003
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 5624,
+        "costTotal": 0.00041215199999999994
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 5765,
+        "costTotal": 0.000209424
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 6090,
+        "costTotal": 0.00028925999999999995
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 6278,
+        "costTotal": 0.00017499600000000002
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 6435,
+        "costTotal": 0.00024656399999999995
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "totalTokens": 6582,
+        "costTotal": 0.000235032
+      }
+    ],
+    "calcSnippet": "export function add(a: number, b: number) {\n  return a + b;\n}\n",
+    "contentLooksFixed": true,
+    "independentCheckBefore": {
+      "status": 1,
+      "checksOk": false
+    },
+    "independentCheckAfter": {
+      "status": 0,
+      "checksOk": true,
+      "stdoutTail": "CHECKS_OK\n",
+      "stderrTail": ""
+    },
+    "sessionArtifact": true,
+    "withinThisCap": false
+  },
+  "pass": false,
+  "evidenceVerdict": {
+    "originalMultiFileIndependentCheck": true,
+    "originalMultiFileUsageRecorded": true,
+    "originalMultiFileSessionSaved": true,
+    "softThisCapHonored": false,
+    "reasonPassFalse": "estimatedCalls 13 > thisCallCap 6；功能上独立检查与用量已齐，但累计调用突破本轮总顶",
+    "budgetStop": "totalEstimatedMin 24 >= capCalls 20 → 停止后续外部模型调用；长历史原版、外部工具对照、模型长任务均不再发请求"
+  },
+  "cumulativeAfter": {
+    "priorCalls": 11,
+    "thisEstimatedCalls": 13,
+    "totalEstimatedMin": 24,
+    "priorUsd": 0.004505508,
+    "thisUsdFromEntries": 0.00404298,
+    "note": "Original-side USD from Pi message usage.cost.total when present; DeepSeek invoice unknown"
+  }
+}

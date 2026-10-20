@@ -1,0 +1,12 @@
+{
+  "loop": 126,
+  "status": "completed",
+  "test": "tests/pi-append-kill.test.ts",
+  "anchor": "PI_ANCHOR",
+  "tornEntryBytes": 48,
+  "continuationSeesAnchor": true,
+  "continuationSeesTornEntry": false,
+  "originalUnchanged": true,
+  "externalModel": false,
+  "deploy": false
+}

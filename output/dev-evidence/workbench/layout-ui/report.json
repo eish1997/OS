@@ -1,15 +1,15 @@
 {
   "status": "passed",
-  "at": "2026-10-15T07:28:49.526Z",
+  "at": "2026-10-15T12:50:10.976Z",
   "browser": "155.0.8059.40",
   "checks": [
     "4 spaces / 12 docked / 6 floating seeded and rendered",
-    "100 mixed browser operations; single SSE; elapsed 4285ms",
+    "100 mixed browser operations; single SSE; elapsed 4396ms",
     "floating pointer resize",
     "invalid outside drop restores original floating bounds",
     "icon pointer movement and expansion retain floating bounds",
     "six-window collection restoration",
-    "Shift drag out and pointer edge docking preserve instance",
+    "Floating edge drag only moves; explicit dock button preserves instance",
     "nested divider respects both window minimum widths",
     "split divider pointer resize with available space",
     "small viewport window recovery",

@@ -1,0 +1,14 @@
+{
+  "closed": "DeepSeek 授权配置下真实 worker 执行超过 5 分钟；历史保留；模型请求 0（插件 hold 命令）",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "thinking": "high",
+  "elapsedMs": 315136,
+  "timeoutMs": 1800000,
+  "calls": 0,
+  "spentUsd": 0,
+  "sessionSaved": true,
+  "status": "completed",
+  "nextStep": "可在同一任务额度下追加或新开目标；本次未消耗模型次数",
+  "keyNeverWritten": true
+}

@@ -1,0 +1,13 @@
+{
+  "loop": 148,
+  "suffixStoredForMatchedModel": true,
+  "unlistedCurrentModelKeepsDefault": true,
+  "sourceFileUnchanged": true,
+  "skillsImported": false,
+  "packagesExecuted": false,
+  "browserClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "5 passed",
+  "duration_ms": 13003
+}

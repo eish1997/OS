@@ -1,0 +1,25 @@
+{
+  "status": "failed",
+  "calls": 4,
+  "httpAttempts": 4,
+  "receipts": [
+    {
+      "state": "unknown",
+      "purpose": "compaction"
+    },
+    {
+      "state": "unknown",
+      "purpose": "compaction"
+    },
+    {
+      "state": "unknown",
+      "purpose": "compaction"
+    },
+    {
+      "state": "unknown",
+      "purpose": "compaction"
+    }
+  ],
+  "sourceBytes": 385319,
+  "sawRetry": true
+}

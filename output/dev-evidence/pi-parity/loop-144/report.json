@@ -1,0 +1,12 @@
+{
+  "loop": 144,
+  "descendantRecordedWhileShellAlive": true,
+  "stoppedAfterShellExited": true,
+  "creationMismatchLeftRunning": true,
+  "bornAfterLastListing": false,
+  "unrecordedProcessAttributed": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "1 passed",
+  "duration_ms": 34368
+}

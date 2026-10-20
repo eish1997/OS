@@ -1,0 +1,12 @@
+{
+  "loop": 131,
+  "status": "completed",
+  "test": "tests/pi-mcp-connection-status.test.ts",
+  "transportConnectedThenDisconnected": true,
+  "latestStateReplacesPrevious": true,
+  "unknownServerRejected": true,
+  "nativeMcpPanel": false,
+  "browserUiClicked": false,
+  "externalModel": false,
+  "deploy": false
+}

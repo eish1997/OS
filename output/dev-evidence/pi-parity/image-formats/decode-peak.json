@@ -1,0 +1,11 @@
+{
+  "width": 4096,
+  "height": 4096,
+  "surfaceBytes": 67108864,
+  "limit": 134217728,
+  "before": 204107776,
+  "peakRss": 411525120,
+  "rss": 411521024,
+  "heapUsed": 51519200,
+  "encodedBytes": 58680
+}

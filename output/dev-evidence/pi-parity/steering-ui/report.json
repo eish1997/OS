@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "realModelRequests": 0,
+  "realWorkers": 2,
+  "lostResponseReplayedOnce": true,
+  "closedPageRecovered": true,
+  "followUpPreservedPredecessor": true,
+  "pageErrors": []
+}

@@ -1,0 +1,11 @@
+{
+  "loop": 135,
+  "status": "completed",
+  "test": "tests/native-unpublished-reconcile.test.ts",
+  "unreferencedCopyRemoved": true,
+  "boundSessionKept": true,
+  "killedRewriteMarkerRemovedOnOpen": true,
+  "sourceBytesUnchanged": true,
+  "externalModel": false,
+  "deploy": false
+}

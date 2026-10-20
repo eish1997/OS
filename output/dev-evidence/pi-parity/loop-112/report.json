@@ -1,0 +1,13 @@
+{
+  "status": "cancelled",
+  "calls": 1,
+  "httpAttempts": 1,
+  "receipts": [
+    {
+      "state": "unknown",
+      "purpose": "compaction"
+    }
+  ],
+  "sourceBytes": 385324,
+  "cancelledDuring": "compaction-retry-waiting"
+}

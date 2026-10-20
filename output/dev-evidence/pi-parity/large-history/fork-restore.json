@@ -1,0 +1,26 @@
+[
+  {
+    "sizeMiB": 32,
+    "bytes": 33554940,
+    "forkMs": 1242.3195999999998,
+    "backupRestoreMs": 426.59050000000025,
+    "elapsedMs": 1936.2537000000002,
+    "peakRss": 495730688,
+    "sourcePreserved": true,
+    "restored": true,
+    "maxHttpMs": 19.020400000000336,
+    "healthRequests": 105
+  },
+  {
+    "sizeMiB": 127,
+    "bytes": 133173421,
+    "forkMs": 8463.5715,
+    "backupRestoreMs": 1836.6866999999984,
+    "elapsedMs": 11996.2219,
+    "peakRss": 983453696,
+    "sourcePreserved": true,
+    "restored": true,
+    "maxHttpMs": 44.47360000000117,
+    "healthRequests": 335
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "errors": [],
+  "checks": [
+    "file import",
+    "preview",
+    "inactive save",
+    "trust enablement",
+    "project override",
+    "stale global CAS preserves input",
+    "literal credential rejection",
+    "narrow layout",
+    "invalid project override remains editable and can be repaired",
+    "HTTP and stdio form preserves existing entries and spaced args",
+    "duplicate form name rejected"
+  ],
+  "realModels": 0
+}

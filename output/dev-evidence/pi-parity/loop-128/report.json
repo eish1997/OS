@@ -1,0 +1,14 @@
+{
+  "loop": 128,
+  "status": "completed",
+  "test": "tests/pi-record-schema.test.ts",
+  "guidanceRewritten": false,
+  "replyChunkRejected": true,
+  "toolReconcileRejected": true,
+  "unknownToolBlocksContinuation": false,
+  "runInputRegression": "passed",
+  "toolProgressRegression": "passed",
+  "browser": false,
+  "externalModel": false,
+  "deploy": false
+}

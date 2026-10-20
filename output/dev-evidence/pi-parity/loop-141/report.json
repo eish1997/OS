@@ -1,0 +1,12 @@
+{
+  "loop": 141,
+  "recordedShellStopped": true,
+  "laterChildStopped": true,
+  "mismatchedCreationLeftRunning": true,
+  "unrecordedProcessAttributed": false,
+  "creationMissingNotKilled": true,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "1 passed",
+  "duration_ms": 17245
+}

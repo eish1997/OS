@@ -15,10 +15,12 @@ export class Store {
     if(options.readOnly){this.db=new DatabaseSync(path,{readOnly:true});this.db.exec('PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');return;}
     mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
+    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS entities(kind TEXT NOT NULL,id TEXT PRIMARY KEY,project_id TEXT,revision INTEGER NOT NULL,body TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS entity_scope ON entities(kind,project_id);
       CREATE TABLE IF NOT EXISTS events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,id TEXT UNIQUE NOT NULL,body TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS run_stream_chunks ON events(json_extract(body,'$.runId'),json_extract(body,'$.data.messageId'),json_extract(body,'$.data.chunk')) WHERE json_extract(body,'$.type')='assistant.delta';
+      CREATE INDEX IF NOT EXISTS run_tool_chunks ON events(json_extract(body,'$.runId'),json_extract(body,'$.data.messageId'),json_extract(body,'$.data.chunk')) WHERE json_extract(body,'$.type')='tool.delta';
       CREATE TABLE IF NOT EXISTS commands(key TEXT PRIMARY KEY,digest TEXT NOT NULL,result TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY,expires INTEGER NOT NULL,created INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS node_tokens(node_id TEXT PRIMARY KEY,hash TEXT NOT NULL);
@@ -111,6 +113,12 @@ export class Store {
     return this.db.prepare('SELECT sequence,body FROM events WHERE sequence>? ORDER BY sequence LIMIT ?').all(after, limit).map(row => ({ ...JSON.parse(String(row.body)), sequence: Number(row.sequence) }));
   }
   cursor() { return Number(this.db.prepare('SELECT COALESCE(MAX(sequence),0) AS n FROM events').get()!.n); }
+  commandReceipt<T>(key: string, digest: string): { value: T } | undefined {
+    const row = this.db.prepare('SELECT digest,result FROM commands WHERE key=?').get(key);
+    if (!row) return undefined;
+    if (row.digest !== digest) throw new AppError(409, '幂等键已经用于不同请求');
+    return { value: JSON.parse(String(row.result)) as T };
+  }
   command<T>(key: string, digest: string, fn: () => T): T {
     return this.transaction(() => {
       const row = this.db.prepare('SELECT digest,result FROM commands WHERE key=?').get(key);

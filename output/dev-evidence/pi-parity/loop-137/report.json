@@ -1,0 +1,16 @@
+{
+  "loop": 137,
+  "markerKeptAfterSuccessfulRewrite": true,
+  "markerClearedAfterSessionPath": true,
+  "unboundFinishedCopyRemovedOnReconcile": true,
+  "boundCopyBytesKept": true,
+  "outsideMarkerUntouched": true,
+  "midWriteMarkerStillPresent": true,
+  "failedForkLeavesNoMarker": true,
+  "sqliteMidWriteRecovery": false,
+  "importBytes": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "15 passed",
+  "duration_ms": 7408
+}

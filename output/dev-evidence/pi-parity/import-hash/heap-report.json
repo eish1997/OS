@@ -1,0 +1,11 @@
+{
+  "fileBytes": 33554432,
+  "chunkBytes": 1048576,
+  "baseline": 496945712,
+  "peak": 515477896,
+  "growth": 18532184,
+  "retained": 48670436,
+  "retainedGrowth": -448275276,
+  "samples": 14,
+  "imports": 0
+}

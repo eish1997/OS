@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "at": "2026-10-16T01:58:22.387Z",
+  "checks": [
+    "pasted command passes deployed source parsing",
+    "trust confirmation still required",
+    "no third-party installation initiated",
+    "updated input help visible",
+    "saved layout and plugin state unchanged"
+  ]
+}

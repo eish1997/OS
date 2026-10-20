@@ -100,9 +100,16 @@ function Workbench(){
     setChooser(undefined);setSettingsOpen(false);
   };
   function focusWindow(id:string){change(l=>mutateLayout(l,n=>{const f=n.floating.find(w=>w.windowId===id);if(f){f.mode='open';n.floating=n.floating.filter(w=>w!==f);n.floating.push(f);}else{const s=n.workspaces.find(w=>leaves(w.root).some(node=>node.windowId===id));if(s)n.activeWorkspaceId=s.id;}}));setShowWindows(false);requestAnimationFrame(()=>{document.querySelector<HTMLElement>(`[data-window="${CSS.escape(id)}"] .wb-window-title`)?.focus();});}
+  function openConversation(c:Conversation){
+    const current=layoutRef.current;if(!current)return;
+    const existing=Object.values(current.windows).find(w=>w.type==='chat'&&w.binding.conversationId===c.id);
+    if(existing){focusWindow(existing.id);return;}
+    const w=windowRegistry.chat.create(c.projectId);w.binding.conversationId=c.id;w.title=c.title;
+    change(l=>addWindow(l,w));
+  }
   function content(w:WindowInstance){
     const definition=windowRegistry[w.type];const Component=definition?.component;
-    if(Component){const props={window:definition.restore(w),snapshot:data.snapshot,patch:(p:ViewPatch)=>patchView(w.id,w.binding.projectId,p),targets:Object.values(layout!.windows).filter(w=>w.type==='chat'),onSend:sendAsset,refresh:data.refresh};return w.type==='chat'?<ChatWindow key={`${w.id}:${w.binding.projectId}:${w.binding.conversationId}`} {...props} onBind={id=>change(l=>mutateLayout(l,n=>{if(n.windows[w.id])updateProjectWindow(n.windows[w.id],w.binding.projectId,{},id);}))}/>:<Component key={`${w.id}:${w.binding.projectId}`} {...props}/>;}
+    if(Component){const props={window:definition.restore(w),snapshot:data.snapshot,patch:(p:ViewPatch)=>patchView(w.id,w.binding.projectId,p),targets:Object.values(layout!.windows).filter(w=>w.type==='chat'),onSend:sendAsset,refresh:data.refresh};return w.type==='chat'?<ChatWindow key={`${w.id}:${w.binding.projectId}:${w.binding.conversationId}`} {...props} onOpen={openConversation} onBind={id=>change(l=>mutateLayout(l,n=>{if(n.windows[w.id])updateProjectWindow(n.windows[w.id],w.binding.projectId,{},id);}))}/>:<Component key={`${w.id}:${w.binding.projectId}`} {...props}/>;}
     return <div className="wb-empty"><p>窗口类型尚未接入：{w.type}</p><p>配置已保留，可以关闭此窗口。</p></div>;
   }
   function header(w:WindowInstance,f?:FloatingWindow){return <div className="wb-window-title" tabIndex={-1} onPointerDown={e=>{if((e.target as HTMLElement).closest('button,select,input'))return;const p=position(e);const r=e.currentTarget.getBoundingClientRect(),s=surface.current!.getBoundingClientRect();begin(e,{kind:'window',id:w.id,...p,originX:f?.x??r.left-s.left,originY:f?.y??r.top-s.top});}}><span className="wb-grip"><Icon name="grip"/></span><strong>{w.title}</strong><div className="wb-window-actions">{f?<><button title="置顶" aria-label="置顶" aria-pressed={f.pinned} onClick={()=>patchFloat(w.id,n=>{n.pinned=!n.pinned;})}><Icon name="pin"/></button><button title="收起为图标" aria-label="收起为图标" onClick={()=>patchFloat(w.id,n=>{n.mode='icon';n.iconX=n.x;n.iconY=n.y;})}><Icon name="minus"/></button><button title="停靠到当前空间" aria-label="停靠到当前空间" onClick={()=>change(l=>dockWindow(l,w.id,leaves(activeWorkspace(l).root)[0].id,'right'))}><Icon name="dock"/></button></>:<button title="悬浮" aria-label="悬浮" onClick={()=>change(l=>floatWindow(l,w.id))}><Icon name="float"/></button>}<button title="关闭窗口" aria-label="关闭窗口" onClick={()=>close(w)}><Icon name="close"/></button></div></div>;}

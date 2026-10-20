@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-15T07:53:15.645Z",
+  "at": "2026-10-15T12:49:53.557Z",
   "browser": "155.0.8059.40",
   "checks": [
     "nested split and close all empty regions retains root",

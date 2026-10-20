@@ -1,0 +1,15 @@
+{
+  "closed": "主界面完成设置、查看、纠正、交互、恢复；含窄窗、键盘、150% 缩放与双页同步",
+  "realModelRequests": 0,
+  "checks": [
+    "settings-narrow",
+    "view-requests",
+    "steer",
+    "interact",
+    "keyboard",
+    "restore-narrow",
+    "multi-page-sync",
+    "chrome-150-zoom"
+  ],
+  "pageErrors": []
+}

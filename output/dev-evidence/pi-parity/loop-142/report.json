@@ -1,0 +1,11 @@
+{
+  "loop": 142,
+  "sameMessageIdentity": true,
+  "missingSuffixAppended": true,
+  "shorterFinalDoesNotReplace": true,
+  "browserRefreshClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "2 passed",
+  "duration_ms": 98930
+}

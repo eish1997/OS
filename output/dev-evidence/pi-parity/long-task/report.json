@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "elapsedMs": 312526,
+  "timeoutMs": 1800000,
+  "maxCalls": 2,
+  "calls": 0,
+  "realModelRequests": 0,
+  "sessionSaved": true,
+  "scope": "real Pi worker command exceeds prior five-minute boundary; no model or tool-loop quality claim"
+}

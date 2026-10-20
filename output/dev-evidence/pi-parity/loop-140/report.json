@@ -1,0 +1,13 @@
+{
+  "loop": 140,
+  "connectedBecomesDisconnected": true,
+  "closedRowUnchanged": true,
+  "duplicateTickDoesNotRewrite": true,
+  "nativeMcpPanel": false,
+  "browserClicked": false,
+  "processBornAfterRootGone": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "2 passed",
+  "duration_ms": 7455
+}

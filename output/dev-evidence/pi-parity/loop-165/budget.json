@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-20",
+  "priorCapCalls": 20,
+  "addedCalls": 100,
+  "capCalls": 120,
+  "capUsdCatalog": 0.65,
+  "usedBeforeThisLoopMin": 24,
+  "usedAfterThisLoop": 52,
+  "usedUsdAfter": 0.020160468,
+  "remainingCalls": 68,
+  "remainingUsd": 0.629839532,
+  "loop165Calls": 28,
+  "stagesAllPass": true,
+  "rule": "追加次数叠在原总顶上；不按脚本各自重置；目录 USD 顶仍为 0.65（未追加费用）"
+}

@@ -5,11 +5,11 @@ import { request } from './client';
 import { ChatPane } from './panes';
 import { Select } from './controls';
 
-export function ChatWindow(props:WindowContentProps&{onBind:(conversationId:string)=>void}){
+export function ChatWindow(props:WindowContentProps&{onBind:(conversationId:string)=>void;onOpen:(conversation:Conversation)=>void}){
   const projectId=props.window.binding.projectId;
   const [list,setList]=useState<Conversation[]>([]),[selected,setSelected]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
   useEffect(()=>{if(!projectId)return;let cancelled=false;request<Conversation[]>('/conversations').then(all=>{if(!cancelled)setList(all.filter(c=>c.projectId===projectId));}).catch(e=>{if(!cancelled)setError(String(e));});return()=>{cancelled=true;};},[projectId,props.snapshot?.cursor]);
-  if(props.window.binding.conversationId)return <ChatPane {...props}/>;
+  if(props.window.binding.conversationId)return <ChatPane {...props} conversation={list.find(c=>c.id===props.window.binding.conversationId)}/>;
   if(!projectId)return <div className="wb-empty"><p>在顶部选择项目后，即可开始 Pi 对话。</p></div>;
   if(!props.snapshot?.projects.some(p=>p.id===projectId&&!p.archived))return <div className="wb-empty"><p>当前项目不可用，请在顶部选择其他项目。</p></div>;
   return <div className="wb-empty"><p>为当前项目开始或继续一段对话。</p><button className="wb-primary" disabled={busy} onClick={async()=>{setBusy(true);setError('');try{const c=await request<Conversation>('/conversations',{projectId,title:'Pi 对话',commandId:crypto.randomUUID()});props.onBind(c.id);await props.refresh();}catch(e){setError(String(e));}finally{setBusy(false);}}}>{busy?'创建中…':'新建对话'}</button>

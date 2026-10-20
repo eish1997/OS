@@ -3,6 +3,7 @@ import type { PluginAction, PluginPackage, PluginSnapshot } from '../../shared/p
 import type { WindowContentProps } from './window-contract';
 import { ApiError, request } from './client';
 import './plugins.css';
+import {McpSettings} from './mcp-settings';
 
 const labels = { extensions: '扩展', skills: 'Skills', prompts: '提示词', themes: '终端主题' };
 const phases: Record<string, string> = { queued: '已排队', waiting_for_environment: '等待现有执行结束', preparing: '准备中', applying: '正在处理文件', committing: '保存配置', completed: '已完成', failed: '失败', reconcile_required: '需要修复' };
@@ -53,6 +54,7 @@ export function PluginsPane({ snapshot, window: w, patch }: WindowContentProps) 
   return <div className="wb-plugins" data-workbench-interactive aria-label="插件管理">
     <header className="wb-plugin-toolbar"><input aria-label="搜索已安装插件" placeholder="搜索已安装插件" value={query} onChange={e => patch({ query: e.target.value })}/><button className="wb-primary" disabled={busy || pending} onClick={() => openAction('install')}>安装插件</button><a href="https://pi.dev/packages" target="_blank" rel="noreferrer">浏览官方目录 ↗</a></header>
     <p className="wb-caption">当前工作台统一管理 · 后续开始的执行使用新配置</p>
+    <McpSettings projects={snapshot?.projects??[]}/>
     {error && <p role="alert" className="wb-inline-error">{error}</p>}
     {data?.configuration.health === 'reconcile_required' && <p role="alert" className="wb-inline-error">环境需要修复：{data.configuration.error}。新执行暂停使用此环境。</p>}
     {action && <form className="wb-plugin-install" onSubmit={submit} aria-label="插件操作">

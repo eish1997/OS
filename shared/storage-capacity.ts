@@ -9,7 +9,7 @@ export interface StorageCheck { group?:StorageGroup; growth:number; totalGrowth?
 export interface StorageLimits {
   totalBytes: number; databaseBytes: number; assetsBytes: number; uploadsBytes: number; sessionsBytes: number; workspacesBytes: number; logsBytes: number; pluginsBytes: number; canvasBytes: number; minFreeBytes: number; controlReserveBytes: number;
 }
-export const defaultStorageLimits: StorageLimits = { totalBytes: 2 * 1024 ** 3, databaseBytes: 768 * 1024 ** 2, assetsBytes: 500 * 1024 ** 2, uploadsBytes: 20 * 1024 ** 2, sessionsBytes: 128 * 1024 ** 2, workspacesBytes: 64 * 1024 ** 2, logsBytes: 4 * 1024 ** 2, pluginsBytes: 512 * 1024 ** 2, canvasBytes: 512 * 1024 ** 2, minFreeBytes: 64 * 1024 ** 2, controlReserveBytes: 4 * 1024 ** 2 };
+export const defaultStorageLimits: StorageLimits = { totalBytes: 2 * 1024 ** 3, databaseBytes: 768 * 1024 ** 2, assetsBytes: 500 * 1024 ** 2, uploadsBytes: 20 * 1024 ** 2, sessionsBytes: 2 * 128 * 1024 * 1024 + 16 * 1024 * 1024, workspacesBytes: 64 * 1024 ** 2, logsBytes: 4 * 1024 ** 2, pluginsBytes: 512 * 1024 ** 2, canvasBytes: 512 * 1024 ** 2, minFreeBytes: 64 * 1024 ** 2, controlReserveBytes: 4 * 1024 ** 2 };
 
 // Read-only measurement; skip links rather than walking outside the data root.
 export function storageUsage(dataDir: string, assetQuotaBytes: number) {

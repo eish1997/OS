@@ -1,0 +1,14 @@
+{
+  "closed": "同一离线会话完成读、写、编辑、搜索、命令与取消；取消后已有文件内容不变",
+  "steps": [
+    "write",
+    "edit",
+    "read",
+    "grep",
+    "find",
+    "powershell",
+    "cancel"
+  ],
+  "realModels": 0,
+  "note": "不是真实模型驱动的六步任务样本；PIV-16 仍需授权后对照"
+}

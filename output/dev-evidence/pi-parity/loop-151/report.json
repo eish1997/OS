@@ -1,0 +1,14 @@
+{
+  "closed": "MCP 登录按钮给出授权地址且令牌不出现在页面；本地服务探测到工具并可在执行中调用；页面显示传输已连通后变为已断开",
+  "browserClicked": true,
+  "oauthLoginButton": true,
+  "authorizationUrlShown": true,
+  "tokenAbsentFromPage": true,
+  "tokenInPrivateFile": true,
+  "localProbeToolCount": 1,
+  "localToolCalled": true,
+  "transportConnectedThenDisconnected": true,
+  "realModels": 0,
+  "delivery": false,
+  "pivMatrix": false
+}

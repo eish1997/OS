@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync, renameSync, readFileSync, existsSync, statSync, readdirSync, unlinkSync } from 'node:fs';
+import { mkdirSync, writeFileSync, renameSync, readFileSync, existsSync, statSync, readdirSync, unlinkSync, openSync, closeSync, fsyncSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Asset, Entity, Draft, Task, Run, ProjectSummary, Memory } from '../shared/contracts.js';
 import { AppError, Store } from './store.js';
@@ -24,7 +24,8 @@ export class Assets {
     if (upload.state === 'done') { const asset = this.store.get<Asset>('asset', upload.assetId!); if (digest(data) !== asset.hash) throw new AppError(409, '上传 ID 对应其他内容'); return asset; }
     if (upload.state !== 'pending') throw new AppError(409, '上传状态需要对账');
     if (data.length > 10 * 1024 * 1024) throw new AppError(413, '单文件上限为 10 MB');
-    const hash = digest(data); if (expectedHash && hash !== expectedHash) throw new AppError(422, '文件校验失败');
+    const hash = digest(data);
+    if ((expectedHash && hash !== expectedHash)||(upload.expectedHash&&hash!==upload.expectedHash)) throw new AppError(422, '文件校验失败');
     const assetId = randomUUID(); const locator = assetId; const pending = join(this.temp, uploadId);
     const usage=this.store.capacity?.assertAll([
       {group:'uploads',growth:existsSync(pending)?0:data.length},
@@ -34,7 +35,14 @@ export class Assets {
     const used=usage?usage.groups.assets.bytes:readdirSync(this.dir).reduce((n,file)=>n+statSync(join(this.dir,file)).size,0);
     if(used+data.length>this.quotaBytes)throw new AppError(507,'资产空间已满，请归档或调整配额');
     if (existsSync(pending)) { if (digest(readFileSync(pending)) !== hash) throw new AppError(409, '暂存文件内容不同，请新建上传'); }
-    else writeFileSync(pending, data, { flag: 'wx' });
+    else {
+      const partial = `${pending}.partial`;
+      if (existsSync(partial)) unlinkSync(partial);
+      writeFileSync(partial, data, { flag: 'wx' });
+      const fd = openSync(partial, 'r+');
+      try { fsyncSync(fd); } finally { closeSync(fd); }
+      renameSync(partial, pending);
+    }
     this.checkpoint?.('staged', upload);
     const operation = this.store.update<Upload>('upload', uploadId, upload.revision, { state: 'committing', assetId, expectedHash: hash });
     this.checkpoint?.('intent', operation);
@@ -92,6 +100,16 @@ export class Assets {
     return { commit, candidates: purged };
   }
   reconcile() {
+    for (const file of readdirSync(this.temp)) if (file.endsWith('.partial')) { try { unlinkSync(join(this.temp, file)); } catch { /* An incomplete write can be removed on a later open. */ } }
+    for (const upload of this.store.list<Upload>('upload').filter(u => u.state === 'pending' && u.expectedHash)) {
+      const pending = join(this.temp, upload.id);
+      if (!existsSync(pending)) continue;
+      try {
+        const data = readFileSync(pending);
+        if (digest(data) !== upload.expectedHash) continue;
+        this.commit(upload.id, data, upload.expectedHash);
+      } catch { /* A later open or the same upload id can retry the durable bytes. */ }
+    }
     for (const upload of this.store.list<Upload>('upload').filter(u => u.state === 'committing')) {
       const path = join(this.dir, upload.assetId!); const temporary = join(this.temp, upload.id);
       try {

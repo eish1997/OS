@@ -3,16 +3,19 @@ import type { Policy, Run } from '../shared/contracts.js';
 import type { ChatGPTAuth } from './chatgpt-auth.js';
 import type { Service } from './service.js';
 import { AppError, type Store } from './store.js';
+import type { ModelRequestPurpose } from '../shared/pi-runtime.js';
 export class ModelAccess {
-  constructor(readonly chatgpt: ChatGPTAuth, private readonly store: Store) {}
+  constructor(readonly chatgpt: ChatGPTAuth, private readonly store: Store, private readonly apiModel: () => string = () => config.model) {}
   settings() {
     const c = this.chatgpt.status();
     const kind = c.selected ? 'chatgpt' as const : 'api' as const;
-    const binding = kind === 'chatgpt' ? {kind,provider:'openai',model:c.model,connectionId:c.connectionId} : {kind,provider:config.provider,model:config.model};
+    const selected = this.apiModel().trim() || config.model;
+    const binding = kind === 'chatgpt' ? {kind,provider:'openai',model:c.model,connectionId:c.connectionId} : {kind,provider:config.provider,model:selected};
     const maxCalls = kind === 'chatgpt' ? c.maxCalls : config.maxCalls;
     const limitScope = kind==='chatgpt' && c.limitsMode==='automatic' ? 'task' as const : 'connection' as const;
     const used = this.store.list<Run>('run').filter(r=>kind==='chatgpt' ? r.policy.modelBinding?.kind==='chatgpt' && r.policy.modelBinding.connectionId===c.connectionId : r.policy.modelBinding?.kind!=='chatgpt').reduce((n,r)=>n+r.calls,0);
-    return {binding,modelConfigured:kind==='chatgpt'?this.chatgpt.ready():modelConfigured(),limitScope,maxCalls,callsRemaining:limitScope==='task'?maxCalls:Math.max(0,maxCalls-used),budgetUsd:kind==='chatgpt'?0:config.budgetUsd,reservePerCallUsd:kind==='chatgpt'?0:config.reservePerCallUsd,timeoutMs:kind==='chatgpt'?c.timeoutMs:config.timeoutMs};
+    const apiReady = Boolean(config.apiKey && selected && config.maxCalls > 0 && config.budgetUsd > 0 && config.reservePerCallUsd > 0);
+    return {binding,modelConfigured:kind==='chatgpt'?this.chatgpt.ready():apiReady,limitScope,maxCalls,callsRemaining:limitScope==='task'?maxCalls:Math.max(0,maxCalls-used),budgetUsd:kind==='chatgpt'?0:config.budgetUsd,reservePerCallUsd:kind==='chatgpt'?0:config.reservePerCallUsd,timeoutMs:kind==='chatgpt'?c.timeoutMs:config.timeoutMs};
   }
   matches(policy: Policy) {
     const current=this.settings(); const frozen=policy.modelBinding;
@@ -28,8 +31,10 @@ export class ModelAccess {
     if(run.status!=='running'||run.cancelRequested||run.timedOutAt||(run.startedAt&&Date.now()-Date.parse(run.startedAt)>=run.policy.timeoutMs)||!run.policy.allowModel)throw new AppError(403,'本次模型调用许可已撤销或到期');
     return {apiKey:key};
   }
-  async reserve(service: Service,runId:string) {
+  async reserve(service: Service,runId:string, purpose: ModelRequestPurpose = 'agent', requestId?: string) {
     const credential=await this.credential(runId);
-    const settings=this.settings();const reserved=service.reserveCall(runId,settings.limitScope==='task'?undefined:settings.maxCalls,settings.budgetUsd);return {...credential,callNumber:reserved.calls};
+    const settings=this.settings(); const limit=settings.limitScope==='task'?undefined:settings.maxCalls;
+    const reserved=requestId ? service.reserveRequest(runId,requestId,limit,settings.budgetUsd,purpose) : {callNumber:service.reserveCall(runId,limit,settings.budgetUsd,purpose).calls};
+    return {...credential,...reserved};
   }
 }

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import type { Asset, ResearchRequest, Run, Task } from '../shared/contracts';
 
-const labels: Record<string, string> = { queued: '排队中', running: '正在研究', waiting_user: '等待模型连接', waiting_node: '等待执行', completed: '执行结束', failed: '研究失败', cancelled: '已取消', interrupted: '中断，待核对' };
+const labels: Record<string, string> = { queued: '排队中', running: '正在研究', waiting_interaction: '等待用户答复', waiting_user: '等待模型连接', waiting_node: '等待执行', completed: '执行结束', failed: '研究失败', cancelled: '已取消', interrupted: '中断，待核对' };
 export function ResearchPanel({ projectId, tasks, runs, assets, modelReady, onSubmit, onOpen, onTasks }: {
   projectId: string; tasks: Task[]; runs: Run[]; assets: Asset[]; modelReady: boolean;
   onSubmit: (research: ResearchRequest, commandId: string) => Promise<void>;

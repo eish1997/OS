@@ -1,0 +1,13 @@
+{
+  "loop": 130,
+  "status": "completed",
+  "test": "tests/native-mid-corruption.test.ts",
+  "productChange": false,
+  "midFileCompleteLineRejected": true,
+  "laterValidEntryNotUsed": true,
+  "invalidUtf8MiddleRejected": true,
+  "originalBytesUnchanged": true,
+  "readableCopyCreated": false,
+  "externalModel": false,
+  "deploy": false
+}

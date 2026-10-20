@@ -1,0 +1,16 @@
+{
+  "loop": 145,
+  "previewOnly": true,
+  "originalFileUnchanged": true,
+  "authJsonUnread": true,
+  "secretsOmitted": true,
+  "workbenchSettingsUnchanged": true,
+  "loginRequired": true,
+  "foreignOriginRejected": true,
+  "appliedAsCurrentConfiguration": false,
+  "browserClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "2 passed",
+  "duration_ms": 9744
+}

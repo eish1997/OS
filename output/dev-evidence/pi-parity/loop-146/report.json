@@ -1,0 +1,20 @@
+{
+  "loop": 146,
+  "thinkingLevelImported": true,
+  "sameProviderModelImported": true,
+  "differentProviderModelRefused": true,
+  "sourceFileUnchanged": true,
+  "credentialsOmitted": true,
+  "toolsNotAuthorized": true,
+  "sessionDirNotSwitched": true,
+  "packagesNotExecuted": true,
+  "loginRequired": true,
+  "foreignOriginRejected": true,
+  "staleRevisionRejected": true,
+  "perModelThinkingImported": false,
+  "browserClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "3 passed",
+  "duration_ms": 8508
+}

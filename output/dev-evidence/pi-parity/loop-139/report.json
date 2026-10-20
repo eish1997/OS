@@ -1,0 +1,13 @@
+{
+  "loop": 139,
+  "synchronous": "FULL",
+  "uncommittedRowAbsent": true,
+  "committedBeforeKillKept": true,
+  "committedThenKilledKept": true,
+  "sessionJsonl": false,
+  "powerLossTornPage": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "2 passed",
+  "duration_ms": 1294
+}

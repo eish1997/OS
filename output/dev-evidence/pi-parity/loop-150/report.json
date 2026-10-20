@@ -1,0 +1,12 @@
+{
+  "closed": "设置页可以预览并确认导入原版 settings.json，思考档位和已存在的技能、模板会显示在页面上",
+  "browserClicked": true,
+  "sourceFileUnchanged": true,
+  "skills": 2,
+  "prompts": 1,
+  "extensionsNotLoaded": true,
+  "packageNotInstalled": true,
+  "realModels": 0,
+  "delivery": false,
+  "pivMatrix": false
+}

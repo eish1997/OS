@@ -1,0 +1,11 @@
+{
+  "loop": 134,
+  "status": "completed",
+  "test": "tests/owned-process-tree.test.ts",
+  "lateChildStopped": true,
+  "firstListingMissedLateChild": true,
+  "rootGoneBeforeSnapshotStillUnconfirmed": true,
+  "processBornAfterRootGone": false,
+  "externalModel": false,
+  "deploy": false
+}

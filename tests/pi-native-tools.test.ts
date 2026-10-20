@@ -50,3 +50,31 @@ test('native command executes in project cwd and cancellation reaches the shell'
     assert(Date.now() - started < 10000, 'cancelled command must stop promptly');
   } finally { f.session.dispose(); }
 });
+
+test('one offline pass covers read write edit search command and cancel without leftover half writes', { skip: process.platform !== 'win32', timeout: 30000 }, async () => {
+  const f = await setup();
+  const evidence = 'output/dev-evidence/pi-parity/loop-156';
+  mkdirSync(evidence, { recursive: true });
+  try {
+    await f.execute('write', { path: 'notes/alpha.txt', content: 'FINDME-ALPHA' });
+    await f.execute('edit', { path: 'notes/alpha.txt', edits: [{ oldText: 'FINDME-ALPHA', newText: 'FINDME-BETA' }] });
+    assert.equal(readFileSync(join(f.root, 'notes', 'alpha.txt'), 'utf8'), 'FINDME-BETA');
+    assert(JSON.stringify(await f.execute('read', { path: 'notes/alpha.txt' })).includes('FINDME-BETA'));
+    assert(JSON.stringify(await f.execute('grep', { pattern: 'FINDME-BETA', path: '.' })).includes('alpha.txt'));
+    assert(JSON.stringify(await f.execute('find', { pattern: 'alpha.txt', path: '.' })).includes('alpha.txt'));
+    await f.execute('powershell', { command: "Set-Content -LiteralPath 'notes/cmd.txt' -Value 'CMD-OK'", timeout: 10 });
+    assert.equal(readFileSync(join(f.root, 'notes', 'cmd.txt'), 'utf8').trim(), 'CMD-OK');
+    const before = readFileSync(join(f.root, 'notes', 'alpha.txt'), 'utf8');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 300);
+    try { await assert.rejects(f.execute('powershell', { command: 'Start-Sleep -Seconds 30', timeout: 40 }, controller.signal)); }
+    finally { clearTimeout(timer); }
+    assert.equal(readFileSync(join(f.root, 'notes', 'alpha.txt'), 'utf8'), before);
+    writeFileSync(join(evidence, 'report.json'), JSON.stringify({
+      closed: '同一离线会话完成读、写、编辑、搜索、命令与取消；取消后已有文件内容不变',
+      steps: ['write', 'edit', 'read', 'grep', 'find', 'powershell', 'cancel'],
+      realModels: 0,
+      note: '不是真实模型驱动的六步任务样本；PIV-16 仍需授权后对照',
+    }, null, 2));
+  } finally { f.session.dispose(); }
+});

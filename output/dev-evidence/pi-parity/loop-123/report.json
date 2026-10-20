@@ -1,0 +1,11 @@
+{
+  "loop": 123,
+  "status": "completed",
+  "test": "tests/owned-process-tree.test.ts",
+  "injectedKillFailureRecoversChild": true,
+  "deadRootWithoutSnapshot": false,
+  "naturalExitAfterLiveSnapshot": true,
+  "platform": "win32",
+  "externalModel": false,
+  "deploy": false
+}

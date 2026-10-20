@@ -1,0 +1,8 @@
+{
+  "oauthLoginButton": true,
+  "authorizationUrlShown": true,
+  "tokenAbsentFromPage": true,
+  "tokenInPrivateFile": true,
+  "localProbeToolCount": 1,
+  "transportConnectedThenDisconnected": true
+}

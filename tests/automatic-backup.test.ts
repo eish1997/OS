@@ -118,17 +118,17 @@ test('delegated backup uses read-only source and leaves lease ownership and rene
   }finally{await q.close();}
 });
 
-test('accepted native history over foreground limit is archived and SDK-reopened; interactive guard and corruption protection remain',async()=>{
+test('accepted native history over 2 MiB is archived, continued and SDK-reopened with corruption protection',async()=>{
   const q=await setup();try{
     const {loadPi}=await import('../server/pi-adapter.js');const pi=await loadPi();const projectId=q.asset.projectId;const cwd=join(q.source,'workspaces',projectId);mkdirSync(cwd,{recursive:true});
     const manager=pi.SessionManager.create(cwd,join(q.source,'sessions',projectId));for(let i=0;i<3;i++)manager.appendMessage({role:'user',content:'Accepted archive '+i+' '+('x'.repeat(1024*1024)),timestamp:Date.now()});
     const policy={version:1,projectId,toolNames:['write_asset'],allowModel:false,maxCalls:0,maxCostUsd:0,reservePerCallUsd:0,maxOutputTokens:10,timeoutMs:60000};
     let run=q.app.service.submit(projectId,'large native archive','large-native-archive','pi',policy).run;q.app.service.transition(run.id,'running');run=q.app.store.get<Run>('run',run.id);q.app.store.update<Run>('run',run.id,run.revision,{sessionId:manager.getSessionId(),sessionPath:manager.getSessionFile()!});q.app.service.transition(run.id,'completed');
     q.app.store.create<SessionBinding>('session_binding',{id:'session:'+run.id,projectId,runId:run.id,taskId:run.taskId,sessionId:manager.getSessionId(),sessionPath:manager.getSessionFile()!,cwd,piVersion:'1.0.3',policyVersion:1,model:'',authKind:'api'});
-    assert.throws(()=>continuationFor(q.app.store,projectId,policy,run.id),e=>e instanceof Error&&'status'in e&&e.status===413);
+    assert.equal(continuationFor(q.app.store,projectId,policy,run.id)!.sessionId,manager.getSessionId());
     const original=readFileSync(manager.getSessionFile()!);await q.automatic.tick();assert.equal(q.automatic.status().error,undefined);assert(q.automatic.status().restoreCheckedAt);assert.deepEqual(readFileSync(manager.getSessionFile()!),original);
     const point=readdirSync(join(q.root,'automatic')).find(n=>n.startsWith('snapshot-'))!;const target=join(q.root,'large-native-restore');restore(join(q.root,'automatic',point),target);const recovered=new Store(join(target,'workbench.sqlite'));
-    try{const binding=recovered.get<SessionBinding>('session_binding','session:'+run.id);assert.equal(continuationFor(recovered,projectId,policy,run.id,'archive')!.sessionId,manager.getSessionId());assert.throws(()=>continuationFor(recovered,projectId,policy,run.id),e=>e instanceof Error&&'status'in e&&e.status===413);assert.deepEqual(readFileSync(binding.sessionPath),original);assert.equal(pi.SessionManager.open(binding.sessionPath,undefined,binding.cwd).buildSessionContext().messages.length,3);}finally{recovered.close();}
+    try{const binding=recovered.get<SessionBinding>('session_binding','session:'+run.id);assert.equal(continuationFor(recovered,projectId,policy,run.id,'archive')!.sessionId,manager.getSessionId());assert.equal(continuationFor(recovered,projectId,policy,run.id)!.sessionId,manager.getSessionId());assert.deepEqual(readFileSync(binding.sessionPath),original);assert.equal(pi.SessionManager.open(binding.sessionPath,undefined,binding.cwd).buildSessionContext().messages.length,3);}finally{recovered.close();}
     const success=q.automatic.status().lastSuccessAt;q.advance();const rows=original.toString().trim().split('\n');const header=JSON.parse(rows[0]);rows[0]=JSON.stringify({...header,id:'foreign-session'});writeFileSync(manager.getSessionFile()!,rows.join('\n')+'\n');await q.automatic.tick();assert(q.automatic.status().error);assert.equal(q.automatic.status().lastSuccessAt,success);assert.equal(q.automatic.status().retained,1);assert(!readdirSync(join(q.root,'automatic')).some(n=>n.startsWith('pending-')||n.startsWith('restore-')));
   }finally{await q.close();}
 });

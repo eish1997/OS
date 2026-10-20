@@ -1,0 +1,8 @@
+﻿{
+  "closed": "复制会话时，摘要里仍带着已删除记忆关键词的同义改写会被整段拒绝；固定夹具中的 private note 转述不再进入副本，原件不变",
+  "fixtureParaphraseAbsent": true,
+  "sourceUnchanged": true,
+  "synonymOnlyWithoutSharedTokens": "documented-limit",
+  "realModels": 0,
+  "delivery": false
+}

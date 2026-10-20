@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "called": [
+    "a",
+    "b"
+  ],
+  "tools": [
+    {
+      "name": "mcp__fixture__a",
+      "id": "5aa3cd23-0d09-4a3a-bade-af24fe1b3c22:f067047b48c7cbb6ab1b76f88fbee30661069be841c2cb25d733c53d6e4b56bb",
+      "phase": "failed",
+      "outcomeUnknown": true
+    },
+    {
+      "name": "mcp__fixture__b",
+      "id": "5aa3cd23-0d09-4a3a-bade-af24fe1b3c22:215ba7375dae1b66424d1c272d0444fb7b9eb081cc7089e5fb8e6d9f00684f00",
+      "phase": "failed",
+      "outcomeUnknown": true
+    }
+  ]
+}

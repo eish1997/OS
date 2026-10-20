@@ -1,0 +1,13 @@
+{
+  "loop": 138,
+  "copyKeptWhileWorkerAlive": true,
+  "copyRemovedAfterOwnedWorkerStopped": true,
+  "unrelatedPidLeftRunning": true,
+  "unrelatedPidCopyStillRemoved": true,
+  "unreadableCommandDeletes": false,
+  "sqliteMidWriteRecovery": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "5 passed",
+  "duration_ms": 23102
+}

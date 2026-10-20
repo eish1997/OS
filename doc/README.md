@@ -1,6 +1,7 @@
 # 开发文档索引
 
 2026-10-17 画板嵌入隔离交付与残余闭合：[使用说明](dev/画板嵌入使用说明.md)、[097](dev/iterations/097-canvas-residual-closure.md)、[计划](dev/画板嵌入工作台开发计划.md)。默认关闭；证据见 `output/dev-evidence/canvas-embedding/`。
+2026-10-16 Pi能力保留计划：[开发计划](Pi能力保留与体验补齐开发计划.md)、[联合复查](reviews/pi-capability-audit-2026-10-16.md)。覆盖长任务、压缩与历史恢复、思考配置、重试、实时过程、MCP、插件交互、图片和会话分支；包含PIF任务、PIV验收、长期LOOP及原版对照方法。当前为计划，不代表已开始实施或补齐通过。
 
 2026-10-15 插件管理已完成本机交付：[验收审计](dev/iterations/071-plugin-acceptance.md)、[使用说明](dev/插件管理使用说明.md)、[最终证据](../output/dev-evidence/plugins/manifest.json)。最新211项回归通过，真实模型工具闭环及浏览器验证通过，增量应用前后业务摘要一致。
 

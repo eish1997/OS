@@ -1,0 +1,64 @@
+{
+  "closed": "约 120MiB 导入备份还原后可打开并追加接续；记录扫描耗时与 workerPeakRss；未提高配额",
+  "nearLimit": {
+    "originalBytes": 125829633,
+    "forkBytes": 125830203,
+    "reservedBytes": 125838849,
+    "sessionBytes": 251659837
+  },
+  "restoredForkBytes": 125830203,
+  "scan": {
+    "elapsedMs": 4654,
+    "workerPeakRss": 680771584,
+    "entryCount": 2,
+    "fileBytes": 125829633
+  },
+  "continuedAfterRestore": true,
+  "quotaRaised": false,
+  "prior127MiBScans": {
+    "fileBytes": 133169152,
+    "entries": 2032,
+    "stages": [
+      {
+        "name": "structure",
+        "elapsedMs": 815,
+        "workerPeakRss": 63619072
+      },
+      {
+        "name": "effective-context",
+        "elapsedMs": 6725,
+        "workerPeakRss": 378941440
+      },
+      {
+        "name": "cancel",
+        "elapsedMs": 524
+      },
+      {
+        "name": "single-record-effective-context",
+        "elapsedMs": 5620,
+        "workerPeakRss": 698978304
+      },
+      {
+        "name": "two-concurrent-context-scans",
+        "elapsedMs": 7298,
+        "workerPeakRss": [
+          380256256,
+          700137472
+        ],
+        "healthSamples": 125,
+        "maxHealthMs": 73,
+        "note": "Per-worker lifetime peaks, not simultaneous aggregate RSS"
+      },
+      {
+        "name": "http-upload-and-preview",
+        "elapsedMs": 4219,
+        "chunks": 127,
+        "sessionBytes": 133169152
+      }
+    ],
+    "limits": {
+      "fileMiB": 128,
+      "heapMiB": 768
+    }
+  }
+}

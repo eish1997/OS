@@ -1,0 +1,38 @@
+{
+  "purpose": "candidate validation without deploy authorization",
+  "node": "v24.19.0",
+  "npm": "10.9.3",
+  "pi": { "pi-ai": "1.0.3", "pi-coding-agent": "1.0.3" },
+  "commands": {
+    "build": { "exit": 0, "log": "build.log" },
+    "probe:pi": { "exit": 0, "log": "probe-pi.log", "realModelCall": false },
+    "tsc": { "exit": 0 },
+    "npm test serial": {
+      "log": "npm-test-serial.log",
+      "summary": "npm-test-serial-summary.json",
+      "files": 134,
+      "failedFiles": 12,
+      "afterFixAndRecheck": {
+        "research.test.ts": "fixed provider:openai; exit 0",
+        "flakyNowPass": ["pi-import-worker", "pi-stream-crash", "pi-tool-recovery", "supervisor"],
+        "stillFailing": [
+          "draft-agent.test.ts",
+          "faults.test.ts",
+          "pi-idle-worker.test.ts",
+          "pi-mcp-worker.test.ts (force-stop/host-stop)",
+          "pi-native-output-worker.test.ts",
+          "pi-nested-mcp-force-stop.test.ts",
+          "pi-retry-worker.test.ts"
+        ]
+      }
+    }
+  },
+  "envNotes": [
+    "Live PI_* env must be cleared before offline suite or provider/model mismatch returns 400",
+    "C: disk <64MiB free triggers StorageCapacity 507; cleaned TEMP before suite"
+  ],
+  "relatedLive": {
+    "loop165": "all five stages pass; cumulative calls ~52/120 after +100 append",
+    "remainingOpen": ["F13 vision", "F17 deploy", "7 failing offline tests"]
+  }
+}

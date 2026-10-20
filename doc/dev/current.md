@@ -142,7 +142,7 @@ EMB-01已通过真实Chrome贯通：CanvasLayer内单iframe、透明区域绘制
 
 合入 bluegill / 5a64f5f 的独立 apps/canvas 模块与57个补丁，保留当前工作台规范与源码。画布尚未挂载到 CanvasLayer。画布分支历史见 [canvas-current](canvas-current.md)，冲突处理和验证边界见 [073](iterations/073-canvas-merge.md)。
 
-最新：F13 / PIV-13 真实识图已关。`deepseek-flash` 探针认数字 + 工作台上传/刷新/重开/无附件接续均返回预定答案；`deepseek-v4-pro` 提交前拒绝图片。证据 `loop-170/`。累计约 **56/120** 次、目录 USD≈**$0.021**（剩余约 64 次 / $0.629）。本轮无产品代码改动、未重跑离线全套。仍开：F17 部署授权。交付方式：Orca `dulse` 工作树验证完成后合并入 `main`（只读合并准备见 `loop-170/merge-prep.json`；本阶段未合并、未推送、未重启）。
+最新：F13 / PIV-13 真实识图已关。`deepseek-flash` 探针认数字 + 工作台上传/刷新/重开/无附件接续均返回预定答案；`deepseek-v4-pro` 提交前拒绝图片。证据 `loop-170/`。累计约 **56/120** 次、目录 USD≈**$0.021**。其后已授权合并入 main（见文首）。
 
 最新：全套离线串行回归 **134/134 通过**（`npm run test:serial`，exit=0，约 41min，证据 `loop-169/`）。`tsc`/`build`/`probe:pi` 均为 0。无 UI 改动未重跑浏览器。当时仍开：F13 识图、F17 部署授权。预算约 52/120，≈$0.020。
 

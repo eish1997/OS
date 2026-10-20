@@ -1,0 +1,26 @@
+[
+  {
+    "sizeMiB": 3,
+    "bytes": 3155071,
+    "elapsedMs": 270.06640000000016,
+    "maxHttpMs": 48.30619999999999,
+    "healthRequests": 7,
+    "workerPeakRss": 70610944
+  },
+  {
+    "sizeMiB": 32,
+    "bytes": 33554722,
+    "elapsedMs": 359.48780000000033,
+    "maxHttpMs": 17.670700000000124,
+    "healthRequests": 9,
+    "workerPeakRss": 70934528
+  },
+  {
+    "sizeMiB": 127,
+    "bytes": 133173202,
+    "elapsedMs": 1038.2159000000001,
+    "maxHttpMs": 17.5015999999996,
+    "healthRequests": 21,
+    "workerPeakRss": 77873152
+  }
+]

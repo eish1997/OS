@@ -1,0 +1,92 @@
+{
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "thinkingRequested": "high",
+  "thinkingNote": "deepseek-flash thinkingLevelMap.medium is null; shared level is high",
+  "caps": {
+    "maxCalls": 20,
+    "budgetUsd": 0.65,
+    "reservePerCallUsd": 0.05,
+    "cnyCap": 5,
+    "usdApproxRate": 7.2
+  },
+  "costAccounting": "Host enforces PI_BUDGET_USD using Pi catalog USD rates, not DeepSeek CNY invoice; call count hard-capped",
+  "vision": "deferred; F13 remains open even though catalog lists image input on flash",
+  "stages": [
+    {
+      "name": "workbench-basic",
+      "status": "completed",
+      "stopped": "terminal",
+      "calls": 5,
+      "spentUsd": 0.002160252,
+      "reservedUsd": 0,
+      "testsPass": true,
+      "calcSnippet": "export function add(a: number, b: number) {\n  return a + b;\n}\n",
+      "receipts": [
+        {
+          "callNumber": 1,
+          "state": "settled",
+          "purpose": "agent",
+          "costUsd": 0.001401,
+          "tokens": 4361
+        },
+        {
+          "callNumber": 2,
+          "state": "settled",
+          "purpose": "agent",
+          "costUsd": 0.000239244,
+          "tokens": 4544
+        },
+        {
+          "callNumber": 3,
+          "state": "settled",
+          "purpose": "agent",
+          "costUsd": 0.00016788000000000003,
+          "tokens": 4713
+        },
+        {
+          "callNumber": 4,
+          "state": "settled",
+          "purpose": "agent",
+          "costUsd": 0.00017927999999999998,
+          "tokens": 4799
+        },
+        {
+          "callNumber": 5,
+          "state": "settled",
+          "purpose": "agent",
+          "costUsd": 0.000172848,
+          "tokens": 4939
+        }
+      ],
+      "sessionBound": true
+    },
+    {
+      "name": "original-pi-basic",
+      "elapsedMs": 8628,
+      "testsPass": true,
+      "calcSnippet": "export function add(a: number, b: number) {\n  return a + b;\n}\n",
+      "assistantTurns": 0,
+      "remainingCallsBefore": 15,
+      "remainingUsdBefore": 0.647839748
+    }
+  ],
+  "supportedThinkingLevels": [
+    "off",
+    "low",
+    "high",
+    "max"
+  ],
+  "workbenchUsage": {
+    "calls": 5,
+    "spentUsd": 0.002160252
+  },
+  "final": {
+    "workbenchCalls": 5,
+    "workbenchSpentUsd": 0.002160252,
+    "probeCallCountedSeparately": 1,
+    "totalExternalCallsApprox": 6,
+    "cnyCap": 5,
+    "keyNeverWritten": true
+  }
+}

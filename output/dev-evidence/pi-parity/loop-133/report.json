@@ -1,0 +1,11 @@
+{
+  "loop": 133,
+  "status": "completed",
+  "test": "tests/pi-orphan-worker.test.ts",
+  "orphanedWorkerStopped": true,
+  "unrelatedPidLeftRunning": true,
+  "dialogRestartRegression": "passed",
+  "diskWriteSupervision": false,
+  "externalModel": false,
+  "deploy": false
+}

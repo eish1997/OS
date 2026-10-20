@@ -3,23 +3,24 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { AppError } from './store.js';
-export type StorageGroup = 'database' | 'assets' | 'uploads' | 'sessions' | 'workspaces' | 'logs';
+export type StorageGroup = 'database' | 'assets' | 'uploads' | 'sessions' | 'workspaces' | 'logs' | 'plugins';
 // Independent bounds for one prospective write phase, not separate writes.
 export interface StorageCheck { group?:StorageGroup; growth:number; totalGrowth?:number; control?:boolean }
 export interface StorageLimits {
-  totalBytes: number; databaseBytes: number; assetsBytes: number; uploadsBytes: number; sessionsBytes: number; workspacesBytes: number; logsBytes: number; minFreeBytes: number; controlReserveBytes: number;
+  totalBytes: number; databaseBytes: number; assetsBytes: number; uploadsBytes: number; sessionsBytes: number; workspacesBytes: number; logsBytes: number; pluginsBytes: number; minFreeBytes: number; controlReserveBytes: number;
 }
-export const defaultStorageLimits: StorageLimits = { totalBytes: 2 * 1024 ** 3, databaseBytes: 768 * 1024 ** 2, assetsBytes: 500 * 1024 ** 2, uploadsBytes: 20 * 1024 ** 2, sessionsBytes: 128 * 1024 ** 2, workspacesBytes: 64 * 1024 ** 2, logsBytes: 4 * 1024 ** 2, minFreeBytes: 64 * 1024 ** 2, controlReserveBytes: 4 * 1024 ** 2 };
+// Keep aligned with nativeSessionMaximum: one max original, one fork, and fork-growth slack.
+export const defaultStorageLimits: StorageLimits = { totalBytes: 2 * 1024 ** 3, databaseBytes: 768 * 1024 ** 2, assetsBytes: 500 * 1024 ** 2, uploadsBytes: 20 * 1024 ** 2, sessionsBytes: 2 * 128 * 1024 * 1024 + 16 * 1024 * 1024, workspacesBytes: 64 * 1024 ** 2, logsBytes: 4 * 1024 ** 2, pluginsBytes: 512 * 1024 ** 2, minFreeBytes: 64 * 1024 ** 2, controlReserveBytes: 4 * 1024 ** 2 };
 
 // Read-only measurement; skip links rather than walking outside the data root.
 export function storageUsage(dataDir: string, assetQuotaBytes: number) {
   const issues: string[] = [];
   const empty=()=>({bytes:0,files:0});
-  const groups={database:empty(),assets:empty(),uploads:empty(),sessions:empty(),workspaces:empty(),logs:empty()};
+  const groups={database:empty(),assets:empty(),uploads:empty(),sessions:empty(),workspaces:empty(),logs:empty(),plugins:empty()};
   const groupFor=(name:string):StorageGroup|undefined=>{
     const key=process.platform==='win32'?name.toLowerCase():name;
     if(['workbench.sqlite','workbench.sqlite-wal','workbench.sqlite-shm'].includes(key))return 'database';
-    return ['assets','uploads','sessions','workspaces','logs'].includes(key)?key as StorageGroup:undefined;
+    return ['assets','uploads','sessions','workspaces','logs','plugins'].includes(key)?key as StorageGroup:undefined;
   };
   const measure = (path: string, label: string, group?:StorageGroup,root=false): { bytes: number; files: number } => {
     try {
@@ -42,12 +43,13 @@ export function storageUsage(dataDir: string, assetQuotaBytes: number) {
 // It is an admission boundary, not a substitute for a deployment filesystem quota.
 export class StorageCapacity {
   readonly limits: StorageLimits; private depth = 0; private lockPath: string;
-  constructor(public readonly dataDir: string, overrides: Partial<StorageLimits> = {}, private readonly lockWaitMs = 0) {
+  constructor(public readonly dataDir: string, overrides: Partial<StorageLimits> = {}, private readonly lockWaitMs = 0, lockName:'.storage-write.lock'|'.native-import-write.lock'='.storage-write.lock') {
+    if(!['.storage-write.lock','.native-import-write.lock'].includes(lockName))throw new AppError(400,'写入锁名称无效');
     if(!Number.isSafeInteger(lockWaitMs)||lockWaitMs<0||lockWaitMs>1000)throw new AppError(400,'存储锁等待须为0至1000毫秒');
     this.limits = { ...defaultStorageLimits, ...overrides };
     for (const [key, value] of Object.entries(this.limits)) if (!Number.isSafeInteger(value) || value < 0 || (key !== 'minFreeBytes' && key !== 'controlReserveBytes' && value === 0)) throw new AppError(400, '存储上限须为有效字节数');
     if (this.limits.controlReserveBytes >= Math.min(this.limits.totalBytes, this.limits.databaseBytes)) throw new AppError(400, '恢复预留须小于整体及数据库上限');
-    mkdirSync(dataDir, { recursive: true }); this.lockPath = join(dataDir, '.storage-write.lock');
+    mkdirSync(dataDir, { recursive: true }); this.lockPath = join(dataDir, lockName);
   }
   usage() {
     const usage = storageUsage(this.dataDir, this.limits.assetsBytes);

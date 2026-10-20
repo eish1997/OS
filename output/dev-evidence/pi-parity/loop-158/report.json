@@ -1,0 +1,19 @@
+{
+  "closed": "页面可见 429/503 恢复的两次请求与 401 单次失败；失败计入同一任务额度；401 无自动重试；追加后累计仍保留",
+  "realModelRequests": 0,
+  "recovered": {
+    "runId": "3f2500f4-bcfe-481b-8f6c-4337052af57a",
+    "calls": 2,
+    "usedCalls": 2,
+    "retrySucceeded": true
+  },
+  "auth": {
+    "runId": "254bba05-3ec6-441d-9678-b46bb8e97858",
+    "calls": 1,
+    "usedCalls": 1,
+    "retryState": null,
+    "grantMaxCalls": 5
+  },
+  "engineeringProof": "tests/pi-retry-worker.test.ts auth/429/503",
+  "pageErrors": []
+}

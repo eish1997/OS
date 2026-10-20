@@ -1,0 +1,11 @@
+{
+  "loop": 143,
+  "runningPreviewFlushedOnFinish": true,
+  "phaseRemainsRunning": true,
+  "sigkillFlushesMemory": false,
+  "browserClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "1 passed",
+  "duration_ms": 7939
+}

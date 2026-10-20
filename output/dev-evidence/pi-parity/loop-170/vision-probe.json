@@ -1,0 +1,54 @@
+{
+  "purpose": "F13 vision capability probe (not full workbench UI)",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "catalogListsImage": true,
+  "fileName": "canvas-probe.png",
+  "promptLeaksAnswer": false,
+  "fileNameLeaksAnswer": false,
+  "expectedDigit": "4",
+  "callsSpentThisProbe": 2,
+  "rawHttp": {
+    "status": 200,
+    "ok": true,
+    "text": "",
+    "matchesExpected": false,
+    "usage": {
+      "prompt_tokens": 247,
+      "completion_tokens": 32,
+      "total_tokens": 279,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 32
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 247
+    },
+    "ms": 1524
+  },
+  "piStreamSimple": {
+    "ok": true,
+    "text": "4",
+    "matchesExpected": true,
+    "usage": {
+      "input": 221,
+      "output": 1,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "reasoning": 0,
+      "totalTokens": 222,
+      "cost": {
+        "input": 0.0000663,
+        "output": 0.0000012,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "total": 0.0000675
+      }
+    },
+    "ms": 10507
+  },
+  "visionCapable": true,
+  "note": "Provider returned the fixed visual answer; proceed to workbench UI acceptance"
+}

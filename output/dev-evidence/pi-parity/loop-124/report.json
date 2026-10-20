@@ -1,0 +1,11 @@
+{
+  "loop": 124,
+  "status": "completed",
+  "test": "tests/asset-host-kill.test.ts",
+  "stages": ["staged", "intent", "renamed"],
+  "resumedSameAsset": true,
+  "partialDiscarded": true,
+  "uploadIntentRegression": "passed",
+  "externalModel": false,
+  "deploy": false
+}

@@ -1,0 +1,1 @@
+﻿{"loop":104,"tests":"tests/pi-settings.test.ts","pass":5,"fail":0,"notes":"API model select freezes into later task bindings; subscription cannot set apiModel here"}

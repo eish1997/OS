@@ -1,0 +1,30 @@
+[
+    {
+        "file":  "faults.test.ts",
+        "exit":  0
+    },
+    {
+        "file":  "draft-agent.test.ts",
+        "exit":  0
+    },
+    {
+        "file":  "pi-native-output-worker.test.ts",
+        "exit":  0
+    },
+    {
+        "file":  "pi-mcp-worker.test.ts",
+        "exit":  0
+    },
+    {
+        "file":  "pi-nested-mcp-force-stop.test.ts",
+        "exit":  1
+    },
+    {
+        "file":  "pi-idle-worker.test.ts",
+        "exit":  1
+    },
+    {
+        "file":  "pi-retry-worker.test.ts",
+        "exit":  1
+    }
+]

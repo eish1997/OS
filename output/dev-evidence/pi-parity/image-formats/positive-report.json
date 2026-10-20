@@ -1,0 +1,9 @@
+{
+  "progressiveJpegBytes": 521,
+  "animatedWebpBytes": 222,
+  "sof2": true,
+  "anmf": true,
+  "piDecode": "resizeImage kept original dimensions",
+  "surfaceLimitUnchanged": "128 MiB declared RGBA",
+  "notCovered": "decode peak for a 128 MiB surface or many animation frames"
+}

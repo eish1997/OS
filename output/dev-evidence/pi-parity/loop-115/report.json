@@ -1,0 +1,18 @@
+{
+  "status": "interrupted",
+  "parent": {
+    "name": "codemode",
+    "id": "01d28848-345b-4a38-8ab8-75b7ce7430d0:0e85bd68be41f3bbe21ddf0aca11051f765ff9143d7e68a137eaf5f53df69447",
+    "phase": "running",
+    "source": "builtin:codemode"
+  },
+  "nested": {
+    "name": "mcp__fixture__echo",
+    "id": "01d28848-345b-4a38-8ab8-75b7ce7430d0:d55e5a459fb7d106529b893f54abf314c5ddd8cecac772fe4247a0f9c9a0677e",
+    "phase": "running",
+    "source": "builtin:mcp"
+  },
+  "mcpPidGone": true,
+  "grandchildPidGone": true,
+  "retryBlockedUntilReconcile": true
+}

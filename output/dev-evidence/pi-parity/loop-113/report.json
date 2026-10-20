@@ -1,0 +1,21 @@
+{
+  "parent": {
+    "name": "codemode",
+    "id": "7565afaa-a6c3-43d0-be31-1b899f969562:0e85bd68be41f3bbe21ddf0aca11051f765ff9143d7e68a137eaf5f53df69447",
+    "callId": "wait-call|fc",
+    "phase": "completed",
+    "source": "builtin:codemode"
+  },
+  "nested": {
+    "name": "mcp__fixture__echo",
+    "id": "7565afaa-a6c3-43d0-be31-1b899f969562:d55e5a459fb7d106529b893f54abf314c5ddd8cecac772fe4247a0f9c9a0677e",
+    "callId": "wait-call|fc/1",
+    "phase": "completed",
+    "source": "builtin:mcp"
+  },
+  "independent": true,
+  "toolNames": [
+    "codemode",
+    "mcp__fixture__echo"
+  ]
+}

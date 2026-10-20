@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "realWorkers": 2,
+  "realModelRequests": 0,
+  "branchUi": true,
+  "uploadedThroughBrowser": true,
+  "attachmentSurvivesReload": true,
+  "requestContainsImage": true,
+  "pageErrors": []
+}

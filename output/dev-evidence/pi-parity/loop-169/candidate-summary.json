@@ -1,0 +1,34 @@
+{
+  "at": "2026-10-20",
+  "node": "v24.19.0",
+  "npm": "10.9.3",
+  "pi": "1.0.3",
+  "regression": {
+    "entry": "npm run test:serial",
+    "files": 134,
+    "failed": 0,
+    "exit": 0,
+    "testTimeoutMs": 180000,
+    "log": "output/dev-evidence/pi-parity/loop-169/npm-test-serial.log",
+    "summary": "output/dev-evidence/pi-parity/loop-169/npm-test-serial-summary.json",
+    "elapsedMs": 2453579
+  },
+  "tsc": 0,
+  "build": 0,
+  "probePi": 0,
+  "browser": "skipped-no-ui-change",
+  "budget": {
+    "capCalls": 120,
+    "capUsd": 0.65,
+    "usedCallsApprox": 52,
+    "usedUsdApprox": 0.020,
+    "note": "本轮仅离线回归；未调用真实供应商"
+  },
+  "open": ["F13-vision", "F17-deploy-auth"],
+  "fixes": [
+    "force-stop ignores racing worker done; interrupt on worker exit; reopen unsettled failed tools",
+    "backup verify allows dotted session segments under .output",
+    "draft retry only from latest attempt (fixture aligned)",
+    "serial runner --test-timeout=180000; settle stop when child already exited"
+  ]
+}

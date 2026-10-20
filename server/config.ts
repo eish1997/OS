@@ -9,7 +9,7 @@ if (existsSync('.env')) for (const line of readFileSync('.env', 'utf8').split(/\
 const number = (name: string, fallback: number) => {
   const n = Number(process.env[name] ?? fallback); if (!Number.isFinite(n) || n < 0) throw new Error(`Invalid ${name}`); return n;
 };
-const storageEnv: Record<keyof typeof defaultStorageLimits, string> = { totalBytes:'DATA_MAX_BYTES', databaseBytes:'DATABASE_MAX_BYTES', assetsBytes:'ASSET_MAX_BYTES', uploadsBytes:'UPLOAD_TEMP_MAX_BYTES', sessionsBytes:'SESSION_MAX_BYTES', workspacesBytes:'WORKSPACE_MAX_BYTES', logsBytes:'LOG_MAX_BYTES', minFreeBytes:'STORAGE_MIN_FREE_BYTES', controlReserveBytes:'STORAGE_CONTROL_RESERVE_BYTES' };
+const storageEnv: Record<keyof typeof defaultStorageLimits, string> = { totalBytes:'DATA_MAX_BYTES', databaseBytes:'DATABASE_MAX_BYTES', assetsBytes:'ASSET_MAX_BYTES', uploadsBytes:'UPLOAD_TEMP_MAX_BYTES', sessionsBytes:'SESSION_MAX_BYTES', workspacesBytes:'WORKSPACE_MAX_BYTES', logsBytes:'LOG_MAX_BYTES', pluginsBytes:'PLUGIN_MAX_BYTES', minFreeBytes:'STORAGE_MIN_FREE_BYTES', controlReserveBytes:'STORAGE_CONTROL_RESERVE_BYTES' };
 const storageLimits = { ...defaultStorageLimits };
 const offsitePaths=[process.env.OFFSITE_BINARY,process.env.OFFSITE_CONFIG,process.env.OFFSITE_WORK_DIR];
 if(offsitePaths.some(Boolean)&&!offsitePaths.every(Boolean))throw new Error('Offsite deployment paths must be configured together');

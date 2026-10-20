@@ -1,0 +1,26 @@
+{
+  "sessionsLimit": 285212672,
+  "fileMaximum": 134217728,
+  "contract": "original+fork+16MiB",
+  "fit": {
+    "originalBytes": 125829633,
+    "forkBytes": 125830203,
+    "reservedBytes": 125838849,
+    "sessionBytes": 251659837
+  },
+  "restoredForkBytes": 125830203,
+  "scan": {
+    "elapsedMs": 4654,
+    "workerPeakRss": 680771584,
+    "entryCount": 2,
+    "fileBytes": 125829633
+  },
+  "continuedAfterRestore": true,
+  "quotaRaised": false,
+  "denied": {
+    "firstBytes": 83886429,
+    "secondBytes": 94372192,
+    "reservedBytes": 94380896,
+    "sessionBytes": 262145624
+  }
+}

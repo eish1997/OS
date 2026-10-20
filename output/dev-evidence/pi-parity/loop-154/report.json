@@ -1,0 +1,27 @@
+{
+  "closed": "流式消息、交互答复、追加预算、分支创建各自具备写入前失败、事务回滚、提交后重放三格证据，不重复副作用",
+  "matrix": {
+    "stream": {
+      "beforeWrite": "interrupt-boundaries + run-stream",
+      "midTransaction": "interrupt-boundaries + run-stream",
+      "afterCommitReplay": "interrupt-boundaries + run-stream / runtime-ui reconnect"
+    },
+    "interaction": {
+      "beforeWrite": "interrupt-boundaries + plugin-interaction",
+      "midTransaction": "interrupt-boundaries + plugin-interaction",
+      "afterCommitReplay": "interrupt-boundaries + plugin-interaction"
+    },
+    "budget": {
+      "beforeWrite": "task-budget-addition invalid",
+      "midTransaction": "interrupt-boundaries + task-budget-addition rollback",
+      "afterCommitReplay": "interrupt-boundaries + task-budget-addition HTTP"
+    },
+    "branch": {
+      "beforeWrite": "native-session reject before run",
+      "midTransaction": "interrupt-boundaries + native-session",
+      "afterCommitReplay": "interrupt-boundaries + pi-image-worker HTTP"
+    }
+  },
+  "realModels": 0,
+  "delivery": false
+}

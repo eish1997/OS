@@ -17,7 +17,7 @@ async function setup(schedule = false) {
   return { app, base, cookie, login, call };
 }
 test('HTTP selected-draft binding freezes host content and grants editing only for valid selected context', async () => {
-  const previous={...config};Object.assign(config,{apiKey:'offline-unused-fixture-key',model:'gpt-5.6-sol',maxCalls:2,budgetUsd:1,reservePerCallUsd:0.1});
+  const previous={...config};Object.assign(config,{apiKey:'offline-unused-fixture-key',provider:'openai',model:'gpt-5.6-sol',maxCalls:2,budgetUsd:1,reservePerCallUsd:0.1});
   const {app,call}=await setup(false);
   try {
     const p=(await call('/projects',{name:'稿件HTTP项目'})).value as Project;

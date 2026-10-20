@@ -1,0 +1,11 @@
+{
+  "sessionsLimit": 285212672,
+  "files": [
+    41943296,
+    41943296
+  ],
+  "sessionBytes": 83886592,
+  "healthSamples": 9,
+  "maxHealthMs": 30,
+  "runs": 0
+}

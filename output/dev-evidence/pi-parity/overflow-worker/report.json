@@ -1,0 +1,10 @@
+{
+  "sourceBytes": 385286,
+  "calls": 3,
+  "reason": "overflow",
+  "purposes": [
+    "agent:unknown",
+    "compaction:settled",
+    "agent:settled"
+  ]
+}

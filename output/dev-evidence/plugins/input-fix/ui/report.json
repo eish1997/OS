@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "root": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\plugin-ui-uR77Lx",
+  "browser": "155.0.8059.40",
+  "checks": [
+    "install trust disclosure",
+    "lost install response retries same request exactly once",
+    "real worker install",
+    "enable and disable API",
+    "two browser contexts observe enable disable and uninstall",
+    "close and reopen during pending update retains operation and completes once",
+    "single manager open",
+    "floating wide and narrow keyboard navigation",
+    "settings restores iconified manager",
+    "real Chrome 150% zoom error input retained and initial focus",
+    "cross workspace settings locates docked manager",
+    "copy and import preserve singleton",
+    "refresh restore",
+    "uninstall registration"
+  ],
+  "errors": [],
+  "modelRequests": 0
+}

@@ -1,0 +1,11 @@
+{
+  "closed": "页面能看到最终回复后缀，刷新后仍是同一条；工具面板能看到收尾前补上的预览，刷新后仍在",
+  "browserClicked": true,
+  "streamSuffixVisible": true,
+  "streamSuffixAfterReload": true,
+  "toolPreviewFlushedOnFinish": true,
+  "toolPreviewAfterReload": true,
+  "realModels": 0,
+  "delivery": false,
+  "pivMatrix": false
+}

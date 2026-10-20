@@ -83,10 +83,12 @@ test('reopen and clean joint restore preserve original grant and retry counts wi
   }
 });
 
-test('two actual processes competing for the last task call admit exactly one sibling attempt', async () => {
+test('two actual processes competing for the last task call admit exactly one reservation', async () => {
   const f = setup(); try {
     const first = f.start('first'); f.service.reserveCall(first.id, undefined, 0); f.service.transition(first.id, 'failed');
-    const runs = [f.retry(first.id, 'a'), f.retry(first.id, 'b')];
+    const resumed = f.retry(first.id, 'a');
+    assert.throws(() => f.retry(first.id, 'b'), /后续执行/);
+    const runs = [resumed, resumed];
     const children = runs.map(run => {
       const child = spawn(process.execPath, ['--import', 'tsx', 'tests/helpers/task-budget-reserver.ts', f.dir, run.id], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
       let output = '', errors = ''; let readyResolve!: () => void;

@@ -1,0 +1,13 @@
+{
+  "loop": 127,
+  "status": "completed",
+  "test": "tests/pi-event-schema.test.ts",
+  "unknownChunkIgnored": true,
+  "unknownHistoryIgnored": true,
+  "missingReceiptVersionRejected": true,
+  "receiptRewritten": false,
+  "ledgerRegression": "passed",
+  "streamRegression": "passed",
+  "externalModel": false,
+  "deploy": false
+}

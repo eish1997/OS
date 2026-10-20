@@ -1,0 +1,78 @@
+{
+  "purpose": "F13 real vision workbench UI acceptance",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "nonVisionModel": "deepseek-v4-pro",
+  "thinking": "high",
+  "prior": {
+    "calls": 54,
+    "usd": 0.02023
+  },
+  "caps": {
+    "calls": 120,
+    "usd": 0.65
+  },
+  "sessionCaps": {
+    "maxCalls": 12,
+    "budgetUsd": 0.2
+  },
+  "expectedDigit": "4",
+  "fileName": "canvas-probe.png",
+  "prompt": "Look at the attached image. Reply with only the single large digit you see. No other words.",
+  "stages": [
+    {
+      "name": "non-vision-reject",
+      "model": "deepseek-v4-pro",
+      "status": 400,
+      "bodySnippet": "{\"error\":\"当前模型不支持图片，请选择支持视觉的模型或移除图片\"}",
+      "pass": true
+    },
+    {
+      "name": "workbench-vision-upload-send",
+      "status": "completed",
+      "calls": 1,
+      "spentUsd": 0.000908316,
+      "assistantText": "4",
+      "matchesExpected": true,
+      "sessionHasImageBytes": true,
+      "receipts": [
+        {
+          "callNumber": 1,
+          "state": "settled",
+          "costUsd": 0.000908316,
+          "tokens": 4485
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "refresh-history-image",
+      "pass": true
+    },
+    {
+      "name": "reopen-window-history",
+      "pass": true
+    },
+    {
+      "name": "continuation-without-reattach",
+      "status": "completed",
+      "calls": 1,
+      "spentUsd": 0.000188808,
+      "assistantText": "4",
+      "pass": true
+    }
+  ],
+  "sessionUsage": {
+    "calls": 2,
+    "spentUsd": 0.001097124
+  },
+  "cumulativeAfter": {
+    "calls": 56,
+    "usd": 0.021327124000000003,
+    "remaining": {
+      "calls": 64,
+      "usd": 0.6286728760000001
+    }
+  },
+  "pass": true
+}

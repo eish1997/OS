@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "realModelRequests": 0,
+  "checks": [
+    "settings save/reload",
+    "800x600 operability",
+    "new run frozen high",
+    "known and unknown request receipts",
+    "authentication and pagination validation",
+    "manual compaction targets same conversation and source",
+    "queued compaction cancellation",
+    "explicit budget addition preserves old policy and task consumption",
+    "budget grant survives browser reload"
+  ],
+  "pageErrors": []
+}

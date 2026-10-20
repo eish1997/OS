@@ -23,7 +23,7 @@ test('research input accepts repository roots and rejects unsupported or credent
 
 test('research HTTP flow constrains tools, persists real source lineage, deduplicates and survives reopen', async () => {
   const previous = { ...config };
-  Object.assign(config, { apiKey: 'offline-test-key', model: 'gpt-5.6-sol', maxCalls: 2, budgetUsd: 1, reservePerCallUsd: 0.1 });
+  Object.assign(config, { apiKey: 'offline-test-key', provider: 'openai', model: 'gpt-5.6-sol', maxCalls: 2, budgetUsd: 1, reservePerCallUsd: 0.1 });
   const dir = mkdtempSync(join(tmpdir(), 'research-flow-'));
   const app = createApp({ dataDir: dir, password: 'research-local-test-password', schedule: false, backup: { root: '' } });
   await new Promise<void>(resolve => app.server.listen(0, '127.0.0.1', resolve));

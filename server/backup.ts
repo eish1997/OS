@@ -3,6 +3,8 @@ import { join, relative, resolve, dirname, win32, posix } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { Store, AppError } from './store.js';
 import type { Asset, Run } from '../shared/contracts.js';
+import {closeInteractions} from './plugin-interaction.js';
+import {StorageCapacity} from './storage.js';
 function safePath(path:string){for(let p=resolve(path);;p=dirname(p)){if(existsSync(p)&&lstatSync(p).isSymbolicLink())throw new AppError(400,'备份路径包含链接');if(dirname(p)===p)break;}}
 function files(root: string, path = root): string[] { safePath(path);return readdirSync(path).flatMap(name => { const child = join(path, name);safePath(child); if (statSync(child).isDirectory()) return files(root, child); return [relative(root, child).replaceAll('\\', '/')]; }); }
 const hash = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -18,6 +20,10 @@ export function backupRelativePath(sourceRoot: string, value?: string): string |
   return windows?child.replaceAll('\\','/'):child;
 }
 export function backup(store: Store, dataDir: string, destination: string, leaseOwner?: string) {
+  // Freeze import records and file prefixes together, without blocking scheduler lease renewals.
+  return new StorageCapacity(dataDir,{},0,'.native-import-write.lock').exclusive(()=>backupSnapshot(store,dataDir,destination,leaseOwner));
+}
+function backupSnapshot(store: Store, dataDir: string, destination: string, leaseOwner?: string) {
   const target = resolve(destination); if (existsSync(target)) throw new AppError(409, '备份目录必须是新目录');
   safePath(dataDir);safePath(target);
   if (target === resolve(dataDir) || target.startsWith(resolve(dataDir) + (process.platform === 'win32' ? '\\' : '/'))) throw new AppError(400, '备份不能放在数据目录中');
@@ -25,7 +31,7 @@ export function backup(store: Store, dataDir: string, destination: string, lease
   if(leaseOwner){const current=store.db.prepare("SELECT owner,until_ms FROM locks WHERE name='scheduler'").get();if(current?.owner!==leaseOwner||Number(current.until_ms)<=Date.now())throw new AppError(409,'调用方的备份租约已失效');}
   else if (!store.lease('scheduler', owner, 120_000)) throw new AppError(409, '调度正在运行；停止服务后执行离线备份');
   try {
-    if (store.list<Run>('run').some(r => r.status === 'running')) throw new AppError(409, '在途任务需先停止或完成');
+    if (store.list<Run>('run').some(r => r.status === 'running' || r.status === 'waiting_interaction')) throw new AppError(409, '在途任务需先停止或完成');
     mkdirSync(target, { recursive: true });
     const dbPath = join(target, 'workbench.sqlite'); store.db.exec(`VACUUM INTO '${dbPath.replaceAll("'", "''")}'`);
     const copy = new Store(dbPath); let assetList:Asset[];
@@ -45,7 +51,8 @@ export function verifyBackup(source:string){
   if (manifest.schema !== 1||typeof manifest.sourceRoot!=='string'||!Array.isArray(manifest.files)||manifest.files.length>100000) throw new AppError(400, '备份版本或清单无效');
   const paths=new Set<string>();
   for (const file of manifest.files) {
-    if(typeof file.path!=='string'||typeof file.sha256!=='string'||!/^[a-f0-9]{64}$/.test(file.sha256)||file.path.includes('..')||paths.has(file.path)||!(file.path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(file.path)||/^sessions\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(file.path)))throw new AppError(400,'备份路径或哈希无效');
+    // Sessions may include owned run output under .output (e.g. processes.jsonl); segment dots are required.
+    if(typeof file.path!=='string'||typeof file.sha256!=='string'||!/^[a-f0-9]{64}$/.test(file.sha256)||file.path.includes('..')||paths.has(file.path)||!(file.path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(file.path)||/^sessions\/(?:[a-zA-Z0-9_.-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(file.path)))throw new AppError(400,'备份路径或哈希无效');
     paths.add(file.path);safePath(join(source,file.path));
     if (hash(join(source, file.path)) !== file.sha256) throw new AppError(422, '备份文件校验失败');
   }
@@ -58,7 +65,10 @@ export function restore(source: string, destination: string, protectDestination?
   const store = new Store(join(target, 'workbench.sqlite'));
   const remap = (path?: string) => { const child=backupRelativePath(manifest.sourceRoot,path);return child===undefined?undefined:join(target,...child.split('/')); };
   store.db.exec('DELETE FROM sessions; DELETE FROM node_tokens; DELETE FROM locks;');
+  // Restored data belongs to a new execution environment; require a fresh import confirmation.
+  for(const confirmation of store.list('native_import_confirmation'))store.update('native_import_confirmation',confirmation.id,confirmation.revision,{...({expiresAt:0} as object)});
   for (const run of store.list<Run>('run')) {
+    closeInteractions(store,run.id,'restored');
     const sessionPath = remap(run.sessionPath);
     store.update<Run>('run', run.id, run.revision, { sessionPath, workerPid: undefined, leaseOwner: undefined, leaseUntil: undefined });
   }
@@ -66,6 +76,18 @@ export function restore(source: string, destination: string, protectDestination?
   for (const binding of store.list('session_binding')) {
     const value = binding as typeof binding & { cwd?: string; sessionPath?: string };
     store.update('session_binding', value.id, value.revision, { ...({ cwd: remap(value.cwd), sessionPath: remap(value.sessionPath), pid: undefined, worker: undefined } as object) });
+  }
+  // Plugin code/dependencies are not in this backup. Never keep live source-root pointers enabled.
+  for (const pluginConfig of store.list<import('../shared/plugins.js').PluginConfiguration>('plugin_config')) {
+    store.update<import('../shared/plugins.js').PluginConfiguration>('plugin_config', pluginConfig.id, pluginConfig.revision, {
+      health: 'ready', error: undefined, environmentRevision: pluginConfig.environmentRevision + 1,
+      packages: pluginConfig.packages.map(p => ({ ...p, enabled: false, installationState: 'missing', lastLoad: undefined,
+        root: p.kind === 'local' ? p.root : remap(p.root) ?? '', resources: p.resources.map(r => ({ ...r, path: p.kind === 'local' ? r.path : remap(r.path) ?? '' })) }))
+    });
+  }
+  for (const op of store.list<import('../shared/plugins.js').PluginOperation>('plugin_operation')) {
+    store.update<import('../shared/plugins.js').PluginOperation>('plugin_operation', op.id, op.revision, { workerPid: undefined, workerBirth: undefined,
+      ...(!['completed', 'failed', 'reconcile_required'].includes(op.phase) ? { phase: 'failed' as const, progress: '从备份恢复；原操作未重放', error: '请检查来源后重新安装' } : {}) });
   }
   for (const node of store.list('node')) store.update('node', node.id, node.revision, { ...({ revoked: true, lastSeen: 0 } as object) });
   store.close(); return { restored: true, dataDir: target, credentialsMustBeConfigured: true };

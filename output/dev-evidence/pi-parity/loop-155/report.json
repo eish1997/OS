@@ -1,0 +1,15 @@
+{
+  "closed": "导入后的思考档位进入之后的新任务 policy；导入前已提交的任务保持原档位；设置页显示导入结果",
+  "browserClicked": true,
+  "sourceFileUnchanged": true,
+  "beforeImportThinking": "medium",
+  "afterImportThinking": "high",
+  "oldTaskUnchanged": true,
+  "skills": 2,
+  "prompts": 1,
+  "extensionsNotLoaded": true,
+  "packageNotInstalled": true,
+  "realModels": 0,
+  "delivery": false,
+  "pivMatrix": false
+}

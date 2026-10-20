@@ -1,0 +1,7 @@
+{
+  "defaultSessionsBytes": 285212672,
+  "fileMaximum": 134217728,
+  "legacyOverride": 134217728,
+  "migration": "config-only; no session file rewrite",
+  "adr": "037"
+}

@@ -1,0 +1,12 @@
+{
+  "loop": 125,
+  "status": "completed",
+  "test": "tests/native-torn-tail.test.ts",
+  "originalKeepsTornTail": true,
+  "continuationUsesCompletePrefix": true,
+  "readableCopyRemoved": true,
+  "completeBadLineRejected": true,
+  "nativeSessionRegression": "12 passed",
+  "externalModel": false,
+  "deploy": false
+}

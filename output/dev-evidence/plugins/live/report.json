@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T12:53:45.698Z",
+  "source": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\workbench-plugin-live-VkbxWm",
+  "projectId": "578a80ef-0afa-47a3-bb15-bfa35c939196",
+  "runIds": [
+    "7b7d0759-cb6b-4fa9-9689-d7b6e5e16583",
+    "84846021-9214-48e1-94bb-64b981f2ff4e"
+  ],
+  "modelRequests": 3,
+  "usage": [
+    {
+      "input": 2554,
+      "output": 44,
+      "cacheRead": 2176,
+      "cacheWrite": 0,
+      "totalTokens": 4774,
+      "complete": true
+    },
+    {
+      "input": 2297,
+      "output": 7,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 2304,
+      "complete": true
+    }
+  ],
+  "checks": [
+    "local install defaults disabled",
+    "real model invokes plugin and returns tool marker",
+    "disabled fresh run excludes plugin",
+    "uninstall removes declaration"
+  ]
+}

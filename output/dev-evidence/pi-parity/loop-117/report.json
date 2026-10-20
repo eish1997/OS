@@ -1,0 +1,19 @@
+{
+  "status": "completed",
+  "simultaneous": true,
+  "effects": [
+    "B"
+  ],
+  "tools": [
+    {
+      "name": "gate_a",
+      "id": "959baa52-22ae-441e-9ad6-0c533fd344fc:12cd97c3442c489c28aa74746fe8e4b95bd2edde60dbce9afc7080fbff7a34f7",
+      "phase": "completed"
+    },
+    {
+      "name": "gate_b",
+      "id": "959baa52-22ae-441e-9ad6-0c533fd344fc:294a57c277bae8e1f2279d029c98c5135c27660514fa220ed0384c0a4b20dbc6",
+      "phase": "completed"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "loop": 132,
+  "status": "completed",
+  "test": "tests/native-import-host-kill.test.ts",
+  "beforeWriteResumed": true,
+  "partialPrefixResumed": true,
+  "afterSyncIdempotent": true,
+  "differentBytesRejected": true,
+  "nativeImportRegression": "2 passed",
+  "externalModel": false,
+  "deploy": false
+}

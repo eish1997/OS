@@ -27,7 +27,9 @@ test('owned worker crash blocks dispatch until reconciliation and retry creates 
     const p = app.service.createProject('A'); const first = app.service.submit(p.id, 'fixture', 'crash', 'fixture', pol(p.id)).run;
     await until(() => app.store.get<Run>('run', first.id).status === 'running'); assert(app.scheduler.terminateOwnedWorker(first.id)); await until(() => app.store.get<Run>('run', first.id).status === 'interrupted');
     const second = app.service.submit(p.id, 'fixture', 'queued', 'fixture', pol(p.id)).run; app.scheduler.tick(); assert.equal(app.store.get<Run>('run', second.id).status, 'queued'); assert.throws(() => app.service.retry(first.id, 'tooearly'));
-    app.scheduler.acknowledge(first.id); const retried = app.service.retry(first.id, 'after-reconcile'); assert.notEqual(retried.id, first.id); assert.equal(retried.parentRunId, first.id); assert.equal(retried.attempt, 2); app.service.cancel(second.id); app.service.cancel(retried.id);
+    // Acknowledge waits until process-tree confirmation finishes (terminations cleared).
+    await until(() => { try { app.scheduler.acknowledge(first.id); return true; } catch { return false; } }, 20000);
+    const retried = app.service.retry(first.id, 'after-reconcile'); assert.notEqual(retried.id, first.id); assert.equal(retried.parentRunId, first.id); assert.equal(retried.attempt, 2); app.service.cancel(second.id); app.service.cancel(retried.id);
   } finally { await app.close(); }
 });
 test('real controlled HTTP write with lost response remains unknown and is never repeated', async () => {

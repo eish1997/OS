@@ -1,0 +1,17 @@
+{
+  "ok": {
+    "server": "fixture",
+    "ok": true,
+    "toolCount": 1,
+    "at": "2026-10-20T12:46:01.400Z",
+    "note": "单次探测结果，刷新后不会自动保持；不是持续连接状态，也不代替执行时的启动提醒"
+  },
+  "bad": {
+    "server": "missing",
+    "ok": false,
+    "code": "program_missing",
+    "at": "2026-10-20T12:46:04.307Z",
+    "note": "单次探测结果，刷新后不会自动保持；不是持续连接状态，也不代替执行时的启动提醒"
+  },
+  "oauthNotImplemented": true
+}

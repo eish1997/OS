@@ -1,0 +1,14 @@
+{
+  "loop": 136,
+  "status": "completed",
+  "test": "tests/pi-session-metadata.test.ts",
+  "productChange": false,
+  "entries": ["thinking_level_change", "model_change", "usage", "custom", "session_info", "label", "custom_message"],
+  "scanMatchesSdkEntryCount": true,
+  "importPreviewAccepted": true,
+  "forkReopensUserText": true,
+  "originalBytesUnchanged": true,
+  "pivMatrix": false,
+  "externalModel": false,
+  "deploy": false
+}

@@ -1,0 +1,13 @@
+{
+  "loop": 129,
+  "status": "completed",
+  "test": "tests/mcp-oauth.test.ts",
+  "browserOpened": false,
+  "tokenInResponse": false,
+  "tokenInPrivateFile": true,
+  "probeAfterLoginIsNeedsAuth": false,
+  "mcpProbeRegression": "1 passed",
+  "browserUiClicked": false,
+  "externalModel": false,
+  "deploy": false
+}

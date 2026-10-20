@@ -1,0 +1,67 @@
+{
+  "auditedAt": "2026-10-20",
+  "node": "v24.19.0",
+  "npm": "10.9.3",
+  "findings": [
+    {
+      "loop": 162,
+      "proved": "DeepSeek 授权配置（long / deepseek-flash）下真实 worker 墙钟约 315s 完成，会话保留，未触达 timeoutMs=1800000",
+      "notProved": "实际模型请求与工具执行跨越旧 5 分钟时限；不等于「真实模型长任务已通过」",
+      "mechanism": "插件 hold_long 空等 310s，calls=0，spentUsd=0",
+      "action": "PIV-05 / F8 降为部分关闭；需模型+工具补验才可全关"
+    },
+    {
+      "loop": 160,
+      "workbench": {
+        "proved": "独立临时项目；5 次 settled 回执；calc.ts 由 a-b 改为 a+b；sessionBound",
+        "notProved": "验证器未执行预定检查 npx tsx calc.test.ts（仅内容启发式 testsPass）"
+      },
+      "original": {
+        "independentProject": true,
+        "elapsedMs": 8628,
+        "assistantTurnsReported": 0,
+        "assistantTurnsMeaning": "脚本用 session.buildSessionContext?.().messages 计数；SDK 示例用量为 session.state.messages。assistantTurns:0 是计量缺陷，不能证明零模型调用",
+        "usageReceipts": "缺失",
+        "independentCheck": "未跑预定测试命令",
+        "fileEndedCorrect": true,
+        "verdict": "原版侧证据不足，不能凭文件最终正确判定通过"
+      }
+    },
+    {
+      "loop": 161,
+      "workbench": {
+        "proved": "伪造约 98 条历史后接续；5 次回执；实现 mul；内容启发式通过",
+        "notProved": "验证器未执行 LONGHIST_CHECKS_OK 预定命令"
+      },
+      "original": {
+        "independentProject": true,
+        "elapsedMs": 5799,
+        "usageReceipts": "缺失",
+        "independentCheck": "未跑",
+        "fileEndedCorrect": true,
+        "verdict": "原版侧证据不足，保持未完成"
+      }
+    }
+  ],
+  "budgetLedger": {
+    "capCalls": 20,
+    "capUsdCatalog": 0.65,
+    "cnyHostApprox": 5,
+    "known": [
+      { "source": "loop-160/probe", "calls": 1, "usd": "unknown-invoice; probe-only" },
+      { "source": "loop-160/workbench-basic", "calls": 5, "usd": 0.002160252 },
+      { "source": "loop-160/original-pi-basic", "calls": "unknown", "usd": "unknown", "note": "文件已改但无回执" },
+      { "source": "loop-161/workbench-continue", "calls": 5, "usd": 0.002345256 },
+      { "source": "loop-161/original-continue", "calls": "unknown", "usd": "unknown" },
+      { "source": "loop-162/hold", "calls": 0, "usd": 0 }
+    ],
+    "knownHostCallsMin": 11,
+    "knownHostUsd": 0.004505508,
+    "reverifyOriginalMultiFile": { "calls": 13, "usdCatalogFromEntries": 0.00404298, "independentCheck": true },
+    "totalEstimatedCallsMin": 24,
+    "remainingCallsForHostCap": 0,
+    "remainingUsdCatalog": 0.641451512,
+    "externalCallsStopped": true,
+    "rule": "各脚本不得各自重置为 20/0.65；累计已达/超过 20 次硬顶后停止外部模型"
+  }
+}

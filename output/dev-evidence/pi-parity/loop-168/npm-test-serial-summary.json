@@ -1,0 +1,806 @@
+﻿[
+    {
+        "file":  "api.test.ts",
+        "exit":  0,
+        "pass":  8,
+        "fail":  0
+    },
+    {
+        "file":  "asset-host-kill.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "automatic-backup.test.ts",
+        "exit":  0,
+        "pass":  11,
+        "fail":  0
+    },
+    {
+        "file":  "automatic-offsite.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "backup-portable.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "browser-port.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "cancel-contention.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "capacity.test.ts",
+        "exit":  0,
+        "pass":  14,
+        "fail":  0
+    },
+    {
+        "file":  "chatgpt.test.ts",
+        "exit":  0,
+        "pass":  18,
+        "fail":  0
+    },
+    {
+        "file":  "chatgpt-lock.test.ts",
+        "exit":  0,
+        "pass":  8,
+        "fail":  0
+    },
+    {
+        "file":  "chatgpt-transfer.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "chatgpt-transfer-crash.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "connection-read.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "core.test.ts",
+        "exit":  0,
+        "pass":  16,
+        "fail":  0
+    },
+    {
+        "file":  "desktop-entry.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "document-reader.test.ts",
+        "exit":  0,
+        "pass":  7,
+        "fail":  0
+    },
+    {
+        "file":  "draft-agent.test.ts",
+        "exit":  0,
+        "pass":  13,
+        "fail":  0
+    },
+    {
+        "file":  "faults.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "incremental-sha256.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "interrupt-boundaries.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "local-permissions.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "local-service.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "mcp-config.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "mcp-credentials.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "mcp-diagnostics.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "mcp-oauth.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "mcp-probe.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "model-idle.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "model-request-ledger.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "model-retry-hint.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "native-branch-points.test.ts",
+        "exit":  0,
+        "pass":  11,
+        "fail":  0
+    },
+    {
+        "file":  "native-export.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-image-decode-peak.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-image-stream.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "native-image-validation.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-backup.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-capacity.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-fork-capacity.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-host-kill.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-images.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-inspection.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-preview-pair.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-import-recovery.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-imports.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "native-large.test.ts",
+        "exit":  0,
+        "pass":  6,
+        "fail":  0
+    },
+    {
+        "file":  "native-mid-corruption.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "native-output.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-session.test.ts",
+        "exit":  0,
+        "pass":  12,
+        "fail":  0
+    },
+    {
+        "file":  "native-torn-tail.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "native-unpublished-reconcile.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "network.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "node-cli.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "offsite-backup.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "offsite-work.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "owned-process-tree.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "pi-accounting.test.ts",
+        "exit":  0,
+        "pass":  8,
+        "fail":  0
+    },
+    {
+        "file":  "pi-agent-reserve-interrupt.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-append-kill.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-auto-compaction-interrupt.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-auto-compaction-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-compaction-guard.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-compaction-host-restart.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-compaction-interrupt.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-compaction-retry-cancel.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-compaction-retry-exhaust.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-compaction-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-cross-tool-wait.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-dialog-tool-worker.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-dialog-worker.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-event-schema.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-idle-worker.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-image-input.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-image-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-import-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-interaction-schema.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-interaction-wait-state.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-builtins.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-connection-status.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-dynamic-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-http-worker.test.ts",
+        "exit":  0,
+        "pass":  7,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-lost-connection.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-parallel-unknown.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-mcp-worker.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "pi-native-output-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-native-tools.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "pi-nested-mcp-force-stop.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-nested-tool-receipts.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-original-fixture.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-orphan-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-overflow-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-partial-toolcall-interrupt.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-record-schema.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-retry-worker.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-session-metadata.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-settings.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "pi-settings-preview.test.ts",
+        "exit":  0,
+        "pass":  7,
+        "fail":  0
+    },
+    {
+        "file":  "pi-steer-during-wait.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-steering-worker.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  0
+    },
+    {
+        "file":  "pi-stream-crash.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-tool-recovery.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "pi-unpublished-live-worker.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "pi-wait-host-restart.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-crash.test.ts",
+        "exit":  1,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-execution.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-git.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-http.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-interaction.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-layout.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-manager.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-npm.test.ts",
+        "exit":  1,
+        "pass":  0,
+        "fail":  1
+    },
+    {
+        "file":  "plugin-npm-crash.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-offline.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-prerequisites.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-recovery.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-runtime.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "plugin-state.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "research.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "run-input.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "run-stream.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "search.test.ts",
+        "exit":  0,
+        "pass":  9,
+        "fail":  0
+    },
+    {
+        "file":  "spawn-ledger.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "sqlite-host-kill.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "storage-faults.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "summary.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "supervisor.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "task-budget.test.ts",
+        "exit":  0,
+        "pass":  6,
+        "fail":  0
+    },
+    {
+        "file":  "task-budget-addition.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "tool-progress.test.ts",
+        "exit":  0,
+        "pass":  4,
+        "fail":  0
+    },
+    {
+        "file":  "upload-intent.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "wal-capacity.test.ts",
+        "exit":  0,
+        "pass":  3,
+        "fail":  0
+    },
+    {
+        "file":  "workbench-config.test.ts",
+        "exit":  0,
+        "pass":  2,
+        "fail":  0
+    },
+    {
+        "file":  "workbench-conversation.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    },
+    {
+        "file":  "workbench-layout.test.ts",
+        "exit":  0,
+        "pass":  5,
+        "fail":  0
+    },
+    {
+        "file":  "workbench-project-context.test.ts",
+        "exit":  0,
+        "pass":  1,
+        "fail":  0
+    }
+]

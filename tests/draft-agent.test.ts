@@ -171,12 +171,15 @@ test('sibling attempts and other tasks cannot advance retry draft authority',asy
     const {run}=f.start();await f.service.executeOperation(run.id,'saved','update_draft',{draftId:f.draft.id,revision:1,title:'根尝试',body:'根尝试保存'});f.service.transition(run.id,'failed');
     const sibling=f.service.retry(run.id,'sibling');f.service.transition(sibling.id,'running');
     await f.service.executeOperation(sibling.id,'edit','update_draft',{draftId:f.draft.id,revision:2,title:'另一个尝试',body:'兄弟尝试保存'});f.service.transition(sibling.id,'failed');
-    const retry=f.service.retry(run.id,'branch');f.service.transition(retry.id,'running');
-    assert.equal((f.service.tool(retry.id,'read_draft',{}) as {revision:number}).revision,2);
+    // Resume only from the latest attempt (same contract as task-budget-addition); root is no longer eligible.
+    assert.throws(()=>f.service.retry(run.id,'from-root'),/后续执行/);
+    const retry=f.service.retry(sibling.id,'branch');f.service.transition(retry.id,'running');
+    // Ancestry includes sibling's confirmed update (revision 3); other tasks still cannot advance this authority.
+    assert.equal((f.service.tool(retry.id,'read_draft',{}) as {revision:number}).revision,3);
     const other=f.service.submit(f.project.id,'另一个目标','other-task','fixture',f.policy,[],undefined,{...f.context,selectedDraftRevision:3}).run;f.service.transition(other.id,'running');
     await f.service.executeOperation(other.id,'edit','update_draft',{draftId:f.draft.id,revision:3,title:'其他任务',body:'其他任务保存'});
-    const read=f.service.tool(retry.id,'read_draft',{}) as {revision:number;changedSinceBinding:boolean};assert.equal(read.revision,2);assert(read.changedSinceBinding);
-    for(const revision of [2,3,4])await assert.rejects(f.service.executeOperation(retry.id,`adopt-${revision}`,'update_draft',{draftId:f.draft.id,revision,title:'不允许',body:'覆盖'}),errorStatus(409));
+    const read=f.service.tool(retry.id,'read_draft',{}) as {revision:number;changedSinceBinding:boolean};assert.equal(read.revision,3);assert(read.changedSinceBinding);
+    for(const revision of [3,4,5])await assert.rejects(f.service.executeOperation(retry.id,`adopt-${revision}`,'update_draft',{draftId:f.draft.id,revision,title:'不允许',body:'覆盖'}),errorStatus(409));
     assert.equal(f.store.get<Draft>('draft',f.draft.id).body,'其他任务保存');
   }finally{f.store.close();}
 });

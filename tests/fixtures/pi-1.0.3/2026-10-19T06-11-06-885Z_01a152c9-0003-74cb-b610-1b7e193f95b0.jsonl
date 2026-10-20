@@ -1,0 +1,5 @@
+{"type":"session","version":3,"id":"01a152c9-0003-74cb-b610-1b7e193f95b0","timestamp":"2026-10-19T06:11:06.885Z","cwd":"C:\\Users\\ZYF\\orca\\workspaces\\OS\\dulse"}
+{"type":"message","id":"2f0b0414","parentId":null,"timestamp":"2026-10-19T06:11:06.889Z","message":{"role":"user","content":"ORIGINAL_USER","timestamp":1}}
+{"type":"message","id":"f2faa72d","parentId":"2f0b0414","timestamp":"2026-10-19T06:11:06.891Z","message":{"role":"assistant","content":[{"type":"text","text":"ORIGINAL_ASSISTANT"}],"api":"openai-completions","provider":"fixture","model":"fixture","usage":{"input":1,"output":1,"cacheRead":0,"cacheWrite":0,"totalTokens":2,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":2}}
+{"type":"compaction","id":"a69c610d","parentId":"f2faa72d","timestamp":"2026-10-19T06:11:06.893Z","summary":"ORIGINAL_SUMMARY","firstKeptEntryId":"a69c610d","tokensBefore":4}
+{"type":"message","id":"c81f6bc2","parentId":"2f0b0414","timestamp":"2026-10-19T06:11:06.895Z","message":{"role":"user","content":"SIBLING","timestamp":3}}

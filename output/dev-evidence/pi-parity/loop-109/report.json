@@ -1,0 +1,7 @@
+{
+  "purpose": "agent",
+  "interruptedState": "reserved",
+  "reservedUsd": 10,
+  "recovered": "completed",
+  "window": "after-reserve-before-response-bytes"
+}

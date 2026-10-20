@@ -1,0 +1,14 @@
+{
+  "loop": 149,
+  "localSkillRegistered": true,
+  "localPromptRegistered": true,
+  "missingPathRefused": true,
+  "extensionNotLoaded": true,
+  "packageNotInstalled": true,
+  "sourceFileUnchanged": true,
+  "browserClicked": false,
+  "pivMatrix": false,
+  "delivery": false,
+  "tests": "6 passed",
+  "duration_ms": 9969
+}

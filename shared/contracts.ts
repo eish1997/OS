@@ -1,14 +1,30 @@
-export type RunStatus = 'queued' | 'running' | 'waiting_node' | 'waiting_user' | 'completed' | 'failed' | 'cancelled' | 'interrupted';
+export type RunStatus = 'queued' | 'running' | 'waiting_node' | 'waiting_user' | 'waiting_interaction' | 'completed' | 'failed' | 'cancelled' | 'interrupted';
+/** Worker still owns the run: either actively executing or blocked on a user dialog. Distinct from waiting_user (model auth). */
+export function isLiveExecution(status: RunStatus) { return status === 'running' || status === 'waiting_interaction'; }
 export type Acceptance = 'pending' | 'passed' | 'failed' | 'needs_review';
 export interface Entity { id: string; revision: number; createdAt: string; updatedAt: string; projectId?: string }
+export interface Run { mcpDiagnostics?: import('./mcp.js').McpDiagnostic[]; mcpConnections?: import('./mcp.js').McpConnectionStatus[]; mcpManifest?: import('./mcp.js').McpManifest; pluginManifest?: import('./plugins.js').PluginRunManifest; pluginTools?: { name: string; source: string }[] }
+export interface Policy { piRuntime?: import('./pi-runtime.js').PiExecutionProfile }
+export interface Run { compaction?: import('./pi-runtime.js').PiCompactionState }
+export interface Run { retryState?: import('./pi-runtime.js').PiRetryState }
+export interface Run { sessionAction?: 'compact'; compactionFocus?: string }
+export interface SessionBinding { pluginSignature?: string }
 export interface Project extends Entity { name: string; description: string; archived: boolean }
 export interface Conversation extends Entity { projectId: string; title: string }
+export interface Conversation {importedFrom?:{importId:string;sourceHash:string;sourceEntryId:string}}
 export interface ResearchRequest { url: string; purpose: string }
 export interface Task extends Entity { projectId: string; conversationId?: string; goal: string; acceptance: Acceptance; acceptanceNote?: string; acceptanceSourceIds?: string[]; context: { research?: ResearchRequest; projectId: string; assetIds: string[]; view: string; selectedAssetId?: string; selectedDraftId?: string; selectedDraftRevision?: number; selectedDraft?: Draft; summary?: ProjectSummary }; commandId: string }
 export interface ProjectSummary extends Entity { projectId: string; goal: string; progress: string; decisions: string; nextStep: string; sourceIds: string[]; confirmed: boolean; sourceRunId?: string }
 export interface ConversationMessage { id: string; sequence: number; role: 'user' | 'assistant'; text: string; at: string; runId?: string }
+export interface ConversationMessage { phase?: import('./run-stream.js').MessagePhase | 'interrupted'; fullTextUrl?: string }
+export interface ConversationMessage {inputState?:import('./run-input.js').RunInputState;inputReason?:string}
+export interface ConversationMessage {followUp?:{state:Run['status'];sourceRunId:string;runId:string;reason?:string}}
+export interface ConversationMessage { images?:{assetId:string;name:string;hash:string;url?:string}[] }
+export interface Conversation { branch?:{sourceRunId:string;sourceEntryId:string;sourceConversationId?:string;sourceHash:string} }
 export interface ConversationPage { messages: ConversationMessage[]; olderThan?: number }
-export interface NativeContinuation { runId:string; sessionId:string; sha256:string }
+export interface NativeContinuation { runId:string; sessionId:string; sha256:string; entryId?:string }
+export interface ImportedContinuation {importId:string;sha256:string;entryId:string;pluginSignature:string;mcpSignature:string;externalEffectsReview:string}
+export interface Run {importedContinuation?:ImportedContinuation}
 export interface SessionBinding extends Entity { projectId:string; runId:string;taskId:string;sessionId:string;sessionPath:string;cwd:string;piVersion:string;policyVersion:number;model:string;authKind:string;worker?:string;pid?:number;node?:string;reconstructed?:boolean }
 export interface Run extends Entity { projectId: string; conversationId?: string; taskId: string; status: RunStatus; mode: 'pi' | 'fixture' | 'node'; attempt: number; parentRunId?: string; continuation?:NativeContinuation; continueAfterRunId?:string;cancelRequested: boolean; cancelRequestedAt?: string; timedOutAt?: string; leaseOwner?: string; leaseUntil?: number; startedAt?: string; endedAt?: string; error?: string; sessionPath?: string; sessionId?: string; workerPid?: number; workerStartedAt?: string; nodeId?: string; resultAssetIds: string[]; resultDraftIds?: string[]; policy: Policy; calls: number; modelCallsSettled?: number; modelCallsReported?: number; reservedUsd: number; spentUsd: number; usage?: ModelUsage }
 export interface ModelBinding { kind: 'api' | 'chatgpt'; provider: string; model: string; connectionId?: string }
@@ -27,7 +43,8 @@ export interface Snapshot { projects: Project[]; summaries: ProjectSummary[]; ta
 const transitions: Record<RunStatus, RunStatus[]> = {
   queued: ['running', 'waiting_node', 'waiting_user', 'cancelled', 'failed'],
   waiting_node: ['queued', 'running', 'cancelled'], waiting_user: ['queued', 'cancelled'],
-  running: ['completed', 'failed', 'cancelled', 'interrupted'],
+  running: ['waiting_interaction', 'completed', 'failed', 'cancelled', 'interrupted'],
+  waiting_interaction: ['running', 'completed', 'failed', 'cancelled', 'interrupted'],
   completed: [], failed: [], cancelled: [], interrupted: []
 };
 export function canTransition(from: RunStatus, to: RunStatus) { return transitions[from].includes(to); }

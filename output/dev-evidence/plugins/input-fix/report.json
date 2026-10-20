@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "previousAcceptance": "../manifest.json",
+  "changedFiles": [
+    {
+      "path": "server/plugin-packages.ts",
+      "before": "403d24e215fe514b47e953a4784a506648b739a323273e03383d39c6514f6c0c",
+      "after": "24dd1b98b33b19e9b7a865c0c77507361f9964a67951c8ec1a93e15a847e5224"
+    },
+    {
+      "path": "src/workbench/plugins.tsx",
+      "before": "97d3cedfc7bfdebb773dc9324d28fdb87546a9a19acd2c4c4f1b5d3fba1df43b",
+      "after": "59e20bdb22ba2a83715858ecb0d64c1c64f0d29134fc14078afb6b1309433716"
+    },
+    {
+      "path": "tests/plugin-state.test.ts",
+      "before": "5102c85af22c6fd4e3e1be2025b5f274d09afb826246f5c702eee024025a5e62",
+      "after": "90f5d677743347d197ff06b98995ace345a315df1e7ed04c166b7b8e4af8b19a"
+    },
+    {
+      "path": "tests/plugin-npm.test.ts",
+      "before": "413108f6913435c92bf6808b02c34084de04a19a3afa3f82bbbf078e5119a49b",
+      "after": "d762d741687eec4aaac6110a3ae1caad9eabc8910fb4575a9045fe017f316d3f"
+    },
+    {
+      "path": "tests/plugin-http.test.ts",
+      "before": "4ea1a074e5b5fea6cfeb7b1e9d3a3967ce258ef3742f0739b13640d1ffeae961",
+      "after": "eefbcc82f3222a5de5a8ff6775fa084a1d97e3a7d9e59088b069a36040b5c5b0"
+    },
+    {
+      "path": "scripts/plugin-ui-qa.ts",
+      "before": "72ad8dcff99a18274e558cb36d42cee4007da415068303139a8f4ba0165d30df",
+      "after": "5f020cd1230fa882c468678e118e08db586e8cc199420b1d2fe1d2cd02f2e784"
+    },
+    {
+      "path": "doc/dev/插件管理使用说明.md",
+      "before": "1fa8d4fdcea33cf80542e53e0cbc46933eb76a1b83c08d7f7864915fa5dd7de4",
+      "after": "71ce1a162f3464925b708180130c098ee0b8c8b7adc07ab3aa56edae9c8573f1"
+    },
+    {
+      "path": "dist/index.html",
+      "before": "3adbd1ff3c27bdcb607701c875ca05fb2838b01956ff986522022cc7d9c37f13",
+      "after": "7c1faf7cc1283d1c03ef1453a1cffba67fae966301c6aff904625bcf2abedd4c"
+    },
+    {
+      "path": "dist/assets/app-CVgaH6wI.js",
+      "before": null,
+      "after": "d0888447a9f217b51b89d3fb498f19d0d0a343d76681e121e764cdc8eba33edb"
+    },
+    {
+      "path": "dist/assets/index-CUMZlDce.js",
+      "before": null,
+      "after": "b41b384769f11a66c8bb7d4ff0bae1699d436b40b362404080d1ae69f423d804"
+    }
+  ],
+  "documentation": [
+    {
+      "path": "doc/dev/current.md",
+      "before": "ac828bde451554a52fc0a6ff61dc28a8404e0952ed9f38ade4eb75dc564430f4",
+      "after": "e301ab0dc14df5f8d64e1262487bd72fe9e9a713ccccc76c0d74f13100419317"
+    },
+    {
+      "path": "doc/dev/iterations/072-plugin-install-input.md",
+      "before": null,
+      "after": "1e4ee1884dd5437137a765a2773427ee61168f8fbe4513dc119c5a6da75f50b2"
+    }
+  ],
+  "evidence": {
+    "browser.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.log": "677d6da9de68a8577b99cb8c799d2341a351583cf2c051f3ef88e5a65ad48b6f",
+    "candidate.json": "39a918f3a709a69a20d8f695d0398b95f8e382df5b63d0a990080b75784bc089",
+    "deployed.json": "360219c2a73601cc37ddff8cb6dcfe486dcd86e947f20dbd52d8bbda07f839c6",
+    "deployed.png": "65ed1983b838d41bea8ffe750aa8dc03bfdb501f435edb69156c2d3237b72e2e",
+    "tests.log": "5e88f69697bbf3d83107a5d0e2cdc9e2dec717f6c68698031abd468d0dec39fc",
+    "types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "checks": {
+    "targetedTests": 7,
+    "types": true,
+    "build": true,
+    "browser": true,
+    "deployed": true,
+    "businessDataUnchanged": true
+  },
+  "thirdPartyInstalled": false,
+  "modelRequests": 0,
+  "startup": "initial observation timeout; same owned process subsequently ready; no duplicate restart"
+}

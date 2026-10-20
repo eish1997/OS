@@ -1,0 +1,262 @@
+{
+  "purpose": "continue under +100 call append",
+  "prior": {
+    "calls": 24,
+    "usd": 0.00855
+  },
+  "caps": {
+    "calls": 120,
+    "usd": 0.65
+  },
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "thinking": "high",
+  "stages": [
+    {
+      "name": "workbench-multifile-independent-check",
+      "status": "completed",
+      "stopped": "terminal",
+      "calls": 7,
+      "spentUsd": 0.0025000800000000004,
+      "independentCheck": {
+        "status": 0,
+        "checksOk": true,
+        "stdoutTail": "CHECKS_OK\n",
+        "stderrTail": ""
+      },
+      "receipts": [
+        {
+          "callNumber": 1,
+          "state": "settled",
+          "costUsd": 0.000943416,
+          "tokens": 4341
+        },
+        {
+          "callNumber": 2,
+          "state": "settled",
+          "costUsd": 0.000160344,
+          "tokens": 4461
+        },
+        {
+          "callNumber": 3,
+          "state": "settled",
+          "costUsd": 0.00017251200000000002,
+          "tokens": 4603
+        },
+        {
+          "callNumber": 4,
+          "state": "settled",
+          "costUsd": 0.00014508000000000001,
+          "tokens": 4688
+        },
+        {
+          "callNumber": 5,
+          "state": "settled",
+          "costUsd": 0.0005403480000000001,
+          "tokens": 5387
+        },
+        {
+          "callNumber": 6,
+          "state": "settled",
+          "costUsd": 0.000166956,
+          "tokens": 5639
+        },
+        {
+          "callNumber": 7,
+          "state": "settled",
+          "costUsd": 0.000371424,
+          "tokens": 5900
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "original-longhist-independent-check",
+      "elapsedMs": 16362,
+      "historyEntries": 98,
+      "estimatedCalls": 7,
+      "usageFromEntries": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 4361,
+          "costTotal": 0.0010093799999999998
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 4575,
+          "costTotal": 0.000249444
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 4642,
+          "costTotal": 0.000152712
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 5103,
+          "costTotal": 0.000262548
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 5348,
+          "costTotal": 0.00026995199999999995
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 5430,
+          "costTotal": 0.00017862
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "totalTokens": 5518,
+          "costTotal": 0.000172788
+        }
+      ],
+      "independentCheck": {
+        "status": 0,
+        "checksOk": true,
+        "stdoutTail": "LONGHIST_CHECKS_OK\n",
+        "stderrTail": ""
+      },
+      "pass": true
+    },
+    {
+      "name": "workbench-external-mcp",
+      "status": "completed",
+      "calls": 3,
+      "spentUsd": 0.0012462719999999999,
+      "mcpCalled": true,
+      "outMatches": true,
+      "toolCount": 1,
+      "receipts": [
+        {
+          "callNumber": 1,
+          "state": "settled",
+          "costUsd": 0.0008903159999999999
+        },
+        {
+          "callNumber": 2,
+          "state": "settled",
+          "costUsd": 0.000218844
+        },
+        {
+          "callNumber": 3,
+          "state": "settled",
+          "costUsd": 0.000137112
+        }
+      ],
+      "pass": true,
+      "note": "third-class external tool; not F13 vision"
+    },
+    {
+      "name": "original-external-mcp",
+      "elapsedMs": 13905,
+      "mcpBindNote": "no-bindExtensions-mcp",
+      "estimatedCalls": 6,
+      "usageFromEntries": [
+        {
+          "totalTokens": 2722,
+          "costTotal": 0.00063198
+        },
+        {
+          "totalTokens": 6639,
+          "costTotal": 0.001307628
+        },
+        {
+          "totalTokens": 7031,
+          "costTotal": 0.000256668
+        },
+        {
+          "totalTokens": 7848,
+          "costTotal": 0.0009756719999999999
+        },
+        {
+          "totalTokens": 8054,
+          "costTotal": 0.00029687999999999996
+        },
+        {
+          "totalTokens": 8259,
+          "costTotal": 0.000269616
+        }
+      ],
+      "mcpCalled": true,
+      "outMatches": true,
+      "pass": true,
+      "note": "same token/server contract as workbench; not vision"
+    },
+    {
+      "name": "model-tool-over-5min-then-continue",
+      "elapsedMs": 322652,
+      "status": "completed",
+      "calls": 3,
+      "spentUsd": 0.0012600719999999999,
+      "toolCount": 2,
+      "doneTxt": "DONE_LONG",
+      "receipts": [
+        {
+          "callNumber": 1,
+          "state": "settled",
+          "costUsd": 0.000941316
+        },
+        {
+          "callNumber": 2,
+          "state": "settled",
+          "costUsd": 0.000170244
+        },
+        {
+          "callNumber": 3,
+          "state": "settled",
+          "costUsd": 0.000148512
+        }
+      ],
+      "longPass": true,
+      "continuePass": true,
+      "continueCalls": 2,
+      "continueUsd": 0.0005701559999999999,
+      "pass": true
+    }
+  ],
+  "final": {
+    "usedCalls": 52,
+    "usedUsd": 0.020160468,
+    "remaining": {
+      "calls": 68,
+      "usd": 0.629839532
+    },
+    "stages": [
+      {
+        "name": "workbench-multifile-independent-check",
+        "pass": true,
+        "calls": 7
+      },
+      {
+        "name": "original-longhist-independent-check",
+        "pass": true,
+        "calls": 7
+      },
+      {
+        "name": "workbench-external-mcp",
+        "pass": true,
+        "calls": 3
+      },
+      {
+        "name": "original-external-mcp",
+        "pass": true,
+        "calls": 6
+      },
+      {
+        "name": "model-tool-over-5min-then-continue",
+        "pass": true,
+        "calls": 3
+      }
+    ]
+  },
+  "pass": true
+}

@@ -43,13 +43,14 @@ export function storageUsage(dataDir: string, assetQuotaBytes: number) {
 export class StorageCapacity {
   readonly limits: StorageLimits; private depth = 0; private lockPath: string;
   readonly dataDir: string; private readonly lockWaitMs: number;
-  constructor(dataDir: string, overrides: Partial<StorageLimits> = {}, lockWaitMs = 0) {
+  constructor(dataDir: string, overrides: Partial<StorageLimits> = {}, lockWaitMs = 0, lockName: '.storage-write.lock' | '.native-import-write.lock' = '.storage-write.lock') {
     this.dataDir = dataDir; this.lockWaitMs = lockWaitMs;
+    if(!['.storage-write.lock','.native-import-write.lock'].includes(lockName))throw new AppError(400,'写入锁名称无效');
     if(!Number.isSafeInteger(lockWaitMs)||lockWaitMs<0||lockWaitMs>1000)throw new AppError(400,'存储锁等待须为0至1000毫秒');
     this.limits = { ...defaultStorageLimits, ...overrides };
     for (const [key, value] of Object.entries(this.limits)) if (!Number.isSafeInteger(value) || value < 0 || (key !== 'minFreeBytes' && key !== 'controlReserveBytes' && value === 0)) throw new AppError(400, '存储上限须为有效字节数');
     if (this.limits.controlReserveBytes >= Math.min(this.limits.totalBytes, this.limits.databaseBytes)) throw new AppError(400, '恢复预留须小于整体及数据库上限');
-    mkdirSync(dataDir, { recursive: true }); this.lockPath = join(dataDir, '.storage-write.lock');
+    mkdirSync(dataDir, { recursive: true }); this.lockPath = join(dataDir, lockName);
   }
   usage() {
     const usage = storageUsage(this.dataDir, this.limits.assetsBytes);

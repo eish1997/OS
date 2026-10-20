@@ -32,7 +32,7 @@
 | F14 | PIV-14 | 已关闭记录。证据路径见 `piv-records.md` | 无新导入改动不重跑 | `piv-records.md` + loop-153 |
 | F15 | PIV-16 / PIF-11 | 已关闭。三类对照 + 识图样本均有证据。`loop-165` 多文件/长历史/MCP；`loop-170` 真实识图 | 无新对照样本不重跑 | `loop-160`–`163`、`loop-165/`、`loop-170/`；见 `pi-comparison-prep.md` |
 | F16 | PIV-17 | 已关闭。主界面完成设置、查看、纠正、交互、恢复；含窄窗、键盘、Chrome 150% 缩放与双页同步 | 保持 `npm run test:pi-sweep-ui`。无新布局改动不重跑 | 2026-10-20 证据 `loop-159/report.json` |
-| F17 | PIV-18 / PIF-12 | 合并/部署未授权。交付= `dulse` 验证后合并 `main`，不另建部署位。候选：构建/探针/串行 134、识图闭环、只读合并准备已写 | 授权后按 `pi-deploy-checklist.md` 提交并合并；本阶段不改 main、不推送、不重启 | `loop-169/`、`loop-170/merge-prep.json`；`pi-usage-notes.md` |
+| F17 | PIV-18 / PIF-12 | 已关闭（合并）。`dulse` `510ec8f` 已合入 `main` `a7109bb`（含冲突消解与类型修复）；保留 canvas。未重启日常服务；未另建部署位 | 保持合并提交；服务重启另需授权 | `main` `a7109bb`+后续类型修复；`loop-169/`、`loop-170/` |
 
 ## 回归债（已关闭）
 

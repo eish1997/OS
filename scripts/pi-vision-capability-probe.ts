@@ -138,6 +138,7 @@ try {
             { type: 'text', text: PROMPT },
             { type: 'image', data: b64, mimeType: 'image/png' },
           ],
+          timestamp: Date.now(),
         },
       ],
     },
@@ -147,7 +148,7 @@ try {
     if (event.type === 'done' && event.message) {
       const content = event.message.content;
       piText = Array.isArray(content)
-        ? content.filter((p: { type: string }) => p.type === 'text').map((p: { text?: string }) => p.text ?? '').join('')
+        ? content.filter((p: { type: string }) => p.type === 'text').map((p: { type: string; text?: string }) => p.text ?? '').join('')
         : String(content ?? '');
       piUsage = event.message.usage;
     }

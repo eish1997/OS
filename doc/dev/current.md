@@ -1,5 +1,7 @@
 # 开发现场
 
+最新：用户授权后已将 `dulse` Pi 能力合入 `main`（`510ec8f` → merge `a7109bb`，含冲突消解与 `tsc` 通过的类型修复）。F13 识图与 F17 合并关闭；**日常服务未重启**。main 上合并前 WIP 已 stash（`wip-before-dulse-merge-*`）。证据 `loop-169/`、`loop-170/`。
+
 ## 097：计划残余闭合（2026-10-17）
 
 补齐 096 剩余项：双宿主管理区租约、编辑中备份/观察、schema3 拒绝、真实 507、仓库外包+缩放/404、V11/V12 切换与单 iframe、跨标签布局提示、使用说明与交付审查。见[097](iterations/097-canvas-residual-closure.md)、[使用说明](画板嵌入使用说明.md)。证据 `capacity-ui-097`、`residual-097`。默认仍 `CANVAS_ENABLED=0`。系统 IME 全路径仍需本机抽检。未部署、推送或模型调用。

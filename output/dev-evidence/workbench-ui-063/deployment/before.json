@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-15T08:25:30.470Z",
+  "health": {
+    "ready": true,
+    "pid": 23568,
+    "instanceId": "0801e854-d668-4d78-8c46-1c68173b649e",
+    "launchId": "f8ebe8d8-eb75-47d4-b818-a0bfd0d24b76"
+  },
+  "digest": {
+    "projects": {
+      "count": 21,
+      "sha256": "757ee6114d14d443a61e1c75f3a6aada994a872336be2c1e27ab3a000b9b9d76"
+    },
+    "summaries": {
+      "count": 2,
+      "sha256": "61e34194ecb2d169c737f7db566361824826c9259b6d3acd2aa997f94e38696d"
+    },
+    "tasks": {
+      "count": 39,
+      "sha256": "c27eaab1c5fe35f79b7626431ba4c2f00c1fd6a81a68eab0f7c1b2926a77991f"
+    },
+    "runs": {
+      "count": 40,
+      "sha256": "cf5fcff8b91d4a2f5f77e73285ff3e56b38f92587b3590417bfd3f7587e05642"
+    },
+    "assets": {
+      "count": 56,
+      "sha256": "057574a64cae2017a502c20fe767a063237aecde54f11160cdc1d2bb4c4a129e"
+    },
+    "memories": {
+      "count": 5,
+      "sha256": "7621e0a12be189d85008febdf00d17f8fdd38652800183cef6af383688edccf3"
+    },
+    "drafts": {
+      "count": 16,
+      "sha256": "f97ce9dbb1d0308edc1e7e3d52b321032a0bc0777e8deaa0bb4b1c16874a8e82"
+    },
+    "inbox": {
+      "count": 2,
+      "sha256": "0bf1312c77e8ef0f15362108d0cac861f84d4252ff254d453cf8aa82e287ec3f"
+    },
+    "nodes": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "modelConfigured": true,
+  "model": "gpt-5.6-sol",
+  "activeRuns": 0
+}

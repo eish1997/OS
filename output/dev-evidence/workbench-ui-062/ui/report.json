@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T07:55:37.661Z",
+  "browser": "155.0.8059.40",
+  "checks": [
+    "nested split and close all empty regions retains root",
+    "state retained across float",
+    "Escape drag cancellation",
+    "pin and icon restore",
+    "group collection",
+    "global space switch",
+    "refresh",
+    "second browser context",
+    "real asset preview",
+    "two asset views target separate chats without shared selection",
+    "two independent chat submissions",
+    "scope unchanged after space switch",
+    "real asset filter and preview scroll survive float/dock",
+    "removed asset shows recoverable placeholder"
+  ],
+  "errors": [],
+  "modelRequests": 0,
+  "limitations": [
+    "scheduler disabled for UI protocol tests; not online Pi inference",
+    "not full V01–V17 acceptance"
+  ]
+}

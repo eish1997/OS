@@ -1,0 +1,133 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -3,6 +3,7 @@
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useLocalLayout } from '@/app/shell/local-layout'
++import { useLocalConnections } from '@/app/document/local-connections'
+ import EditorCanvas from '@/components/EditorCanvas.vue'
+ import LocalWorkspacePanel from '@/components/editor/LocalWorkspacePanel.vue'
+ import LayersPanel from '@/components/LayersPanel.vue'
+@@ -14,6 +15,7 @@
+ import { osCanvasWorkspace } from '@/theme/os-canvas-workspace'
+ 
+ const store = useEditorStore()
++const { canConnect, connect, missing } = useLocalConnections(store)
+ const { layersOpen, propertiesOpen, error: layoutError, busy: layoutBusy, toggle, retry, reload } = useLocalLayout()
+ const editing = computed(() => store.state.showUI && store.state.play === null)
+ const styles = osCanvasWorkspace()
+@@ -27,6 +29,8 @@
+       <EditorCanvas />
+     </div>
+     <div :class="styles.controls()" aria-label="画布面板">
++      <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
++      <span v-if="missing" role="status">{{ missing }} 条连接缺少端点</span>
+       <IconButton
+         label="图层面板"
+         :active="layersOpen"
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connections.ts
+@@ -0,0 +1,100 @@
++import { computed, onScopeDispose, ref } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import type { SceneNode } from '@open-pencil/scene-graph'
++import { getWorldMatrix, getParentWorldMatrix } from '@open-pencil/scene-graph/coordinate'
++import Matrix from '@open-pencil/scene-graph/matrix'
++import { localNodeId } from './local-identity'
++
++const pluginId = 'os.canvas'
++const key = 'os.canvas/connection'
++type Connection = { version: 1; source: string; target: string }
++
++function relation(node: SceneNode): Connection | undefined {
++  const raw = node.pluginData.find(item => item.pluginId === pluginId && item.key === key)?.value
++  if (!raw) return undefined
++  try {
++    const value: unknown = JSON.parse(raw)
++    if (typeof value !== 'object' || value === null) return undefined
++    if ('version' in value && value.version === 1 && 'source' in value && typeof value.source === 'string' &&
++      'target' in value && typeof value.target === 'string') return value as Connection
++  } catch { console.warn('关系连接元数据无法解析，原数据已保留。') }
++  return undefined
++}
++
++/** Relations are ordinary vector artwork plus stable endpoint identities. */
++export function useLocalConnections(editor: Editor) {
++  const missing = ref(0)
++  let updating = false, queued = false, disposed = false
++  const canConnect = computed(() => {
++    const nodes = [...editor.state.selectedIds].map(id => editor.graph.getNode(id))
++    return nodes.length === 2 && nodes.every(node => node && !relation(node) && localNodeId(node))
++  })
++
++  function sync() {
++    if (disposed || updating) return
++    updating = true
++    try {
++      const nodes = [...editor.graph.nodes.values()]
++      const identities = new Map(nodes.map(node => [localNodeId(node), node]))
++      let absent = 0
++      for (const line of nodes) {
++        const link = relation(line)
++        if (!link) continue
++        const source = identities.get(link.source), target = identities.get(link.target)
++        // Preserve last geometry and metadata when an endpoint disappears. Undo
++        // restores the identity and reconnects; never delete someone else's work.
++        if (!source || !target) { absent++; continue }
++        const from = Matrix.mapPoints(getWorldMatrix(source, editor.graph), [source.width, source.height / 2])
++        const to = Matrix.mapPoints(getWorldMatrix(target, editor.graph), [0, target.height / 2])
++        const inverse = Matrix.invert(getParentWorldMatrix(editor.graph.getNode(line.parentId ?? ''), editor.graph))
++        if (!inverse) { absent++; continue }
++        const points = Matrix.mapPoints(inverse, [...from, ...to])
++        const x = Math.min(points[0], points[2]), y = Math.min(points[1], points[3])
++        const width = Math.abs(points[2] - points[0]), height = Math.abs(points[3] - points[1])
++        const vertices = [{ x: points[0] - x, y: points[1] - y }, { x: points[2] - x, y: points[3] - y }]
++        const old = line.vectorNetwork?.vertices
++        if (Math.abs(line.x - x) < 0.00001 && Math.abs(line.y - y) < 0.00001 &&
++          Math.abs(line.width - width) < 0.00001 && Math.abs(line.height - height) < 0.00001 &&
++          line.rotation === 0 && old?.length === 2 && vertices.every((v, i) =>
++            Math.abs(v.x - old[i].x) < 0.00001 && Math.abs(v.y - old[i].y) < 0.00001)) continue
++        editor.graph.updateNode(line.id, { x, y, width, height, rotation: 0,
++          vectorNetwork: { vertices, segments: [{ start: 0, end: 1,
++            tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }], regions: [] } })
++      }
++      missing.value = absent
++    } finally { updating = false }
++  }
++  function schedule() {
++    if (updating || queued || disposed) return
++    queued = true
++    queueMicrotask(() => { queued = false; sync() })
++  }
++  const stops = [
++    editor.onEditorEvent('node:created', schedule),
++    editor.onEditorEvent('node:updated', schedule),
++    editor.onEditorEvent('node:previewUpdated', schedule),
++    editor.onEditorEvent('node:deleted', schedule),
++    editor.onEditorEvent('node:reparented', schedule),
++    editor.onEditorEvent('graph:replaced', schedule)
++  ]
++  onScopeDispose(() => { disposed = true; for (const stop of stops) stop() })
++  schedule()
++
++  function connect() {
++    if (!canConnect.value) return
++    const nodes = [...editor.state.selectedIds].map(id => editor.graph.getNode(id))
++    const source = localNodeId(nodes[0]), target = localNodeId(nodes[1])
++    if (!source || !target) return
++    const id = editor.createShape('VECTOR', 0, 0, 1, 1, undefined, '关系连接')
++    const node = editor.graph.getNode(id)
++    if (!node) return
++    editor.graph.updateNode(id, { pluginData: [...node.pluginData,
++      { pluginId, key, value: JSON.stringify({ version: 1, source, target }) }],
++      fills: [], strokes: [{ type: 'SOLID', color: { r: 0.72, g: 0.7, b: 0.69, a: 1 },
++        visible: true, opacity: 1, weight: 2, align: 'CENTER' }] })
++    sync()
++    editor.select([id])
++    editor.requestRender()
++  }
++  return { canConnect, connect, missing }
++}

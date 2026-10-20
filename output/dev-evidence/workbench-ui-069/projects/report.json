@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": [
+    "add assets and Pi without project",
+    "no project picker in add dialog",
+    "global project filters assets",
+    "separate conversations and drafts",
+    "layout geometry preserved",
+    "selection and drafts survive reload"
+  ],
+  "errors": []
+}

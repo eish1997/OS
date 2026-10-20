@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "activeWorkspaceId": "594b8369-266b-4d5b-9e79-bcbd442be9dc",
+  "workspaces": [
+    {
+      "id": "25be974c-9ae3-41ab-acdd-1736493e8019",
+      "name": "资产空间",
+      "root": {
+        "kind": "split",
+        "id": "b24af639-f48e-49c1-8691-de1f98412260",
+        "axis": "x",
+        "ratio": 0.2,
+        "first": {
+          "kind": "leaf",
+          "id": "1847aa04-6ecc-4a7b-805a-134f4d40c5a5"
+        },
+        "second": {
+          "kind": "split",
+          "id": "4268c386-dcae-466e-9c41-a4473073b526",
+          "axis": "x",
+          "ratio": 0.75,
+          "first": {
+            "kind": "leaf",
+            "id": "673cc1a8-284f-42c7-a9b9-d88eca2248bd"
+          },
+          "second": {
+            "kind": "leaf",
+            "id": "480f1e3b-e720-477e-922c-63ac899eb468"
+          }
+        }
+      }
+    },
+    {
+      "id": "594b8369-266b-4d5b-9e79-bcbd442be9dc",
+      "name": "Residual Space",
+      "root": {
+        "kind": "leaf",
+        "id": "e2755e51-e550-4441-8e2d-8a9a5e4bf6c8"
+      }
+    }
+  ],
+  "windows": {},
+  "floating": [],
+  "collection": {
+    "x": 24,
+    "y": 24
+  },
+  "activeProjectId": "635aee14-27dc-4d67-9ce1-6c28d4a82ab0"
+}

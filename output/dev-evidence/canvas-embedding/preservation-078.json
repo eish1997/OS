@@ -1,0 +1,37 @@
+{
+  "changes": [
+    {
+      "path": ".env.example",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": ".gitignore",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "doc/dev/backlog.md",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "doc/dev/current.md",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "server/app.ts",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "server/config.ts",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "server/storage.ts",
+      "expectedImplementationChange": true
+    },
+    {
+      "path": "src/workbench/app.tsx",
+      "expectedImplementationChange": true
+    }
+  ],
+  "unexpected": []
+}

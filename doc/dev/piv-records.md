@@ -17,7 +17,7 @@
 | PIV-05 | 关闭 | hold 机制 `loop-162/`；模型+工具 >5 分钟并接续 `loop-165/`（elapsedMs≈323s，continuePass） |
 | PIV-16 | 关闭 | 多文件/长历史/外部 MCP：`loop-165/`（及 `160`–`163`）。识图样本：`loop-170/` |
 | PIV-17 | 关闭 | `loop-159/report.json`（`npm run test:pi-sweep-ui`）；设置/查看/纠正/交互/恢复 + 窄窗/键盘/150%缩放/双页 |
-| PIV-18 | 准备中 | 无合并/部署授权。交付= dulse→main。候选 `loop-169/`；识图闭环 `loop-170/`；只读合并准备 `loop-170/merge-prep.json`；清单 `pi-deploy-checklist.md` |
+| PIV-18 | 关闭（合并，未重启服务） | `dulse`→`main`：`510ec8f` / merge `a7109bb`；类型修复随后提交。清单 `pi-deploy-checklist.md`。日常服务未重启 |
 | PIV-01 | 部分关闭 | 离线六步总检 `loop-156/report.json`（`tests/pi-native-tools.test.ts`）。真实模型样本并入 PIV-16 |
 | PIV-04 | 关闭 | `loop-157/report.json`；既有 `import-large/`、`import-fork/` |
 | PIV-06 | 关闭 | `loop-158/report.json`（`npm run test:pi-budget-ui`）；工程 `tests/pi-retry-worker.test.ts` |

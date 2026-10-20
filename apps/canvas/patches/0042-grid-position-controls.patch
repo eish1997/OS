@@ -1,0 +1,69 @@
+diff --git a/src/components/properties/layout/LayoutSection.vue b/src/components/properties/layout/LayoutSection.vue
+--- a/src/components/properties/layout/LayoutSection.vue
++++ b/src/components/properties/layout/LayoutSection.vue
+@@ -3,6 +3,7 @@
+ 
+ import ClipContentControl from '@/components/properties/layout/ClipContentControl.vue'
+ import FlexControls from '@/components/properties/layout/flex/FlexControls.vue'
++import GridPositionControls from '@/components/properties/layout/grid/GridPositionControls.vue'
+ import GridControls from '@/components/properties/layout/grid/GridControls.vue'
+ import LayoutFlowControl from '@/components/properties/layout/LayoutFlowControl.vue'
+ import LayoutWrapToggle from '@/components/properties/layout/LayoutWrapToggle.vue'
+@@ -44,6 +45,7 @@
+         </div>
+         <TextResizingControl v-if="ctx.node.type === 'TEXT'" />
+         <SizeControls />
++        <GridPositionControls />
+         <ClipContentControl
+           v-if="LAYOUT_CONTAINER_TYPES.has(ctx.node.type) && ctx.node.layoutMode === 'NONE'"
+         />
+diff --git a/src/components/properties/layout/grid/GridPositionControls.vue b/src/components/properties/layout/grid/GridPositionControls.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/layout/grid/GridPositionControls.vue
+@@ -0,0 +1,45 @@
++<script setup lang="ts">
++import { computed, onScopeDispose, watch } from 'vue'
++import type { NodePreview } from '@open-pencil/core/editor'
++import type { GridPosition } from '@open-pencil/scene-graph'
++import { useLayoutControlsContext } from '@open-pencil/vue'
++import NumberField from '@/components/inputs/NumberField.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++
++const ctx = useLayoutControlsContext()
++const parent = computed(() => ctx.node?.parentId ? ctx.editor.graph.getNode(ctx.node.parentId) : undefined)
++const enabled = computed(() => parent.value?.layoutMode === 'GRID' && ctx.node?.layoutPositioning !== 'ABSOLUTE')
++const position = computed(() => ctx.node?.gridPosition ?? { column: 1, row: 1, columnSpan: 1, rowSpan: 1 })
++const fields: { key: keyof GridPosition; label: string }[] = [
++  { key: 'column', label: '起始列' }, { key: 'row', label: '起始行' },
++  { key: 'columnSpan', label: '跨列数' }, { key: 'rowSpan', label: '跨行数' }
++]
++let preview: NodePreview | undefined
++function cancel() { preview?.cancel(); preview = undefined }
++function commit() { preview?.commit(); preview = undefined }
++function update(key: keyof GridPosition, value: number) {
++  const node = ctx.node
++  if (!node || !enabled.value || !Number.isSafeInteger(value) || value < 1) return
++  if (!preview || preview.closed) preview = ctx.editor.beginNodePreview('修改网格位置')
++  preview.update(node.id, { gridPosition: { ...position.value, [key]: value } })
++}
++function automatic() {
++  cancel()
++  if (ctx.node) ctx.editor.updateNodeWithUndo(ctx.node.id, { gridPosition: null }, '自动排列网格')
++}
++watch(() => ctx.node?.id, cancel)
++onScopeDispose(cancel)
++</script>
++<template>
++  <section v-if="enabled" class="mt-2" aria-label="网格子项位置">
++    <div class="mb-1 flex items-center justify-between text-xs">
++      <span>{{ ctx.node?.gridPosition ? '指定网格位置' : '自动排列' }}</span>
++      <AppButton :disabled="!ctx.node?.gridPosition" @click="automatic">恢复自动排列</AppButton>
++    </div>
++    <div class="grid grid-cols-2 gap-1.5">
++      <NumberField v-for="field in fields" :key="field.key" :aria-label="field.label" :icon="field.label"
++        :model-value="position[field.key]" :min="1" :step="1"
++        @update:model-value="update(field.key, $event)" @commit="commit" @cancel="cancel" />
++    </div>
++  </section>
++</template>

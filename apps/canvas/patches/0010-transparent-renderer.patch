@@ -1,0 +1,145 @@
+diff --git a/packages/core/src/canvas/renderer.ts b/packages/core/src/canvas/renderer.ts
+--- a/packages/core/src/canvas/renderer.ts
++++ b/packages/core/src/canvas/renderer.ts
+@@ -213,6 +213,15 @@
+   viewportWidth = 0
+   viewportHeight = 0
+   showRulers = true
++  // Presentation-only desktop mode; never writes the document page background.
++  desktopTransparent = false
++
++  setDesktopTransparent(enabled: boolean): void {
++    if (this.desktopTransparent === enabled) return
++    this.desktopTransparent = enabled
++    this.invalidateAllPictures()
++  }
++
+   pageColor = CANVAS_BG_COLOR
+   rulerTheme: RulerTheme | null = null
+   /** Selection chrome, set from editor state each frame through {@link setSelectionTheme}. */
+diff --git a/packages/core/src/canvas/renderer/pipeline.ts b/packages/core/src/canvas/renderer/pipeline.ts
+--- a/packages/core/src/canvas/renderer/pipeline.ts
++++ b/packages/core/src/canvas/renderer/pipeline.ts
+@@ -225,6 +225,14 @@
+   canvas.restore()
+ }
+ 
++function clearFrameBackground(r: SkiaRenderer, canvas: Canvas, overlay: boolean): void {
++  if (overlay || r.desktopTransparent) {
++    canvas.clear(r.ck.Color4f(0, 0, 0, 0))
++  } else {
++    canvas.clear(r.ck.Color4f(r.pageColor.r, r.pageColor.g, r.pageColor.b, 1))
++  }
++}
++
+ export function render(
+   r: SkiaRenderer,
+   graph: SceneGraph,
+@@ -251,11 +259,7 @@
+   graph.clearAbsPosCache()
+ 
+   const canvas = r.surface.getCanvas()
+-  if (layer === 'overlays') {
+-    canvas.clear(r.ck.Color4f(0, 0, 0, 0))
+-  } else {
+-    canvas.clear(r.ck.Color4f(r.pageColor.r, r.pageColor.g, r.pageColor.b, 1))
+-  }
++  clearFrameBackground(r, canvas, layer === 'overlays')
+ 
+   r.worldViewport = {
+     x: -r.panX / r.zoom,
+@@ -283,7 +287,7 @@
+ 
+     p.beginPhase('render:scene')
+     let renderedScene = false
+-    if (layer === 'scene' && !requiresUncachedSceneRender && r.tiledSceneEnabled) {
++    if (layer === 'scene' && !r.desktopTransparent && !requiresUncachedSceneRender && r.tiledSceneEnabled) {
+       const backingPresented = renderSceneBacking(r, canvas, graph, sceneVersion)
+       if (!backingPresented) {
+         canvas.save()
+@@ -307,7 +311,7 @@
+       renderedScene = true
+       p.setScenePictureMode('hit', tiled.covered ? 'tiled' : 'tiled-fallback')
+     }
+-    if (!renderedScene && layer === 'scene' && !requiresUncachedSceneRender) {
++    if (!renderedScene && layer === 'scene' && !r.desktopTransparent && !requiresUncachedSceneRender) {
+       const presentation = renderSceneBacking(r, canvas, graph, sceneVersion)
+       if (presentation) {
+         renderedScene = true
+diff --git a/packages/core/src/editor/create.ts b/packages/core/src/editor/create.ts
+--- a/packages/core/src/editor/create.ts
++++ b/packages/core/src/editor/create.ts
+@@ -80,6 +80,7 @@
+   let _ck: CanvasKit | null = null
+   let _renderer: SkiaRenderer | null = null
+   const _renderers = new Set<SkiaRenderer>()
++  let _desktopTransparent = false
+   let uninstallTextMeasurer: (() => void) | null = null
+   const interactiveEdits = new Set<symbol>()
+   let _textEditor: TextEditor | null = null
+@@ -301,7 +302,14 @@
+   onEditorEvent('node:updated', invalidateEditedText)
+   onEditorEvent('node:previewUpdated', invalidateEditedText)
+ 
++  function setDesktopTransparent(enabled: boolean) {
++    _desktopTransparent = enabled
++    for (const renderer of _renderers) renderer.setDesktopTransparent(enabled)
++    requestRepaint()
++  }
++
+   function setCanvasKit(ck: CanvasKit, renderer: SkiaRenderer) {
++    renderer.setDesktopTransparent(_desktopTransparent)
+     _ck = ck
+     _renderer = renderer
+     _renderers.add(renderer)
+@@ -396,6 +404,7 @@
+     requestRepaint,
+     onEditorEvent,
+     setCanvasKit,
++    setDesktopTransparent,
+     setNavigationPhase,
+     removeCanvasRenderer,
+     replaceGraph,
+diff --git a/tests/engine/core/editor/desktop-transparency.test.ts b/tests/engine/core/editor/desktop-transparency.test.ts
+new file mode 100644
+--- /dev/null
++++ b/tests/engine/core/editor/desktop-transparency.test.ts
+@@ -0,0 +1,38 @@
++import { expect, test } from 'bun:test'
++import { SkiaRenderer } from '@open-pencil/core/canvas'
++import { createEditor } from '@open-pencil/core/editor'
++import { initCanvasKit } from '@open-pencil/core/io'
++
++test('desktop mode follows both layers and recreated renderers without changing page color', async () => {
++  const ck = await initCanvasKit()
++  const editor = createEditor()
++  const renderers: SkiaRenderer[] = []
++  const pageColor = { ...editor.state.pageColor }
++  const attach = () => {
++    const surface = ck.MakeSurface(16, 16)
++    if (!surface) throw new Error('CanvasKit surface unavailable')
++    const renderer = new SkiaRenderer(ck, surface)
++    renderers.push(renderer)
++    editor.setCanvasKit(ck, renderer)
++    return renderer
++  }
++  try {
++    const scene = attach()
++    const overlay = attach()
++    expect(scene.desktopTransparent).toBe(false)
++    editor.setDesktopTransparent(true)
++    expect(scene.desktopTransparent).toBe(true)
++    expect(overlay.desktopTransparent).toBe(true)
++    editor.removeCanvasRenderer(scene)
++    const recreated = attach()
++    expect(recreated.desktopTransparent).toBe(true)
++    editor.setDesktopTransparent(false)
++    expect(recreated.desktopTransparent).toBe(false)
++    expect(overlay.desktopTransparent).toBe(false)
++    expect(attach().desktopTransparent).toBe(false)
++    expect(editor.state.pageColor).toEqual(pageColor)
++  } finally {
++    editor.dispose()
++    for (const renderer of renderers) renderer.destroy()
++  }
++})

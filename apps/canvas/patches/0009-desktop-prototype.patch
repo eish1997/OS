@@ -1,0 +1,126 @@
+diff --git a/desktop/src/lib.rs b/desktop/src/lib.rs
+--- a/desktop/src/lib.rs
++++ b/desktop/src/lib.rs
+@@ -1,5 +1,6 @@
+ mod os_workspace;
+ mod os_web_preview;
++mod os_desktop_preview;
+ mod agents;
+ mod credentials;
+ mod deep_link;
+@@ -366,6 +367,7 @@
+         .manage(PendingRooms(Mutex::new(Vec::new())))
+         .invoke_handler(tauri::generate_handler![
+             os_web_preview::web_preview,
++            os_desktop_preview::desktop_preview,
+             agents::agent_lookup,
+             build_fig_file,
+             credential_read,
+diff --git a/desktop/src/os_desktop_preview.rs b/desktop/src/os_desktop_preview.rs
+new file mode 100644
+--- /dev/null
++++ b/desktop/src/os_desktop_preview.rs
+@@ -0,0 +1,103 @@
++use tauri::{AppHandle, Manager, Webview};
++
++#[tauri::command]
++pub async fn desktop_preview(app: AppHandle, webview: Webview, action: String) -> Result<serde_json::Value, String> {
++    if webview.label() != "main" || !app.config().identifier.starts_with("local.os.canvas.validation") {
++        return Err("Desktop preview requires the main validation webview".into());
++    }
++    #[cfg(windows)] { return windows::command(app, action); }
++    #[cfg(not(windows))] { let _ = (app, action); Err("Desktop prototype is Windows-only".into()) }
++}
++
++#[cfg(windows)]
++mod windows {
++    use super::*;
++    use std::{ffi::c_void, sync::{Mutex, OnceLock, atomic::{AtomicBool, Ordering}}, thread::JoinHandle};
++    #[repr(C)] #[derive(Default)]
++    struct Message { hwnd: *mut c_void, message: u32, wparam: usize, lparam: isize, time: u32, x: i32, y: i32, private: u32 }
++    #[link(name="user32")]
++    extern "system" {
++        fn RegisterHotKey(hwnd: *mut c_void, id: i32, modifiers: u32, key: u32) -> i32;
++        fn UnregisterHotKey(hwnd: *mut c_void, id: i32) -> i32;
++        fn PeekMessageW(message: *mut Message, hwnd: *mut c_void, min: u32, max: u32, remove: u32) -> i32;
++        fn GetMessageW(message: *mut Message, hwnd: *mut c_void, min: u32, max: u32) -> i32;
++        fn PostThreadMessageW(thread: u32, message: u32, wparam: usize, lparam: isize) -> i32;
++    }
++    #[link(name="kernel32")]
++    extern "system" { fn GetCurrentThreadId() -> u32; }
++    struct Registration { thread: u32, worker: JoinHandle<()> }
++    static REGISTRATION: OnceLock<Mutex<Option<Registration>>> = OnceLock::new();
++    static HIDDEN: AtomicBool = AtomicBool::new(false);
++    static ERROR: OnceLock<Mutex<Option<String>>> = OnceLock::new();
++    fn display(app: &AppHandle, restore: bool) -> Result<(), String> {
++        let handle = app.clone();
++        let (send, receive) = std::sync::mpsc::channel();
++        app.run_on_main_thread(move || {
++            let result = (|| -> Result<(), String> {
++                let window = handle.get_window("main").ok_or("Main window missing")?;
++                if restore || HIDDEN.load(Ordering::SeqCst) {
++                    window.show().map_err(|e| e.to_string())?;
++                    HIDDEN.store(false, Ordering::SeqCst);
++                    window.set_focus().map_err(|e| e.to_string())?;
++                } else {
++                    window.hide().map_err(|e| e.to_string())?;
++                    HIDDEN.store(true, Ordering::SeqCst);
++                }
++                Ok(())
++            })();
++            let _ = send.send(result);
++        }).map_err(|e| e.to_string())?;
++        receive.recv().map_err(|e| e.to_string())?
++    }
++    pub fn command(app: AppHandle, action: String) -> Result<serde_json::Value, String> {
++        let mut registration = REGISTRATION.get_or_init(|| Mutex::new(None)).lock().map_err(|_| "Registration lock failed")?;
++        match action.as_str() {
++            "start" => {
++                if registration.is_some() { return Err("Shortcut already registered".into()); }
++                let (send, receive) = std::sync::mpsc::channel();
++                let handle = app.clone();
++                let worker = std::thread::spawn(move || unsafe {
++                    let mut initial = Message::default();
++                    PeekMessageW(&mut initial, std::ptr::null_mut(), 0, 0, 0);
++                    // Ctrl+Alt+F10 is a prototype choice, not the final product binding.
++                    if RegisterHotKey(std::ptr::null_mut(), 1, 0x4003, 0x79) == 0 {
++                        let _ = send.send(Err("Ctrl+Alt+F10 registration failed or conflicts".to_string())); return;
++                    }
++                    if send.send(Ok(GetCurrentThreadId())).is_err() { UnregisterHotKey(std::ptr::null_mut(), 1); return; }
++                    let mut message = Message::default();
++                    loop {
++                        let code = GetMessageW(&mut message, std::ptr::null_mut(), 0, 0);
++                        if code <= 0 { break; }
++                        if message.message == 0x0312 && message.wparam == 1 {
++                            if let Err(error) = display(&handle, false) {
++                                if let Ok(mut slot) = ERROR.get_or_init(|| Mutex::new(None)).lock() { *slot = Some(error); }
++                            }
++                        }
++                    }
++                    UnregisterHotKey(std::ptr::null_mut(), 1);
++                });
++                match receive.recv().map_err(|e| e.to_string())? {
++                    Ok(thread) => { *registration = Some(Registration { thread, worker }); }
++                    Err(error) => { let _ = worker.join(); return Err(error); }
++                }
++            }
++            "toggle" => display(&app, false)?,
++            "restore" => display(&app, true)?,
++            "stop" => {
++                if let Some(value) = registration.as_ref() {
++                    if unsafe { PostThreadMessageW(value.thread, 0x0012, 0, 0) } == 0 { return Err("Cannot stop shortcut thread".into()); }
++                }
++                if let Some(value) = registration.take() { value.worker.join().map_err(|_| "Shortcut thread failed")?; }
++                display(&app, true)?;
++            }
++            "transparent" => {
++                app.get_webview("main").ok_or("Main webview missing")?
++                    .set_background_color(Some(tauri::window::Color(0, 0, 0, 0))).map_err(|e| e.to_string())?;
++            }
++            "status" => (),
++            _ => return Err("Unknown desktop prototype action".into()),
++        }
++        let error = ERROR.get_or_init(|| Mutex::new(None)).lock().map_err(|_| "Error lock failed")?.clone();
++        Ok(serde_json::json!({"registered": registration.is_some(), "hidden": HIDDEN.load(Ordering::SeqCst), "error": error}))
++    }
++}

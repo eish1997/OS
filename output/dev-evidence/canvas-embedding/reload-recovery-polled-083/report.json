@@ -1,0 +1,65 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-t9gxHZ",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:5696/api/canvas/workspace/canvases/3b81943e-7e2c-48c6-8c90-3a668fd98ffa",
+      "status": 503
+    }
+  ],
+  "recoveryDeletions": [
+    {
+      "key": "82a173bc-3b75-41aa-81e3-687c1dafbac1",
+      "store": "meta",
+      "time": 1792149561443,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5696/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:65115)\n    at async http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    },
+    {
+      "key": "82a173bc-3b75-41aa-81e3-687c1dafbac1",
+      "store": "fig",
+      "time": 1792149561444,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5696/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:65146)\n    at async http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    },
+    {
+      "key": "410c220e-1bb1-4121-97fd-6c388419af1a",
+      "store": "meta",
+      "time": 1792149566439,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5696/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:65115)\n    at async http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    },
+    {
+      "key": "410c220e-1bb1-4121-97fd-6c388419af1a",
+      "store": "fig",
+      "time": 1792149566439,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:5696/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:65146)\n    at async http://127.0.0.1:5696/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "offlineSnapshotObservedAt": 1792149564671,
+  "beforeReloadRecords": [
+    {
+      "id": "82a173bc-3b75-41aa-81e3-687c1dafbac1",
+      "documentName": "Untitled",
+      "updatedAt": "2026-10-16T11:19:24.558Z",
+      "byteLength": 29262,
+      "formatVersion": 1
+    }
+  ],
+  "offlineEditAt": 1792149561471,
+  "reloadRecoveryInspection": {
+    "records": [
+      {
+        "id": "82a173bc-3b75-41aa-81e3-687c1dafbac1",
+        "documentName": "Untitled",
+        "updatedAt": "2026-10-16T11:19:24.558Z",
+        "byteLength": 29262,
+        "formatVersion": 1
+      }
+    ],
+    "path": "/canvas/",
+    "route": "/",
+    "dialogs": 1
+  },
+  "reloadedRecoveryUsedSameEditorAndCreatedCopy": true,
+  "passed": true
+}

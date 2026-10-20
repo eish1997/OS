@@ -1,0 +1,42 @@
+diff --git a/src/app/document/local-note-fonts.ts b/src/app/document/local-note-fonts.ts
+--- a/src/app/document/local-note-fonts.ts
++++ b/src/app/document/local-note-fonts.ts
+@@ -10,7 +10,7 @@
+   let attempts = new WeakMap<SceneNode, string>()
+   const pending = new Set<string>()
+   let graph = editor.graph, queued = false, disposed = false
+-  const signature = (node: SceneNode) => JSON.stringify([node.text, node.fontFamily, node.fontWeight, node.italic, node.fontSize, node.width, node.lineHeight, node.letterSpacing, node.styleRuns, node.textParagraphs])
++  const signature = (node: SceneNode) => JSON.stringify([graph.getNode(node.parentId ?? "")?.name, node.text, node.fontFamily, node.fontWeight, node.italic, node.fontSize, node.width, node.lineHeight, node.letterSpacing, node.styleRuns, node.textParagraphs])
+   function schedule() {
+     if (queued || disposed) return
+     queued = true
+@@ -20,7 +20,7 @@
+     if (disposed) return
+     if (graph !== editor.graph) { graph = editor.graph; attempts = new WeakMap(); pending.clear(); failed.clear() }
+     for (const node of graph.nodes.values()) {
+-      if (node.type !== 'TEXT' || !node.text || !node.parentId) continue
++      if (node.type !== 'TEXT' || !node.parentId) continue
+       const parent = graph.getNode(node.parentId)
+       if (!parent?.pluginData.some(item => item.pluginId === 'os.canvas' && item.key === 'os.canvas/note' && item.value === '1')) continue
+       const key = signature(node)
+@@ -28,15 +28,18 @@
+       attempts.set(node, key); pending.add(node.id); failed.delete(node.id)
+       void prepare(node, key)
+     }
+-    for (const id of failed) if (!graph.getNode(id)?.text) failed.delete(id)
++    for (const id of failed) if (!graph.getNode(id)) failed.delete(id)
+   }
+   async function prepare(node: SceneNode, key: string) {
+     const targetGraph = graph
+     const current = () => !disposed && editor.graph === targetGraph && targetGraph.getNode(node.id) === node && signature(node) === key
+     try {
+       await ensureGraphFonts(targetGraph, [node.id], editor.renderer)
++      // Frame labels are canvas text too, even when the note body is empty or Latin-only.
++      await fontManager.ensureFallbackPack(['cjk'], targetGraph.getNode(node.parentId ?? '')?.name ?? '')
+       if (current()) {
+-        editor.updateTextEditNode(node.id, { text: node.text })
++        // Font resolution changes layout, not authored text or document history.
++        targetGraph.withLayoutMutations(() => editor.updateTextEditNode(node.id, { text: node.text }))
+         editor.requestRender()
+       }
+     } catch { if (current()) failed.add(node.id) }

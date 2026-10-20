@@ -1,0 +1,11 @@
+{
+  "root": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-relocated-o2ApQW",
+  "canvasId": "d14a3756-7358-4612-b5dd-7f63a919fe68",
+  "packageBytes": 29993,
+  "imported": {
+    "operationId": "6979f699-d88a-402a-8c6b-c3446adced9d",
+    "canvasId": "d14a3756-7358-4612-b5dd-7f63a919fe68"
+  },
+  "passed": false,
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n404 !== 200\n"
+}

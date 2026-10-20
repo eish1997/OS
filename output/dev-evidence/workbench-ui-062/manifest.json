@@ -1,0 +1,21 @@
+﻿{
+    "hashes":  {
+                   "doc/design.md":  "26C5BAB163E849051249A1709D4F79DD3A443D52A63684748DEEF7DD0C1B4280",
+                   "src/workbench/workbench.css":  "84658C6B68B8125BCF5138A5B55646DE6AEF94BA4A4E1B5FC2FB61464C6F518C",
+                   "src/workbench/panes.tsx":  "1DF6C92BA8658AD58E001E5CB887645583C728C7C444A3F46F525FF7AF30466D",
+                   "output/dev-evidence/workbench-ui-062/ui/report.json":  "368E60C762F4A6181C7708A3668A663FA54D16D17530C207246098B2E3E76A4A",
+                   "src/workbench/app.tsx":  "96EBABCCEEC4EE46A0E238F623DB119DE0C9090ABA5AAF2CD356DBE2398FAD6F",
+                   "output/dev-evidence/workbench-ui-062/entry/report.json":  "433D038AD6D19AC9E56F057AB22EF69EE363DA8F65E630C47793D828FE18A365",
+                   "output/dev-evidence/workbench-ui-062/layout-ui/report.json":  "44CB097E8209B377AABA91375B62B1D2744F1229309CCF23DAEFB430BCD2ACCF"
+               },
+    "status":  "applied",
+    "modelRequests":  0,
+    "checks":  [
+                   "typecheck",
+                   "isolated and production build",
+                   "browser ui",
+                   "browser layout",
+                   "production entry"
+               ],
+    "at":  "2026-10-15T07:57:06.4334376Z"
+}

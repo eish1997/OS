@@ -1,0 +1,250 @@
+﻿{
+    "files":  [
+                  {
+                      "sha256":  "DCA6D97C17B3EFEB5AE368DD014C6A0904101E4A95BEFF38D6160DD522FDD562",
+                      "path":  ".env.example"
+                  },
+                  {
+                      "sha256":  "DAA79E907A848FFFBC49F17EA97EBFE080DC3FAE0A1A5D2E3E8C82C36F601FA7",
+                      "path":  ".gitignore"
+                  },
+                  {
+                      "sha256":  "335B8C0A7A294667C59429120D9D907ACF4A227A448BC342281760EDBD0C69AF",
+                      "path":  "doc/adr/035-plugin-runtime.md"
+                  },
+                  {
+                      "sha256":  "050F7B0ECDB9A01478D4BC9229129A58EAF311229B6428A3F0E12E51CE1DB416",
+                      "path":  "doc/assets/software-discovery-handoff/graph-reference.png"
+                  },
+                  {
+                      "sha256":  "DB15145CA96099ABF5A94844B135A62A21D6693C1CC4D07F40534B7734EAC3C7",
+                      "path":  "doc/assets/software-discovery-handoff/graph-reference.previous-20261016-124322.png"
+                  },
+                  {
+                      "sha256":  "B1739CB1AD69864A3380B4FC9525CA9243A187A68AC16C77AABCFAAFDA7B0B0D",
+                      "path":  "doc/assets/software-discovery-handoff/initial-flow.png"
+                  },
+                  {
+                      "sha256":  "42B04C88F4BF037DE86727BEE9E8E0B288956FEFB9EFCC4FF847AA0D3677A5A2",
+                      "path":  "doc/dev/backlog.md"
+                  },
+                  {
+                      "sha256":  "93578246F067316BD4CE310858EEE2162A1643906E25857D8E33C969021692B9",
+                      "path":  "doc/dev/current.md"
+                  },
+                  {
+                      "sha256":  "8F318D667A442D09F1137A74E0C8D22B2DE69E4E99911615AFEA5B67E10F09B0",
+                      "path":  "doc/dev/iterations/071-plugin-acceptance.md"
+                  },
+                  {
+                      "sha256":  "929AD9AA59EB121565FA96055532F596ED0B784C9DF21477CEFBE417CDD5EA88",
+                      "path":  "doc/dev/iterations/071-plugin-management.md"
+                  },
+                  {
+                      "sha256":  "EEED7DF8453E8FF1AC5293D41052C0032AD2444E9D37AF047B9F7D31743314D3",
+                      "path":  "doc/dev/iterations/072-plugin-install-input.md"
+                  },
+                  {
+                      "sha256":  "353D7D83A9AFAF51CF04D13058870504235BA38B6CADF4D05B14F83FD56DE8FA",
+                      "path":  "doc/dev/iterations/074-canvas-embedding-plan-review.md"
+                  },
+                  {
+                      "sha256":  "8EF419614A0F993188438F96DAB3E32197FF6816F417A4C31617E701AF09DCF3",
+                      "path":  "doc/dev/插件管理使用说明.md"
+                  },
+                  {
+                      "sha256":  "D94F09B734ADC9080E09976B4EFE0D314F3001A69E8B99F043E43CFF15496F36",
+                      "path":  "doc/dev/画板嵌入工作台开发计划.md"
+                  },
+                  {
+                      "sha256":  "3FE514749DDA9469A58A1C0E44BB384EBAB17AD446123863055E5BF7E67543F5",
+                      "path":  "doc/README.md"
+                  },
+                  {
+                      "sha256":  "7D669664C7124254F23209EDAD01F4AD0C4845180CBEFF30241C5D4BC5041E18",
+                      "path":  "doc/插件管理开发执行文档.md"
+                  },
+                  {
+                      "sha256":  "FF70731E93E717AD826C5285E589BAD015655D6733BE2D84148497C00D8298E1",
+                      "path":  "doc/软件主动探索与功能依赖图谱交接.md"
+                  },
+                  {
+                      "sha256":  "8B62BD54D5401B71F9387697B951BAFF9E393EC7336874E184A3FB7363BC80B6",
+                      "path":  "scripts/plugin-entry-qa.ts"
+                  },
+                  {
+                      "sha256":  "9CC0A2DD0C83D35A0591FEBAF89754C7F403684123A3B32481F203931CD1D5DE",
+                      "path":  "scripts/plugin-job.ps1"
+                  },
+                  {
+                      "sha256":  "574437DBEBF03A4AFAEC3CA745F7F37CE2A19F52D479662DB3A14C73B5DEEC06",
+                      "path":  "scripts/plugin-live-qa.ts"
+                  },
+                  {
+                      "sha256":  "D3CB51871B9DE84CD39C77D42921AB435CFB0A5861ABC53D0373E5818BE4789E",
+                      "path":  "scripts/plugin-ui-qa.ts"
+                  },
+                  {
+                      "sha256":  "9D87BC89393692A4382E57911022C23714161CB024B377FF3D8CD77D1C19C4A5",
+                      "path":  "server/app.ts"
+                  },
+                  {
+                      "sha256":  "068E2119F18F5A49FFDE6584C8C24F7A557DC890BF85359059AE690DA36657C5",
+                      "path":  "server/backup.ts"
+                  },
+                  {
+                      "sha256":  "4BB05CC2CA7754EA170E447561407AB0C5E74B6CEE400FADA5AD9A417BE980B4",
+                      "path":  "server/config.ts"
+                  },
+                  {
+                      "sha256":  "9BDC4BE5183AE894690F3B5AAFFE8B79F94D2BD83781299442DBBE99977BD940",
+                      "path":  "server/native-session.ts"
+                  },
+                  {
+                      "sha256":  "CA077CAEE13E445CAE43E6798C49322C08A0AE18F8CA4A573E104A3436B52772",
+                      "path":  "server/pi-adapter.ts"
+                  },
+                  {
+                      "sha256":  "F792F0F06FFD7BBCEDC1D207FDACECE8538FC5683B5D7679894D438E13934590",
+                      "path":  "server/plugin-diagnostics.ts"
+                  },
+                  {
+                      "sha256":  "FF73FC35F89CCFA8A9119585AD56BD0D2AE17B8698C18191A9CC40B6339FE5D5",
+                      "path":  "server/plugin-job.ts"
+                  },
+                  {
+                      "sha256":  "261D04306E1B702BE70D6237E815724820572395E8E97BE81E04F1ABC188A861",
+                      "path":  "server/plugin-packages.ts"
+                  },
+                  {
+                      "sha256":  "5313B909509682911ACD7D4588536A335D51470EDBB942B54736776BB52EE9B3",
+                      "path":  "server/plugin-prerequisites.ts"
+                  },
+                  {
+                      "sha256":  "8BCAD6ED7B8BE498927E035BC171B65E264772DEB898604130B6D91495EDE996",
+                      "path":  "server/plugin-runtime.ts"
+                  },
+                  {
+                      "sha256":  "65EFEEAE1C1CAFEA2CC7257A87EAD8325F6423469DEE452F0635FD6202392F47",
+                      "path":  "server/plugins.ts"
+                  },
+                  {
+                      "sha256":  "7CB3B739FC423CDA79CA3A7733190FE5B4B2F20B6053280A47DEF5FA695FE971",
+                      "path":  "server/plugin-state.ts"
+                  },
+                  {
+                      "sha256":  "FA20B26DD8CD410C661A52762BA65198E95476D457B5C60423D3C794BFFE276B",
+                      "path":  "server/plugin-worker.ts"
+                  },
+                  {
+                      "sha256":  "A6B2113571FF943E4A99CBCB17EF84C59D50FF18D4271494484178B52B066E99",
+                      "path":  "server/scheduler.ts"
+                  },
+                  {
+                      "sha256":  "98DE1ACEB86ABE2AE88DBA2308F096E43C1FDE66BD03E23CE3489783B7474F45",
+                      "path":  "server/storage.ts"
+                  },
+                  {
+                      "sha256":  "A701410A9E2D353F05F34988C20C3D6C90671FB7C02729796F9DCB7D5D6D81B1",
+                      "path":  "server/worker.ts"
+                  },
+                  {
+                      "sha256":  "97EE33B6D070C90471567ACAE21AD8A14CEBFB9EFC1FF542831CB585BF317BEF",
+                      "path":  "shared/contracts.ts"
+                  },
+                  {
+                      "sha256":  "D0EDA34DCC218EA7E109957ED579BB54B44A6D2A511852F16CA6C9995E5908E9",
+                      "path":  "shared/plugins.ts"
+                  },
+                  {
+                      "sha256":  "8961ADCF0DBBCB21AA4779D6FC817FB8FE46868B1FB20933684845E82EB471DE",
+                      "path":  "shared/workbench-layout.ts"
+                  },
+                  {
+                      "sha256":  "FDBE4F5761D1BFC8E90BB86D8AAF1D09634D90429EEDF8331FB101BC8DA02D5C",
+                      "path":  "src/workbench/app.tsx"
+                  },
+                  {
+                      "sha256":  "DCFC281A3B0A51E74A7FAC2F150A7532F367B2966CA1B6FAA05590491CE84A96",
+                      "path":  "src/workbench/appearance.tsx"
+                  },
+                  {
+                      "sha256":  "7B0DD14E01CDA460898D82C70FD3D7CD52D023B97463370BD8D0C3FA9325701E",
+                      "path":  "src/workbench/panes.tsx"
+                  },
+                  {
+                      "sha256":  "06B350F3242F3E071A0E9A94BFB3601855F1DC4BACEC6BBD7828DCF277F4876C",
+                      "path":  "src/workbench/plugin-run-details.tsx"
+                  },
+                  {
+                      "sha256":  "7802F5C3E55F73BE614917A3465D192CF964AC1E102897A819E0D9F67A00BDD2",
+                      "path":  "src/workbench/plugins.css"
+                  },
+                  {
+                      "sha256":  "59E20BDB22BA2A83715858ECB0D64C1C64F0D29134FC14078AFB6B1309433716",
+                      "path":  "src/workbench/plugins.tsx"
+                  },
+                  {
+                      "sha256":  "7B49269E7D4A458CABB755060D9D34605FE4771391406322D726625FC1B40E84",
+                      "path":  "src/workbench/registry.ts"
+                  },
+                  {
+                      "sha256":  "84DE171D9D29E513E960FE1A7858919CBCDE0E80EDC448E6BB48475AAB6B70F1",
+                      "path":  "tests/fixtures/plugin-crash-host.ts"
+                  },
+                  {
+                      "sha256":  "C5BB715A7D1EB5B2197BD009F877C57B91AC747B10FB7240B4213E0EFD0F4BE4",
+                      "path":  "tests/plugin-crash.test.ts"
+                  },
+                  {
+                      "sha256":  "9E63C15A29B1D80539D236C0BCEE50A20E435B734AF1555155993A915A62F9B0",
+                      "path":  "tests/plugin-execution.test.ts"
+                  },
+                  {
+                      "sha256":  "BBBB86026E8F65AAFDFC9330E8C8B76123F902644743B9B996144A4DD101E63A",
+                      "path":  "tests/plugin-git.test.ts"
+                  },
+                  {
+                      "sha256":  "40AC07AC03395C8E26E9AD3DC5D340375AF620FA6C8D95FBB263071B4B23DA61",
+                      "path":  "tests/plugin-http.test.ts"
+                  },
+                  {
+                      "sha256":  "47861D583DF44E392FA2E5025C522B70A7A4134CA39B39C5C8F62AFCAD079CE8",
+                      "path":  "tests/plugin-layout.test.ts"
+                  },
+                  {
+                      "sha256":  "9FD9BA5636B285C8EF757F0D4947D5558164BF8FB0A4DA8FF96B85BA70EB414A",
+                      "path":  "tests/plugin-manager.test.ts"
+                  },
+                  {
+                      "sha256":  "000ADB217369049DDA5E03BF9A030A9E94610CE8BF5BEA26DD737AF4BE365DBE",
+                      "path":  "tests/plugin-npm.test.ts"
+                  },
+                  {
+                      "sha256":  "A8FDEF6F1F17A477B8A59F6C4B9BC1BD4678503908BEE495DCEFDE2D9AB178BF",
+                      "path":  "tests/plugin-npm-crash.test.ts"
+                  },
+                  {
+                      "sha256":  "729F120F489DCE9D96C6DB771F5B20B69A582603A5C6B14C7E798576CD936B0A",
+                      "path":  "tests/plugin-offline.test.ts"
+                  },
+                  {
+                      "sha256":  "2F7486E19B4A80FF84352826894A505688B66D21578D3DC012AF38CBEEC0926D",
+                      "path":  "tests/plugin-prerequisites.test.ts"
+                  },
+                  {
+                      "sha256":  "E31F2D194F288737D91C3014EDC3348DF3EBE8F07F04CD6F251E8B36430DDA37",
+                      "path":  "tests/plugin-recovery.test.ts"
+                  },
+                  {
+                      "sha256":  "35C38AC138395C26096CE60193E6B7B82E230DBAA55AA055CC8E813856C910CB",
+                      "path":  "tests/plugin-runtime.test.ts"
+                  },
+                  {
+                      "sha256":  "DB3ED24D5B943F853955D025D3D5E96DEB1BC793C4405DED49AF1314BCB9A6C3",
+                      "path":  "tests/plugin-state.test.ts"
+                  }
+              ],
+    "head":  "1a9a44eb7ae987ce64b89acc20d9ddf9046d7824",
+    "capturedAt":  "2026-10-16T09:10:09.5983222Z"
+}

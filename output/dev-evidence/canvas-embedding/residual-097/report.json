@@ -1,0 +1,38 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-residual-host-OVzILu",
+  "packageDir": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-prod-package-fZ0LNP\\package",
+  "sourcePackage": "F:\\AI\\OS\\.runtime\\canvas-workbench-package-090",
+  "packageOutsideRepo": true,
+  "loadMs": 1705,
+  "resource404": [],
+  "zoomVerified": [
+    100,
+    150
+  ],
+  "lastSwitchNotice": "",
+  "projectSwitchesSucceeded": 10,
+  "spaceProjectSwitches": 20,
+  "iframeCountStable": true,
+  "metrics": [
+    {
+      "listeners": 184,
+      "iframes": 1,
+      "heap": 59655083
+    },
+    {
+      "listeners": 1475,
+      "iframes": 1,
+      "heap": 51410491
+    }
+  ],
+  "processIdStable": 96740,
+  "imeCompositionIsolated": true,
+  "layoutImportAttempted": true,
+  "floatWindowsVisible": 0,
+  "crossTabHint": true,
+  "canvasStatus": {
+    "enabled": true,
+    "state": "ready"
+  },
+  "passed": true
+}

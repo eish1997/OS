@@ -1,0 +1,27 @@
+﻿{
+    "hashes":  {
+                   "doc/design.md":  "6D340EAB30C3A077D1F36E9FE84C5CF0EFA041358892ACD47A99D673E1486270",
+                   "src/workbench/app.tsx":  "EBB6727654BD7D794E0073E4FE5298987348A5D7D8B12CFD1502BC459314ABC3",
+                   "src/workbench/workbench.css":  "79613B4C37E81CBD96E75B7B8E563C79BFA98B95FE612FC9D36538D2F1D27914",
+                   "tests/workbench-config.test.ts":  "0D7C9741264B142DDE7D7AEB8EB89DB0A1E4FC1D58C942AD4B2FF375F73EF723",
+                   "shared/workbench-layout.ts":  "471EA5837E57622A140AA42922C265DB0B3EDA748EC74A34C798C3D05FD59083",
+                   "shared/workbench-appearance.ts":  "75E78DFD4790557D1325BB66E428DD481187C2E5E509C6C772E4B0DED3E5B99A",
+                   "src/workbench/icons.tsx":  "22341F48063EE137E0EA15C0FF1C443DBBA5435B7D031731E784F992DF790834",
+                   "src/workbench/appearance.tsx":  "33E44194B362C99C1A39D758634A82B687D8A7346FBF05C8B56739CDF82F5627",
+                   "doc/dev/iterations/063-workbench-appearance.md":  "5B4FF764A847EEECE2897C51C51338B69C837C5A62F8E979FFEF100C0D9A4E4B",
+                   "tests/workbench-layout.test.ts":  "636A0D4AF9C4FDE42A6D8DE724A045F4F95B99EB06340A3C697CE84DA8331BEC"
+               },
+    "status":  "applied",
+    "modelRequests":  0,
+    "checks":  [
+                   "8 relevant tests passed",
+                   "typecheck",
+                   "production build",
+                   "browser ui",
+                   "browser layout",
+                   "browser appearance",
+                   "production entry",
+                   "business digest unchanged after restart"
+               ],
+    "at":  "2026-10-15T08:27:48.6939310Z"
+}

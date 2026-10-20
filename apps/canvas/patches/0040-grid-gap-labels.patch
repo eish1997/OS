@@ -1,0 +1,21 @@
+diff --git a/src/components/properties/layout/grid/GridControls.vue b/src/components/properties/layout/grid/GridControls.vue
+--- a/src/components/properties/layout/grid/GridControls.vue
++++ b/src/components/properties/layout/grid/GridControls.vue
+@@ -72,6 +72,8 @@
+   <div class="mt-2 grid grid-cols-2 gap-1.5">
+     <NumberField
+       :model-value="Math.round(ctx.node.gridColumnGap)"
++      :label="`${panels.columns} ${panels.spacing}`"
++      data-property="gridColumnGap"
+       :min="0"
+       @update:model-value="ctx.updateProp('gridColumnGap', $event)"
+       @commit="(v: number, p: number) => ctx.commitProp('gridColumnGap', v, p)"
+@@ -83,6 +85,8 @@
+     </NumberField>
+     <NumberField
+       :model-value="Math.round(ctx.node.gridRowGap)"
++      :label="`${panels.rows} ${panels.spacing}`"
++      data-property="gridRowGap"
+       :min="0"
+       @update:model-value="ctx.updateProp('gridRowGap', $event)"
+       @commit="(v: number, p: number) => ctx.commitProp('gridRowGap', v, p)"

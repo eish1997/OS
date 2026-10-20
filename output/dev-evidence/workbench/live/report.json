@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T07:01:27.423Z",
+  "checks": [
+    "Pi completed after its window was closed and browser refreshed",
+    "two real same-project conversations and native continuation remain isolated"
+  ],
+  "projectId": "c3055434-a137-46ed-9954-f66db5cffeff",
+  "runIds": [
+    "a5e8d6f3-e0c4-40b0-ad59-827d8674cfaa",
+    "4165747e-f343-4404-8d90-b3bb6bc38b4a",
+    "dd0ba1dc-e6c3-4911-ba0d-149025dd33ed"
+  ],
+  "modelRequests": 4,
+  "tokenUsage": [
+    {
+      "input": 4684,
+      "output": 42,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 4726,
+      "complete": true
+    },
+    {
+      "input": 2293,
+      "output": 11,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 2304,
+      "complete": true
+    },
+    {
+      "input": 2457,
+      "output": 12,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 2469,
+      "complete": true
+    }
+  ],
+  "layout": "browser-private fixture; production saved layout not modified",
+  "errors": []
+}

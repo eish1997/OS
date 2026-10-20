@@ -1,0 +1,39 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-q3id0N",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "initialRenderMs": 1463.1999998092651,
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "74989add-c2d1-46de-a4f7-0fcf8716b0f3",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "passed": false,
+  "step": "modal-isolation",
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\ntrue !== false\n"
+}

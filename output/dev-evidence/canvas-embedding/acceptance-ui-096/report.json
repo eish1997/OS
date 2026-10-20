@@ -1,0 +1,13 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-acceptance-ui-7rxKOT",
+  "packageDir": ".runtime/canvas-workbench-package-090",
+  "embeddedLoadMs": 2452,
+  "v11ChatAndPluginsBesideCanvas": true,
+  "v03ImeDeleteLeftCanvas": true,
+  "v10NarrowFourThemes": true,
+  "v06DualBrowserConflict": true,
+  "standaloneLoadMs": 2402.5515000000005,
+  "embeddedOverStandalone": 1.02,
+  "v12LoadCompared": true,
+  "passed": true
+}

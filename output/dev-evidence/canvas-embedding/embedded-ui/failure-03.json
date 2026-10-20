@@ -1,0 +1,58 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-5FZyVQ",
+  "errors": [],
+  "consoleErrors": [
+    "Blocked attempt to show multiple 'beforeunload' confirmation panels for a single navigation."
+  ],
+  "failedRequests": [],
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "9c2a7f62-cb46-4627-922d-657af6f364dd",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "beforeReopen": [
+    {
+      "type": "RECTANGLE",
+      "x": 764,
+      "y": 281,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "passed": false,
+  "step": "screenshot",
+  "failure": "AssertionError [ERR_ASSERTION]: [\"Blocked attempt to show multiple 'beforeunload' confirmation panels for a single navigation.\"]\n\n1 !== 0\n"
+}

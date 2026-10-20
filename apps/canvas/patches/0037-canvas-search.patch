@@ -1,0 +1,145 @@
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -9,6 +9,7 @@
+ import { useLocalConnections } from '@/app/document/local-connections'
+ import EditorCanvas from '@/components/EditorCanvas.vue'
+ import LocalWorkspacePanel from '@/components/editor/LocalWorkspacePanel.vue'
++import LocalSearchPanel from '@/components/editor/LocalSearchPanel.vue'
+ import LayersPanel from '@/components/LayersPanel.vue'
+ import PropertiesPanel from '@/components/PropertiesPanel.vue'
+ import Toolbar from '@/components/toolbar/Toolbar.vue'
+@@ -25,6 +26,7 @@
+ const editing = computed(() => store.state.showUI && store.state.play === null)
+ const styles = osCanvasWorkspace()
+ const assetsOpen = ref(true)
++const searchOpen = ref(false)
+ function toggleProperties() {
+   if (assetsOpen.value) {
+     assetsOpen.value = false
+@@ -45,12 +47,14 @@
+ <template>
+   <div ref="workspace" data-slot="os-canvas-workspace" :class="styles.root()">
+     <LocalWorkspacePanel v-show="editing && assetsOpen" />
++    <LocalSearchPanel v-show="editing && searchOpen" />
+     <!-- The canvas stays mounted and full-size when panels or preview state change. -->
+     <div data-slot="os-canvas-layer" :class="styles.canvas()">
+       <EditorCanvas />
+     </div>
+     <div :class="styles.controls()" aria-label="画布面板">
+       <AppButton :aria-pressed="assetsOpen" @click="assetsOpen = !assetsOpen">资产面板</AppButton>
++      <AppButton :disabled="!editing" :aria-pressed="searchOpen" @click="searchOpen = !searchOpen">查找对象</AppButton>
+       <AppButton :disabled="!editing" @click="addNote">新建便签</AppButton>
+       <AppButton :disabled="!canConnect" title="选择两个对象，以选择顺序建立关系连接" @click="connect">连接对象</AppButton>
+       <AppAlert v-if="noteFontFailed" heading="便签字体加载失败" description="文字已保留，可以重新加载字体。"><template #actions><AppButton @click="retryNoteFonts">重试便签字体</AppButton></template></AppAlert>
+diff --git a/src/app/document/local-search.ts b/src/app/document/local-search.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-search.ts
+@@ -0,0 +1,65 @@
++import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import { focusNodes } from '@/app/editor/selection/focus'
++
++type Match = { id: string; pageId: string; name: string; path: string; hidden: boolean }
++export function useLocalSearch(editor: Editor) {
++  const query = ref(''), busy = ref(false), message = ref(''), limit = ref(100)
++  const matches = shallowRef<Match[]>([])
++  let generation = 0, disposed = false, resultGraph = editor.graph
++  function invalidate() { generation++; busy.value = false; matches.value = []; message.value = ''; limit.value = 100 }
++  const stopQuery = watch(query, invalidate)
++  const stopGraph = editor.onEditorEvent('graph:replaced', invalidate)
++  async function search() {
++    invalidate()
++    const text = query.value.trim().toLocaleLowerCase()
++    if (!text) { message.value = '请输入对象名称'; return }
++    const token = generation, graph = editor.graph, switches = editor.pageSwitchCount()
++    const current = () => !disposed && generation === token && editor.graph === graph
++    busy.value = true
++    try {
++      const found: Match[] = []
++      for (const page of graph.getPages()) {
++        await editor.loadPageNodes(page.id)
++        if (!current()) return
++        if (editor.pageSwitchCount() !== switches) { message.value = '页面已切换，请重新搜索'; return }
++        const stack = graph.getChildren(page.id).map(node => ({ node, path: page.name, hidden: !node.visible }))
++        while (stack.length) {
++          const item = stack.pop()
++          if (!item || item.node.internalOnly) continue
++          const { node, path, hidden } = item
++          if (node.name.toLocaleLowerCase().includes(text)) found.push({ id: node.id, pageId: page.id, name: node.name, path, hidden })
++          for (const child of graph.getChildren(node.id)) stack.push({ node: child, path: `${path} / ${node.name}`, hidden: hidden || !child.visible })
++        }
++      }
++      resultGraph = graph; matches.value = found; message.value = found.length ? `找到 ${found.length} 个对象` : '未找到匹配对象'
++    } catch { if (current()) message.value = '搜索失败，请重试' }
++    finally { if (current()) busy.value = false }
++  }
++  function location(id: string) {
++    let node = editor.graph.getNode(id), hidden = false
++    while (node && node.type !== 'CANVAS') {
++      hidden ||= !node.visible
++      node = node.parentId ? editor.graph.getNode(node.parentId) : undefined
++    }
++    return { pageId: node?.id, hidden }
++  }
++  async function locate(match: Match) {
++    const graph = resultGraph, token = generation
++    if (editor.graph !== graph || !graph.getNode(match.id)) { message.value = '对象已删除或画布已切换，请重新搜索'; return }
++    const active = () => !disposed && generation === token && editor.graph === graph
++    if (location(match.id).pageId !== match.pageId) { message.value = '对象已移动，请重新搜索'; return }
++    try {
++      if (editor.state.currentPageId !== match.pageId) {
++        const switches = editor.pageSwitchCount()
++        await editor.switchPage(match.pageId)
++        if (!active() || editor.pageSwitchCount() !== switches + 1) return
++      }
++      if (location(match.id).pageId !== match.pageId || editor.state.currentPageId !== match.pageId || !focusNodes(editor, [match.id])) { message.value = '对象已不可用，请重新搜索'; return }
++      message.value = location(match.id).hidden ? '已定位；对象或父级处于隐藏状态' : `已定位：${graph.getNode(match.id)?.name ?? match.name}`
++    } catch { if (active()) message.value = '定位失败，请重试' }
++  }
++  onScopeDispose(() => { disposed = true; generation++; stopQuery(); stopGraph() })
++  return { query, busy, message, search, locate, matches: computed(() => matches.value.slice(0, limit.value)),
++    more: computed(() => matches.value.length > limit.value), showMore: () => { limit.value += 100 } }
++}
+diff --git a/src/components/editor/LocalSearchPanel.vue b/src/components/editor/LocalSearchPanel.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/editor/LocalSearchPanel.vue
+@@ -0,0 +1,25 @@
++<script setup lang="ts">
++import { useEditorStore } from '@/app/editor/active-store'
++import { useLocalSearch } from '@/app/document/local-search'
++import AppInput from '@/components/ui/input/AppInput.vue'
++import AppButton from '@/components/ui/button/AppButton.vue'
++import { localSearch } from '@/theme/local-search'
++const { query, busy, message, matches, more, showMore, search, locate } = useLocalSearch(useEditorStore())
++const styles = localSearch()
++</script>
++<template>
++  <section :class="styles.root()" aria-label="画布搜索" @pointerdown.stop @wheel.stop>
++    <form :class="styles.form()" @submit.prevent="search">
++      <AppInput v-model="query" aria-label="搜索对象名称" placeholder="搜索所有页面的对象名称" />
++      <AppButton type="submit" :disabled="busy">搜索</AppButton>
++    </form>
++    <p role="status" :class="styles.status()">{{ busy ? '正在搜索…' : message }}</p>
++    <div :class="styles.results()" aria-label="搜索结果">
++      <AppButton v-for="match in matches" :key="match.id" :class="styles.result()" @click="locate(match)">
++        <span>{{ match.name }}{{ match.hidden ? '（隐藏）' : '' }}</span>
++        <span :class="styles.path()">{{ match.path }}</span>
++      </AppButton>
++      <AppButton v-if="more" @click="showMore">显示更多</AppButton>
++    </div>
++  </section>
++</template>
+diff --git a/src/theme/local-search.ts b/src/theme/local-search.ts
+new file mode 100644
+--- /dev/null
++++ b/src/theme/local-search.ts
+@@ -0,0 +1,6 @@
++import { tv } from 'tailwind-variants'
++export const localSearch = tv({ slots: {
++  root: 'absolute left-1/2 top-14 z-30 w-96 max-w-[calc(100%-2rem)] -translate-x-1/2 rounded border border-border bg-panel p-2',
++  form: 'flex items-center gap-2', status: 'py-1 text-xs text-muted', results: 'flex max-h-80 flex-col gap-1 overflow-auto',
++  result: 'flex h-auto flex-col items-start text-left', path: 'max-w-full truncate text-xs text-muted'
++} })

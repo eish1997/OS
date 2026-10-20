@@ -1,0 +1,75 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-3y5nhf",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "initialRenderMs": 1921.5,
+  "emptyDraftStayedUnsaved": true,
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "b8dd1c5e-2dfe-4481-aca2-607be043bf5b",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "saveAckWaitedForPersistence": true,
+  "afterConfirmedSave": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "beforeReopen": [
+    {
+      "type": "RECTANGLE",
+      "x": 764,
+      "y": 281,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 501,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "passed": true
+}

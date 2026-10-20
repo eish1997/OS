@@ -1,4 +1,10 @@
 import { nativePiTools } from '../shared/pi-tools.js';
+import { serveCanvasStatic } from './canvas-static.js';
+import type { CanvasTransport } from './canvas-transport.js';
+import { CanvasBindings } from './canvas-bindings.js';
+import { CanvasApi } from './canvas-api.js';
+import { CanvasService } from './canvas-service.js';
+import { loadCanvasPackage } from './canvas-package.js';
 import { WorkbenchConfigurations } from './workbench-config.js';
 import { researchRequest, researchGoal } from './research.js';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
@@ -47,11 +53,13 @@ async function json(req: IncomingMessage): Promise<Record<string, unknown>> {
 const reply = (res: ServerResponse, data: unknown, status = 200) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); };
 const strings = (v: unknown): string[] => { if (!Array.isArray(v) || v.length > 100 || !v.every(s => typeof s === 'string')) throw new AppError(400, '列表格式无效'); return v; };
 const revision = (v: unknown) => { if (!Number.isSafeInteger(v) || Number(v) < 1) throw new AppError(400, '需要有效版本号'); return Number(v); };
-export function createApp(options: { dataDir?: string; staticDir?: string; password?: string; schedule?: boolean; launchId?: string; onShutdown?: () => void; storageLimits?: Partial<StorageLimits>; chatgpt?: ChatGPTOptions; backup?:BackupOptions } = {}) {
+export function createApp(options: { dataDir?: string; staticDir?: string; canvasStaticDir?: string; canvasTransport?: CanvasTransport; canvasPackageDir?: string; password?: string; schedule?: boolean; launchId?: string; onShutdown?: () => void; storageLimits?: Partial<StorageLimits>; chatgpt?: ChatGPTOptions; backup?:BackupOptions } = {}) {
+  const canvasPackage=options.canvasPackageDir?loadCanvasPackage(options.canvasPackageDir):undefined;
+  const canvasStaticDir=canvasPackage?.staticDir??options.canvasStaticDir;
   const dataDir = options.dataDir ?? config.dataDir; const store = new Store(join(dataDir, 'workbench.sqlite'));
   reconcileUnpublishedSessions(store);
   const capacity = new StorageCapacity(dataDir, { ...config.storageLimits, ...options.storageLimits }); store.attachCapacity(capacity);
-  const assets = new Assets(store, dataDir, capacity.limits.assetsBytes); const auth = new Auth(store, dataDir, options.password ?? config.password);
+  const assets = new Assets(store, dataDir, capacity.limits.assetsBytes);   const auth = new Auth(store, dataDir, options.password ?? config.password);
   const nativeImports=new NativeImports(store,dataDir);
   const chatgpt = new ChatGPTAuth(capacity,{...options.chatgpt,sessionValid:hash=>auth.valid(hash),transferIdle:()=>!store.list<Run>('run').some(r=>r.mode==='pi'&&(['queued','running','waiting_interaction','waiting_user','waiting_node'].includes(r.status)||(r.status==='interrupted'&&!r.error?.includes('已对账'))))});
   const piSettings = new PiSettings(store);
@@ -62,6 +70,10 @@ export function createApp(options: { dataDir?: string; staticDir?: string; passw
   const plugins = new Plugins(store, () => scheduler.pluginMaintenanceBlocked(), () => scheduler.owner);
   const scheduler = new Scheduler(service, () => log.record('scheduler_failure'),modelAccess,plugins,mcpCredentials);
   log.record('service_started');
+  const canvasApi=canvasPackage?new CanvasApi(new CanvasBindings(store)):undefined;
+  const canvasService=canvasPackage?new CanvasService({entry:canvasPackage.entry,directory:join(dataDir,'canvas'),origin:config.origin,storage:{dataDir,limits:capacity.limits}}):undefined;
+  if(canvasService)void canvasService.start().catch(()=>log.record('canvas_service_failed'));
+  const canvasTransport=()=>canvasService?.transport??options.canvasTransport;
   const automaticBackup=new AutomaticBackup(store,scheduler,dataDir,{root:config.backupDir,offsite:config.offsite,...options.backup});
   let shuttingDown = false;
   const snapshot = (): Snapshot => {const m=modelAccess.settings();return ({ projects: store.list('project'), summaries: store.list('summary'), tasks: store.list('task'), runs: store.list('run'), assets: store.list<Asset>('asset').filter(a => a.status === 'ready'), memories: store.list<Memory>('memory').filter(m => !m.deleted), drafts: store.list('draft'), inbox: store.list('inbox'), nodes: store.list('node'), operations: store.list<Operation>('operation').map(o => ({ id: o.id, revision: o.revision, runId: o.runId, projectId: o.projectId, name: o.name, state: o.state, error: o.error })), cursor: store.cursor(), config: { modelConfigured: m.modelConfigured, model: m.binding.model || '尚未配置', authMode:m.binding.kind,limitScope:m.limitScope,callsRemaining:m.callsRemaining, budgetUsd:m.budgetUsd, concurrentLimit: 1, deployment: config.origin.startsWith('https://') ? 'remote' : 'local' } });};
@@ -89,6 +101,12 @@ export function createApp(options: { dataDir?: string; staticDir?: string; passw
         if (req.headers['sec-fetch-site'] === 'cross-site') throw new AppError(403, '跨站请求被拒绝');
       }
       if (path === '/api/auth' && method === 'GET') { let loggedIn = false; try { auth.require(req); loggedIn = true; } catch {} return reply(res, { loggedIn, configured: auth.configured() }); }
+      if (path === '/canvas' || path.startsWith('/canvas/')) {
+        if (!canvasStaticDir) throw new AppError(404, '画板尚未启用');
+        auth.require(req);
+        if (path === '/canvas') { res.writeHead(302, { Location: '/canvas/' }); res.end(); return; }
+        return await serveCanvasStatic(req, res, canvasStaticDir, path);
+      }
       if (path === '/api/login' && method === 'POST') {
         const data = await json(req); const token = auth.login(text(data.password, '密码', 200), req.socket.remoteAddress || 'local');
         res.setHeader('Set-Cookie', `wb_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800${config.origin.startsWith('https://') ? '; Secure' : ''}`); return reply(res, { ok: true });
@@ -133,6 +151,24 @@ export function createApp(options: { dataDir?: string; staticDir?: string; passw
       }
       if (path.startsWith('/api/')) {
         const sessionHash = auth.require(req);
+        if (path === '/api/canvas/status' && method === 'GET') return reply(res, { enabled: Boolean(canvasStaticDir && (canvasService || options.canvasTransport)), state:canvasService?.state??(options.canvasTransport?'ready':'disabled') });
+        if (path === '/api/canvas/restart' && method === 'POST') {
+          if (!canvasService) throw new AppError(404, 'Canvas is not enabled');
+          if (req.headers.origin !== config.origin) throw new AppError(403, 'Canvas origin rejected');
+          try { await canvasService.restart(); } catch { throw new AppError(503, 'Canvas service could not restart'); }
+          return reply(res, {state:canvasService.state});
+        }
+        if (path.startsWith('/api/canvas/workspace/')) {
+          if (!canvasStaticDir) throw new AppError(404, 'Canvas is not enabled');
+          const transport=canvasTransport();if(!transport)throw new AppError(503,'Canvas service is not ready');
+          if(canvasApi)return await canvasApi.handle(req,res,path.slice('/api/canvas/workspace'.length)+url.search,transport,config.origin);
+          return await transport.forward(req, res, path.slice('/api/canvas/workspace'.length) + url.search, config.origin);
+        }
+        if(['/api/canvas/context','/api/canvas/context/opened','/api/canvas/unbound','/api/canvas/associate'].includes(path)){
+          if(!canvasApi)throw new AppError(404,'Canvas is not enabled');
+          const transport=canvasTransport();if(!transport)throw new AppError(503,'Canvas service is not ready');
+          return await canvasApi.handle(req,res,path.slice('/api/canvas'.length)+url.search,transport,config.origin);
+        }
         if (path === '/api/conversations') {
           if (method === 'GET') return reply(res, store.list('conversation', url.searchParams.get('projectId') || undefined));
           if (method === 'POST') { const data = await json(req); return reply(res, service.createConversation(text(data.projectId,'项目'), text(data.title,'对话标题',120), text(data.commandId,'命令',120)), 201); }
@@ -518,7 +554,7 @@ export function createApp(options: { dataDir?: string; staticDir?: string; passw
     } catch (error) { if (!res.headersSent) reply(res, { error: error instanceof AppError ? error.message : '操作失败，请检查本机诊断' }, error instanceof AppError ? error.status : 500); else res.end(); }
   });
   if (options.schedule !== false) {scheduler.start();automaticBackup.start();plugins.start();}
-  return { server, store, service, assets, auth, scheduler, plugins, mcp, chatgpt, modelAccess, automaticBackup, snapshot, close: async () => { await assets.searchIndex.close();await automaticBackup.stop();await plugins.stop();chatgpt.close();await scheduler.stop(); server.closeAllConnections(); await new Promise<void>(r => server.close(() => r())); store.close(); } };
+  return { server, store, service, assets, auth, scheduler, canvasService, plugins, mcp, chatgpt, modelAccess, automaticBackup, snapshot, close: async () => { await canvasService?.dispose();await assets.searchIndex.close();await automaticBackup.stop();await plugins.stop();chatgpt.close();await scheduler.stop(); server.closeAllConnections(); await new Promise<void>(r => server.close(() => r())); store.close(); } };
 }
 import {imageAttachments} from './image-attachments.js';
 import {prepareSource,sourceInspection,reconcileUnpublishedSessions} from './native-session.js';

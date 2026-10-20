@@ -1,0 +1,82 @@
+diff --git a/vite.config.ts b/vite.config.ts
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -32,6 +32,7 @@
+ export default defineConfig(async ({ command }) => {
+   await Promise.all([ensureBrandAssets(['web']), ensureDemoDocument()])
+   return {
++    base: process.env.OS_CANVAS_EMBEDDED_BUILD === '1' ? '/canvas/' : '/',
+     resolve: {
+       alias: createOpenPencilAliases(__dirname)
+     },
+diff --git a/src/router.ts b/src/router.ts
+--- a/src/router.ts
++++ b/src/router.ts
+@@ -3,7 +3,7 @@
+ import WorkspaceView from './views/WorkspaceView.vue'
+ 
+ const router = createRouter({
+-  history: createWebHistory(),
++  history: createWebHistory(import.meta.env.BASE_URL),
+   routes: [
+     { path: '/', component: WorkspaceView },
+     { path: '/storage', redirect: '/' },
+diff --git a/src/boot.ts b/src/boot.ts
+--- a/src/boot.ts
++++ b/src/boot.ts
+@@ -40,7 +40,7 @@
+     console.error(error)
+   }
+ 
+-  if (!IS_TAURI) {
++  if (!IS_TAURI && import.meta.env.BASE_URL !== '/canvas/') {
+     void import('virtual:pwa-register').then(({ registerSW }) => {
+       registerSW({ immediate: true })
+       return undefined
+diff --git a/src/views/WorkspaceView.vue b/src/views/WorkspaceView.vue
+--- a/src/views/WorkspaceView.vue
++++ b/src/views/WorkspaceView.vue
+@@ -25,6 +25,7 @@
+ import { focusNodesByName } from '@/app/editor/selection/focus'
+ import { notificationMessages } from '@/app/i18n/notifications'
+ import { appRuntimeConfig } from '@/app/runtime/config'
++import { osEmbedded } from '@/app/runtime/embedding'
+ import { useDocumentDrop } from '@/app/shell/document-drop'
+ import { useKeyboard } from '@/app/shell/keyboard/use'
+ import { useEditorMenu } from '@/app/shell/menu/use'
+@@ -253,7 +254,7 @@
+     <FontStatusBanner />
+     <RenameSelectionDialog />
+     <CommandPalette />
+-    <TabBar />
++    <TabBar v-if="!osEmbedded" />
+     <HomeWorkspace v-show="activeTab?.kind === 'home'" @new-document="createDocumentInCurrentTab" />
+     <EditorWorkspace
+       v-if="activeTab && activeTab.kind !== 'home'"
+diff --git a/src/app/document/workspace-fetch.ts b/src/app/document/workspace-fetch.ts
+--- a/src/app/document/workspace-fetch.ts
++++ b/src/app/document/workspace-fetch.ts
+@@ -1,10 +1,12 @@
+ import { convertFileSrc } from '@tauri-apps/api/core'
+ import { isTauri } from '@/app/tauri/env'
++import { osEmbedded } from '@/app/runtime/embedding'
+ 
+ // The native protocol keeps the service address and token out of the renderer.
+ // Browser development continues to use the authenticated Vite host proxy.
+ export function workspaceFetch(path: string, init?: RequestInit): Promise<Response> {
+   if (!path.startsWith('/os-workspace/')) throw new Error('Invalid workspace request path')
+-  const url = isTauri() ? new URL(path, convertFileSrc('', 'osworkspace')).href : path
++  const url = isTauri() ? new URL(path, convertFileSrc('', 'osworkspace')).href
++    : osEmbedded ? path.replace('/os-workspace/', '/api/canvas/workspace/') : path
+   return fetch(url, init)
+ }
+diff --git a/src/app/runtime/embedding.ts b/src/app/runtime/embedding.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/runtime/embedding.ts
+@@ -0,0 +1,5 @@
++import { IS_BROWSER } from '@/constants'
++
++// Explicit opt-in: standalone documents keep their original navigation and API.
++export const osEmbedded = IS_BROWSER && window.parent !== window &&
++  new URLSearchParams(window.location.search).has('os-embed')

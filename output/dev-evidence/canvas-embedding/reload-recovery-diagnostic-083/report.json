@@ -1,0 +1,35 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-9NT2EH",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:4935/api/canvas/workspace/canvases/deaa4dad-f1e4-456c-b4d3-48a73c17e0cc",
+      "status": 503
+    }
+  ],
+  "recoveryDeletions": [
+    {
+      "key": "1381df39-72cf-4011-9b7e-146e07908946",
+      "store": "meta",
+      "time": 1792149418546,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:4935/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:4935/canvas/assets/tabs-CHYGMhcR.js:5630:65115)\n    at async http://127.0.0.1:4935/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    },
+    {
+      "key": "1381df39-72cf-4011-9b7e-146e07908946",
+      "store": "fig",
+      "time": 1792149418546,
+      "stack": "Error\n    at IDBObjectStore.delete (<anonymous>:2:235)\n    at Proxy.<anonymous> (http://127.0.0.1:4935/canvas/assets/recorder-DhvegjqG.js:1:1788)\n    at Object.remove (http://127.0.0.1:4935/canvas/assets/tabs-CHYGMhcR.js:5630:65146)\n    at async http://127.0.0.1:4935/canvas/assets/tabs-CHYGMhcR.js:5630:66486"
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "offlineSnapshotObservedAt": 1792149418695,
+  "reloadRecoveryInspection": {
+    "records": [],
+    "path": "/canvas/",
+    "route": "/",
+    "dialogs": 0
+  },
+  "passed": false,
+  "failure": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '恢复', exact: true })\u001b[22m\n"
+}

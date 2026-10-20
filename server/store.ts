@@ -5,7 +5,8 @@ import { dirname } from 'node:path';
 import type { Entity, WorkbenchEvent } from '../shared/contracts.js';
 import type { StorageCapacity } from './storage.js';
 
-export class AppError extends Error { constructor(public status: number, message: string) { super(message); } }
+import { AppError } from '../shared/app-error.ts';
+export { AppError } from '../shared/app-error.ts';
 export class Store {
   readonly db: DatabaseSync;
   private depth = 0;

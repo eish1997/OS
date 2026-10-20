@@ -1,0 +1,96 @@
+diff --git a/src/components/properties/shared-style/SharedStylesSection.vue b/src/components/properties/shared-style/SharedStylesSection.vue
+--- a/src/components/properties/shared-style/SharedStylesSection.vue
++++ b/src/components/properties/shared-style/SharedStylesSection.vue
+@@ -1,7 +1,7 @@
+ <script setup lang="ts">
+-import { computed, ref, watch } from 'vue'
++import { computed, reactive, ref, watch } from 'vue'
+ import { getNodeEditCapability, isEmptyDocumentChange } from '@open-pencil/core/editor'
+-import { copyFills, sharedStyleRefKey, type SceneNode, type SharedStyleKind } from '@open-pencil/scene-graph'
++import { copyFills, SHARED_TEXT_STYLE_FIELDS, sharedStyleRefKey, type SceneNode, type SharedStyleKind } from '@open-pencil/scene-graph'
+ import { sharedStylePatch, useSceneComputed } from '@open-pencil/vue'
+ import { useEditorStore } from '@/app/editor/active-store'
+ import AppInput from '@/components/ui/input/AppInput.vue'
+@@ -14,6 +14,8 @@
+ const name = ref('')
+ const hex = ref('')
+ const error = ref('')
++const text = reactive({ fontFamily: '', fontSize: '' as string | number, fontWeight: '' as string | number, lineHeight: '' as string | number, letterSpacing: '' as string | number })
++const textFields = [{ key: 'fontSize', label: '字号' }, { key: 'fontWeight', label: '字重' }, { key: 'lineHeight', label: '行高（空白为自动）' }, { key: 'letterSpacing', label: '字间距' }] as const
+ const definitions = useSceneComputed(() => [...editor.graph.getAllNodes()].filter(node => node.sharedStyleType && node.source.id))
+ const options = computed(() => definitions.value.map(node => ({ value: node.id, label: node.name })))
+ const style = computed(() => definitions.value.find(node => node.id === selected.value))
+@@ -21,10 +23,12 @@
+ watch(definitions, nodes => {
+   if (!nodes.some(node => node.id === selected.value)) selected.value = nodes[0]?.id ?? ''
+ }, { immediate: true })
+-watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills]), () => {
++watch(() => JSON.stringify([style.value?.id, style.value?.name, style.value?.fills, ...SHARED_TEXT_STYLE_FIELDS.map(key => style.value?.[key])]), () => {
+   name.value = style.value?.name ?? ''
+   const color = style.value?.fills[0]?.color
+   hex.value = color ? [color.r, color.g, color.b].map(value => Math.round(value * 255).toString(16).padStart(2, '0')).join('').toUpperCase() : ''
++  text.fontFamily = style.value?.fontFamily ?? ''
++  for (const field of textFields) text[field.key] = style.value?.[field.key] ?? ''
+   error.value = ''
+ }, { immediate: true })
+ 
+@@ -40,6 +44,18 @@
+   }
+ }
+ 
++function textPatch(): Partial<SceneNode> | null {
++  const fontFamily = text.fontFamily.trim()
++  const fontSize = Number(text.fontSize), fontWeight = Number(text.fontWeight)
++  const letterSpacing = Number(text.letterSpacing)
++  const lineHeight = String(text.lineHeight).trim() === '' ? null : Number(text.lineHeight)
++  if (!fontFamily || !String(text.fontSize).trim() || !String(text.fontWeight).trim() || !String(text.letterSpacing).trim() || ![fontSize, fontWeight, letterSpacing].every(Number.isFinite) || fontSize <= 0 || fontWeight < 1 || fontWeight > 1000 || (lineHeight !== null && (!Number.isFinite(lineHeight) || lineHeight <= 0))) {
++    error.value = '请填写有效字体、正数字号、1–1000 字重和有效间距；行高可留空'
++    return null
++  }
++  return { fontFamily, fontSize, fontWeight, lineHeight, letterSpacing }
++}
++
+ function save() {
+   const current = style.value
+   if (!current || !getNodeEditCapability(editor.graph, current.id).editable || current.locked) return
+@@ -53,10 +69,15 @@
+     fills[0].color = { ...fills[0].color, r: Number.parseInt(colorText.slice(0, 2), 16) / 255, g: Number.parseInt(colorText.slice(2, 4), 16) / 255, b: Number.parseInt(colorText.slice(4, 6), 16) / 255 }
+     patch.fills = fills
+   }
++  if (current.sharedStyleType === 'TEXT') {
++    const typography = textPatch()
++    if (!typography) return
++    Object.assign(patch, typography)
++  }
+   const finish = editor.captureDocumentChange(editor.state.currentPageId)
+   try {
+     editor.graph.updateNode(current.id, patch)
+-    if (patch.fills) updateReferences(current)
++    if (patch.fills || current.sharedStyleType === 'TEXT') updateReferences(current)
+   } catch (cause) {
+     editor.restoreDocumentChange(finish(), 'before')
+     error.value = cause instanceof Error ? cause.message : '更新样式失败'
+@@ -79,6 +100,10 @@
+       <AppSelect v-model="selected" :options="options" label="选择共享样式" />
+       <label class="text-xs text-muted">名称<AppInput v-model="name" aria-label="样式名称" size="sm" /></label>
+       <label v-if="simpleColor" class="text-xs text-muted">填充颜色<AppInput v-model="hex" aria-label="样式颜色" size="sm" /></label>
++      <template v-if="style?.sharedStyleType === 'TEXT'">
++        <label class="text-xs text-muted">字体<AppInput v-model="text.fontFamily" aria-label="样式字体" size="sm" /></label>
++        <label v-for="field in textFields" :key="field.key" class="text-xs text-muted">{{ field.label }}<AppInput v-model="text[field.key]" :aria-label="`样式${field.label}`" type="number" size="sm" /></label>
++      </template>
+       <AppButton size="sm" @click="save">保存样式修改</AppButton>
+       <span v-if="error" role="alert" class="text-xs">{{ error }}</span>
+     </div>
+diff --git a/packages/vue/src/controls/shared-style/model.ts b/packages/vue/src/controls/shared-style/model.ts
+--- a/packages/vue/src/controls/shared-style/model.ts
++++ b/packages/vue/src/controls/shared-style/model.ts
+@@ -53,7 +53,8 @@
+       lineHeight: style.lineHeight,
+       letterSpacing: style.letterSpacing,
+       textDecoration: style.textDecoration,
+-      textCase: style.textCase
++      textCase: style.textCase,
++      fontFeatures: structuredClone(style.fontFeatures)
+     })
+   }
+   return patch

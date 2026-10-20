@@ -1,0 +1,25 @@
+diff --git a/src/app/document/close/use.ts b/src/app/document/close/use.ts
+--- a/src/app/document/close/use.ts
++++ b/src/app/document/close/use.ts
+@@ -6,17 +6,20 @@
+ import { toast } from '@/app/shell/ui'
+ import { allTabs } from '@/app/tabs'
+ import { IS_TAURI } from '@/constants'
++import { osEmbedded } from '@/app/runtime/embedding'
+ 
+ export function useDocumentCloseProtection() {
+   let closing = false
+   let disposed = false
+   const cleanup: Array<() => void> = []
+ 
+-  useEventListener(window, 'beforeunload', (event) => {
++  const stopCloseProtection = useEventListener(osEmbedded ? window.parent : window, 'beforeunload', (event) => {
+     if (isExitApproved() || !allTabs.value.some((tab) => tab.isDirty)) return
+     event.preventDefault()
+     event.returnValue = ''
+   })
++  // A frame navigation must not leave a dirty-state listener on the parent.
++  useEventListener(window, 'pagehide', stopCloseProtection)
+ 
+   async function requestClose(close: () => Promise<void>) {
+     if (closing) return

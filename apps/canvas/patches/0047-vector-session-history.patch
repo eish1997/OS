@@ -1,0 +1,40 @@
+diff --git a/src/app/editor/vector/lifecycle.ts b/src/app/editor/vector/lifecycle.ts
+--- a/src/app/editor/vector/lifecycle.ts
++++ b/src/app/editor/vector/lifecycle.ts
+@@ -19,6 +19,18 @@
+ // Edit-state geometry lives in page-absolute space, mapped through the node's
+ // full world matrix so nested, rotated, and flipped nodes edit correctly.
+ export function createVectorEditLifecycle(editor: Editor, state: VectorEditState) {
++  const sessionKeys = new WeakMap<NonNullable<VectorEditState['nodeEditState']>, string>()
++  let sessionSerial = 0
++
++  function sessionKey(es: NonNullable<VectorEditState['nodeEditState']>) {
++    let key = sessionKeys.get(es)
++    if (!key) {
++      key = `vector-edit:${es.nodeId}:${++sessionSerial}`
++      sessionKeys.set(es, key)
++    }
++    return key
++  }
++
+   function getNodeEditState() {
+     return state.nodeEditState
+   }
+@@ -70,7 +82,7 @@
+       y: bounds.y + bounds.height / 2
+     })
+ 
+-    editor.updateNodeWithUndo(
++    editor.undo.runBatch('Edit vector', () => editor.updateNodeWithUndo(
+       node.id,
+       {
+         x: center.x - bounds.width / 2,
+@@ -86,7 +98,7 @@
+         strokeGeometry: []
+       },
+       'Edit vector'
+-    )
++    ), sessionKey(es))
+     const committed = editor.graph.getNode(es.nodeId)
+     if (committed?.type === 'VECTOR' && committed.vectorNetwork) {
+       const committedWorld = getWorldMatrix(committed, editor.graph)

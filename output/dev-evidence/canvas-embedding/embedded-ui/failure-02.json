@@ -1,0 +1,38 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-embedding-ui-uK1ujJ",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "saved": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    }
+  ],
+  "canvasId": "ab31ebe6-144f-4520-8163-38ef525a7241",
+  "withChinese": [
+    {
+      "type": "RECTANGLE",
+      "x": 450,
+      "y": 240,
+      "width": 180,
+      "height": 120,
+      "text": ""
+    },
+    {
+      "type": "TEXT",
+      "x": 500,
+      "y": 520,
+      "width": 74,
+      "height": 17,
+      "text": "画板中文输入验证"
+    }
+  ],
+  "passed": false,
+  "step": "host-drag-over-canvas",
+  "failure": "TimeoutError: locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.wb-floating') to be visible\u001b[22m\n"
+}

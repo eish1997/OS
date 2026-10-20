@@ -1,0 +1,24 @@
+diff --git a/src/components/brand/BrandMark.vue b/src/components/brand/BrandMark.vue
+--- a/src/components/brand/BrandMark.vue
++++ b/src/components/brand/BrandMark.vue
+@@ -21,7 +21,7 @@
+ const source = computed(() => {
+   // The ivory tile owns its background and always uses the light palette.
+   const suffix = variant !== 'app-icon' && appearance === 'dark' ? '-dark' : ''
+-  return `/brand/${sources[variant]}${suffix}.svg`
++  return `${import.meta.env.BASE_URL}brand/${sources[variant]}${suffix}.svg`
+ })
+ </script>
+ 
+diff --git a/src/app/shell/support/render.ts b/src/app/shell/support/render.ts
+--- a/src/app/shell/support/render.ts
++++ b/src/app/shell/support/render.ts
+@@ -40,7 +40,7 @@
+   container.setAttribute('role', 'alert')
+ 
+   const icon = doc.createElement('img')
+-  icon.src = '/brand/app-icon.svg'
++  icon.src = `${import.meta.env.BASE_URL}brand/app-icon.svg`
+   icon.alt = ''
+   icon.width = 40
+   icon.height = 40

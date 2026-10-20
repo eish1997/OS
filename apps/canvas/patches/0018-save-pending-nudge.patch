@@ -1,0 +1,15 @@
+diff --git a/src/app/document/local-workspace.ts b/src/app/document/local-workspace.ts
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -287,6 +287,11 @@
+     busy.value = true; error.value = ''; status.value = '正在保存'
+     try {
+       if (!pending) {
++        // Finish coalesced arrow edits before capturing their history and geometry.
++        store.flushNudge()
++        // Group fitting can queue derived connection updates in the same edit.
++        await Promise.resolve()
++        if (!isCurrentGeneration(currentGeneration)) return false
+         identity.ensureAll()
+         const version = changes.capture()
+         const capturedViewVersion = viewVersion.value

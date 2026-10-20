@@ -1,0 +1,196 @@
+{
+  "releaseCommit": "3c68f3ffd7c9bc781494cdb85e718ff1e6f49d84",
+  "status": "embedded-review-in-progress",
+  "files": [
+    {
+      "component": "brotli",
+      "file": "canvaskit/brotli-LICENSE",
+      "url": "https://skia.googlesource.com/external/github.com/google/brotli.git/+/6d03dfbedda1615c4cba1211f8d81735575209c8/LICENSE?format=TEXT",
+      "gitBlob": "33b7cdd2dbaeddce1e35aa1a13f63d71154dc42f",
+      "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94",
+      "ref": "6d03dfbedda1615c4cba1211f8d81735575209c8"
+    },
+    {
+      "component": "expat",
+      "file": "canvaskit/expat-COPYING",
+      "url": "https://chromium.googlesource.com/external/github.com/libexpat/libexpat.git/+/6154446fccefbf3ca644894f598969113b0c7bcd/COPYING?format=TEXT",
+      "gitBlob": "c6d184a8aae845ce7bf4d195b214d8244d457f8f",
+      "sha256": "31b15de82aa19a845156169a17a5488bf597e561b2c318d159ed583139b25e87",
+      "ref": "6154446fccefbf3ca644894f598969113b0c7bcd"
+    },
+    {
+      "component": "freetype",
+      "file": "canvaskit/freetype-LICENSE.TXT",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+/264b5fbf5b912b39f98d038bf75d39be0a73f21b/LICENSE.TXT?format=TEXT",
+      "gitBlob": "0f9df2177a47a3e463e45d295afdcc783766836e",
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "ref": "264b5fbf5b912b39f98d038bf75d39be0a73f21b"
+    },
+    {
+      "component": "harfbuzz",
+      "file": "canvaskit/harfbuzz-COPYING",
+      "url": "https://chromium.googlesource.com/external/github.com/harfbuzz/harfbuzz.git/+/9cb1fee51069b206effb4736e443b038d230789d/COPYING?format=TEXT",
+      "gitBlob": "1dd917e9f2e72167de69e3b5dadbc4e7db417da1",
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "ref": "9cb1fee51069b206effb4736e443b038d230789d"
+    },
+    {
+      "component": "icu",
+      "file": "canvaskit/icu-LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/deps/icu.git/+/364118a1d9da24bb5b770ac3d762ac144d6da5a4/LICENSE?format=TEXT",
+      "gitBlob": "9f54372febca06e134bbc9d4700a1ebfeda13843",
+      "sha256": "17510cf7a58b4879b887ec05a45d72cf1b73544dd9ec7e72f20110ed104229ee",
+      "ref": "364118a1d9da24bb5b770ac3d762ac144d6da5a4"
+    },
+    {
+      "component": "libjpeg-turbo",
+      "file": "canvaskit/libjpeg-turbo-LICENSE.md",
+      "url": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/e14cbfaa85529d47f9f55b0f104a579c1061f9ad/LICENSE.md?format=TEXT",
+      "gitBlob": "a785258bcdaeb20de639c6a060a7e3d5df17ae8f",
+      "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430",
+      "ref": "e14cbfaa85529d47f9f55b0f104a579c1061f9ad"
+    },
+    {
+      "component": "libjpeg-turbo",
+      "file": "canvaskit/libjpeg-turbo-README.ijg",
+      "url": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/e14cbfaa85529d47f9f55b0f104a579c1061f9ad/README.ijg?format=TEXT",
+      "gitBlob": "dbf8070cac812bcfd7eb4d407062919f69c777c8",
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6",
+      "ref": "e14cbfaa85529d47f9f55b0f104a579c1061f9ad"
+    },
+    {
+      "component": "libpng",
+      "file": "canvaskit/libpng-LICENSE",
+      "url": "https://skia.googlesource.com/third_party/libpng.git/+/d5515b5b8be3901aac04e5bd8bd5c89f287bcd33/LICENSE?format=TEXT",
+      "gitBlob": "1b765ae9f96abea77d3d9a88c543e3b5f4725813",
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "ref": "d5515b5b8be3901aac04e5bd8bd5c89f287bcd33"
+    },
+    {
+      "component": "libwebp",
+      "file": "canvaskit/libwebp-COPYING",
+      "url": "https://chromium.googlesource.com/webm/libwebp.git/+/845d5476a866141ba35ac133f856fa62f0b7445f/COPYING?format=TEXT",
+      "gitBlob": "7a6f99547d4d6b4c5e6d5321acfaeba313e08de3",
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+      "ref": "845d5476a866141ba35ac133f856fa62f0b7445f"
+    },
+    {
+      "component": "wuffs",
+      "file": "canvaskit/wuffs-LICENSE",
+      "url": "https://skia.googlesource.com/external/github.com/google/wuffs-mirror-release-c.git/+/e3f919ccfe3ef542cfc983a82146070258fb57f8/LICENSE?format=TEXT",
+      "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "ref": "e3f919ccfe3ef542cfc983a82146070258fb57f8"
+    },
+    {
+      "component": "zlib",
+      "file": "canvaskit/zlib-LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/646b7f569718921d7d4b5b8e22572ff6c76f2596/LICENSE?format=TEXT",
+      "gitBlob": "8aca25d8c7a1336c991a2bc84bc2aa341a920885",
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "ref": "646b7f569718921d7d4b5b8e22572ff6c76f2596"
+    },
+    {
+      "component": "freetype",
+      "file": "canvaskit/freetype-docs-FTL.TXT",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+/264b5fbf5b912b39f98d038bf75d39be0a73f21b/docs/FTL.TXT?format=TEXT",
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "ref": "264b5fbf5b912b39f98d038bf75d39be0a73f21b"
+    },
+    {
+      "component": "freetype",
+      "file": "canvaskit/freetype-src-bdf-README",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+/264b5fbf5b912b39f98d038bf75d39be0a73f21b/src/bdf/README?format=TEXT",
+      "sha256": "7984455e7e5a9faba3797c8bf095fbe10cc846316b7320aff8c58402e22b82fe",
+      "ref": "264b5fbf5b912b39f98d038bf75d39be0a73f21b"
+    },
+    {
+      "component": "freetype",
+      "file": "canvaskit/freetype-src-pcf-README",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+/264b5fbf5b912b39f98d038bf75d39be0a73f21b/src/pcf/README?format=TEXT",
+      "sha256": "18d9782898d9eac04476e2f744678137b2a889689ed3e923e052fc396a86f86b",
+      "ref": "264b5fbf5b912b39f98d038bf75d39be0a73f21b"
+    },
+    {
+      "component": "freetype",
+      "file": "canvaskit/freetype-src-gzip-zlib.h",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+/264b5fbf5b912b39f98d038bf75d39be0a73f21b/src/gzip/zlib.h?format=TEXT",
+      "sha256": "c86a25c27f74cb97b8fa07b175f479f063d5064ace9995b4684063643c81cf1b",
+      "ref": "264b5fbf5b912b39f98d038bf75d39be0a73f21b"
+    },
+    {
+      "component": "notofonts/arabic",
+      "file": "canvaskit/NotoNaskhArabic-OFL.txt",
+      "url": "https://api.github.com/repos/notofonts/arabic/git/blobs/d4e170557fc8bcf8d1dcb317d9f1accaf8acf223",
+      "gitBlob": "d4e170557fc8bcf8d1dcb317d9f1accaf8acf223",
+      "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af",
+      "ref": "Immutable OFL blob; copyright matches bundled font metadata, not a font release commit claim"
+    },
+    {
+      "component": "emscripten-core/emscripten",
+      "file": "canvaskit/emscripten-4.0.7-LICENSE",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/git/blobs/70cabe388d27da221bd769c50b427a35354f4f1d",
+      "gitBlob": "70cabe388d27da221bd769c50b427a35354f4f1d",
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "emscripten-runtime",
+      "file": "canvaskit/emscripten-system-lib-libc-musl-COPYRIGHT",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/contents/system/lib/libc/musl/COPYRIGHT?ref=4.0.7",
+      "gitBlob": "c1628e9ac84f927fe791124ec172fb61c760bb9b",
+      "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "emscripten-runtime",
+      "file": "canvaskit/emscripten-system-lib-libcxx-LICENSE.TXT",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/contents/system/lib/libcxx/LICENSE.TXT?ref=4.0.7",
+      "gitBlob": "e159d283443f92ac78b964d2bccebe8f95d5d445",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "emscripten-runtime",
+      "file": "canvaskit/emscripten-system-lib-libcxxabi-LICENSE.TXT",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/contents/system/lib/libcxxabi/LICENSE.TXT?ref=4.0.7",
+      "gitBlob": "b75c0441bcd5be32b5a07e2a1ffc7e67b6d99f16",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "emscripten-runtime",
+      "file": "canvaskit/emscripten-system-lib-compiler-rt-LICENSE.TXT",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/contents/system/lib/compiler-rt/LICENSE.TXT?ref=4.0.7",
+      "gitBlob": "5a79a1b9d5cb0af9a779751f07033e44ca3b14d8",
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "emscripten-runtime",
+      "file": "canvaskit/emscripten-AUTHORS",
+      "url": "https://api.github.com/repos/emscripten-core/emscripten/contents/AUTHORS?ref=4.0.7",
+      "gitBlob": "5aed48f68b996d61e83272c74094aa3be0badd14",
+      "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b",
+      "ref": "4.0.7"
+    },
+    {
+      "component": "Noto Mono optional embedded font (conservative source scope)",
+      "file": "canvaskit/NotoMono-OFL.txt",
+      "url": "https://skia.googlesource.com/skia/+/3c68f3ffd7c9bc781494cdb85e718ff1e6f49d84/modules/canvaskit/fonts/NotoMono-Regular.ttf",
+      "sha256": "a3558f33732e1f0be404664ece79090054685a698ab026a5ed094378d8d0aaee",
+      "ref": "Font name records provide copyright/version/OFL declaration; complete standard OFL 1.1 body from NotoNaskhArabic-OFL.txt, author header replaced with exact NotoMono name record",
+      "fontSHA256": "41fd7ccc82375e2a1e47f0cc2c941c14d7c99ba2f57cf69c9f738d07fb257686",
+      "fontGitBlob": "3560a3a0c87b328a63c3c5dcd2020f3fc32dbbe9"
+    },
+    {
+      "component": "distribution acknowledgements",
+      "file": "canvaskit/ACKNOWLEDGEMENTS.txt",
+      "sha256": "9726fbf9f2138adf5e666f705f48e6f0d0f7e83a1eb2d435814a672f0f34a666",
+      "ref": "Project-authored attribution; not a substitute for original license texts"
+    }
+  ],
+  "provenance": "Official Release Canvaskit v0.41.1 commit; published CHANGELOG matches byte for byte. npm gitHead differs and exact binary reproducibility is not claimed.",
+  "pendingFetches": [],
+  "fontScope": "Release Makefile disables embedded font for default npm variant; full uses compile defaults. Full-font byte search did not establish embedding. NotoMono notice retained conservatively; no exact linked-font claim."
+}

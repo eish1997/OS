@@ -1,0 +1,151 @@
+diff --git a/src/app/document/local-connection-edit.ts b/src/app/document/local-connection-edit.ts
+--- a/src/app/document/local-connection-edit.ts
++++ b/src/app/document/local-connection-edit.ts
+@@ -11,16 +11,17 @@
+     const link = node && relation(node)
+     return node && link ? { id: node.id, locked: node.locked, link } : undefined
+   })
+-  function setAnchor(endpoint: 'source' | 'target', side: AnchorSide) {
++  function setAnchor(endpoint: 'source' | 'target', side: AnchorSide, targetId?: string) {
+     const current = selected.value
+     if (!current || current.locked) return
+     const node = editor.graph.getNode(current.id)
+     if (!node) return
+     const field = endpoint === 'source' ? 'sourceAnchor' : 'targetAnchor'
+-    if ((current.link[field] ?? (endpoint === 'source' ? 'right' : 'left')) === side) return
++    if ((current.link[field] ?? (endpoint === 'source' ? 'right' : 'left')) === side &&
++      (!targetId || targetId === current.link[endpoint])) return
+     const before = node.pluginData
+     const after = before.map(item => item.pluginId === pluginId && item.key === key
+-      ? { ...item, value: JSON.stringify({ ...current.link, [field]: side }) } : item)
++      ? { ...item, value: JSON.stringify({ ...current.link, [field]: side, [endpoint]: targetId ?? current.link[endpoint] }) } : item)
+     const apply = (data: typeof before) => {
+       if (!editor.graph.getNode(current.id)) return
+       editor.graph.updateNode(current.id, { pluginData: data })
+diff --git a/src/app/document/local-connection-drag.ts b/src/app/document/local-connection-drag.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connection-drag.ts
+@@ -0,0 +1,75 @@
++import { computed, ref, watch } from 'vue'
++import type { Editor } from '@open-pencil/core/editor'
++import type { ViewportTransform } from '@open-pencil/core/geometry'
++import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
++import Matrix from '@open-pencil/scene-graph/matrix'
++import { anchorPoint, anchorSides, relation } from './local-connection-data'
++import type { AnchorSide } from './local-connection-data'
++import { localNodeId } from './local-identity'
++import { useConnectionEdit } from './local-connection-edit'
++
++type Endpoint = 'source' | 'target'
++type Anchor = { uuid: string; side: AnchorSide; x: number; y: number }
++
++export function useConnectionDrag(editor: Editor, view: () => ViewportTransform) {
++  const { selected, setAnchor } = useConnectionEdit(editor)
++  const drag = ref<{ endpoint: Endpoint; pointer: number; x: number; y: number; candidate?: Anchor }>()
++  const anchors = computed(() => {
++    void editor.state.sceneVersion
++    const transform = view(), found: Anchor[] = []
++    function visit(id: string) {
++      const node = editor.graph.getNode(id)
++      if (!node || !node.visible || node.locked || editor.graph.isViewHidden(id)) return
++      const uuid = localNodeId(node)
++      if (uuid && !relation(node)) for (const side of anchorSides) {
++        const [x, y] = Matrix.mapPoints(getWorldMatrix(node, editor.graph), anchorPoint(node, side))
++        found.push({ uuid, side, x: x * transform.zoom + transform.panX, y: y * transform.zoom + transform.panY })
++      }
++      for (const child of node.childIds) visit(child)
++    }
++    for (const node of editor.graph.getChildren(editor.state.currentPageId)) visit(node.id)
++    return found
++  })
++  const handles = computed(() => {
++    const current = selected.value
++    if (!current || current.locked || editor.graph.isViewHidden(current.id)) return []
++    return (['source', 'target'] as const).flatMap(endpoint => {
++      const side = endpoint === 'source' ? current.link.sourceAnchor ?? 'right' : current.link.targetAnchor ?? 'left'
++      const anchor = anchors.value.find(a => a.uuid === current.link[endpoint] && a.side === side)
++      if (!anchor) return []
++      const active = drag.value?.endpoint === endpoint ? drag.value : undefined
++      return [{ endpoint, x: active?.x ?? anchor.x, y: active?.y ?? anchor.y }]
++    })
++  })
++  function cancel() { drag.value = undefined }
++  watch(() => [selected.value?.id, JSON.stringify(selected.value?.link), editor.state.currentPageId, editor.state.play], cancel)
++  function begin(endpoint: Endpoint, event: PointerEvent) {
++    if (event.button !== 0 || !selected.value || selected.value.locked) return
++    const handle = handles.value.find(h => h.endpoint === endpoint)
++    if (!handle) return
++    const element = event.currentTarget as HTMLElement
++    element.focus(); element.setPointerCapture(event.pointerId)
++    drag.value = { endpoint, pointer: event.pointerId, x: handle.x, y: handle.y }
++  }
++  function move(event: PointerEvent) {
++    const active = drag.value
++    if (!active || active.pointer !== event.pointerId) return
++    const bounds = (event.currentTarget as HTMLElement).parentElement?.getBoundingClientRect()
++    if (!bounds) return
++    const x = event.clientX - bounds.left, y = event.clientY - bounds.top
++    let candidate: Anchor | undefined, nearest = 14
++    for (const anchor of anchors.value) {
++      const distance = Math.hypot(anchor.x - x, anchor.y - y)
++      if (distance < nearest) { nearest = distance; candidate = anchor }
++    }
++    drag.value = { ...active, candidate, x: candidate?.x ?? x, y: candidate?.y ?? y }
++  }
++  function finish(event: PointerEvent) {
++    if (drag.value?.pointer !== event.pointerId) return
++    move(event)
++    const active = drag.value
++    cancel()
++    if (active.candidate) setAnchor(active.endpoint, active.candidate.side, active.candidate.uuid)
++  }
++  return { handles, drag, begin, move, finish, cancel }
++}
+diff --git a/src/components/editor/LocalConnectionHandles.vue b/src/components/editor/LocalConnectionHandles.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/editor/LocalConnectionHandles.vue
+@@ -0,0 +1,23 @@
++<script setup lang="ts">
++import type { ViewportTransform } from '@open-pencil/core/geometry'
++import { useEditorStore } from '@/app/editor/active-store'
++import { useConnectionDrag } from '@/app/document/local-connection-drag'
++const { drawn } = defineProps<{ drawn: ViewportTransform | null }>()
++const store = useEditorStore()
++const { handles, drag, begin, move, finish, cancel } = useConnectionDrag(store, () => drawn ?? store.state)
++</script>
++
++<template>
++  <div v-if="store.state.showUI && store.state.play === null" class="pointer-events-none absolute inset-0 z-10" aria-label="连接端点">
++    <button v-for="handle in handles" :key="handle.endpoint" type="button"
++      class="pointer-events-auto absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-accent touch-none"
++      :style="{ left: `${handle.x}px`, top: `${handle.y}px` }"
++      :aria-label="handle.endpoint === 'source' ? '拖动连接起点' : '拖动连接终点'"
++      @pointerdown.stop.prevent="begin(handle.endpoint, $event)" @pointermove.stop="move"
++      @pointerup.stop="finish" @pointercancel="cancel" @lostpointercapture="cancel"
++      @keydown.esc.stop.prevent="cancel" @click.stop />
++    <span v-if="drag" role="status" class="absolute bottom-12 left-3 rounded bg-panel p-2 text-xs text-surface">
++      {{ drag.candidate ? '松开以连接到此位置' : '拖到对象边缘吸附，Esc 取消' }}
++    </span>
++  </div>
++</template>
+diff --git a/src/components/EditorCanvas.vue b/src/components/EditorCanvas.vue
+--- a/src/components/EditorCanvas.vue
++++ b/src/components/EditorCanvas.vue
+@@ -45,6 +45,7 @@
+ import { useFollowView } from '@/app/presence/follow-view'
+ import { appRuntimeConfig } from '@/app/runtime/config'
+ import CommentsLayer from '@/components/comments/CommentsLayer.vue'
++import LocalConnectionHandles from '@/components/editor/LocalConnectionHandles.vue'
+ import LocalFileBadges from '@/components/editor/LocalFileBadges.vue'
+ import IsolationDraft from '@/components/editor/IsolationDraft.vue'
+ import IssueMarkerTooltip from '@/components/design-check/IssueMarkerTooltip.vue'
+@@ -265,6 +266,7 @@
+         />
+         <IsolationDraft v-if="isolationPrototype && appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <PlayIslands :view="paneView" :drawn="drawnView" :canvas="canvasRef" />
++        <LocalConnectionHandles v-if="appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <LocalFileBadges v-if="appRuntimeConfig.osCanvas && isActivePane" :drawn="drawnView" />
+         <AppDropOverlay :visible="isDraggingOver" />
+         <IssueMarkerTooltip :marker="hoveredIssueMarker" :canvas="canvasRef" />

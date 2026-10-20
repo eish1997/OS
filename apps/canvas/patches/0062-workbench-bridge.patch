@@ -1,0 +1,296 @@
+diff --git a/src/app/document/local-workspace.ts b/src/app/document/local-workspace.ts
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -1,3 +1,4 @@
++import type { CanvasDocumentState } from '#workbench/canvas-bridge'
+ import { workspaceFetch } from '@/app/document/workspace-fetch'
+ import { fromUint8Array } from 'js-base64'
+ import * as v from 'valibot'
+@@ -61,12 +62,15 @@
+ type StoredMount = v.InferOutput<typeof mountSchema>
+ const scanSchema = v.object({ mount: mountSchema, entries: v.array(fileEntrySchema), scanStatus: v.string() })
+ 
++class WorkspaceRequestError extends Error {
++  constructor(readonly status: number, message: string) { super(message); this.name = 'WorkspaceRequestError' }
++}
+ async function request(path: string, init?: RequestInit) {
+   const response = await workspaceFetch(`/os-workspace${path}`, {
+     ...init, headers: { 'X-OS-Workspace': '1', 'Content-Type': 'application/json' },
+     signal: AbortSignal.timeout(30000)
+   })
+-  if (!response.ok) throw new Error(response.status === 409
++  if (!response.ok) throw new WorkspaceRequestError(response.status, response.status === 409
+     ? '画布已有更新，请保留当前内容后重新打开。'
+     : '本机保存服务不可用，内容仍保留在画布中。')
+   return response
+@@ -76,6 +80,10 @@
+   const contentDirty = store.hasUnsavedChanges.bind(store)
+   store.state.autosaveEnabled = true
+   const busy = ref(false)
++  const bridgePaused = ref(false)
++  const failureStatus = ref(0)
++  let requestOpen: ((canvasId: string) => void) | undefined
++  let bridgeOpening = false
+   const error = ref('')
+   const status = ref('尚未保存到本机')
+   const documents = ref<StoredDocument[]>([])
+@@ -109,7 +117,7 @@
+ 
+   function schedule() {
+     clearTimeout(timer)
+-    if (disposed || opening || !store.state.autosaveEnabled || error.value ||
++    if (disposed || opening || bridgePaused.value || !store.state.autosaveEnabled || error.value ||
+         (revision === 0 && !contentDirty()) || (!contentDirty() && !viewDirty.value && !stagedRestore.value)) return
+     timer = setTimeout(() => { if (!busy.value && !output.busy.value) void save() }, 1000)
+   }
+@@ -143,7 +151,7 @@
+   async function scanFiles() { await scanDirectory(false) }
+ 
+   function canScanDirectory(automatic: boolean) {
+-    return Boolean(currentMountId.value) && !scanBusy.value && !busy.value && !opening &&
++    return Boolean(currentMountId.value) && !bridgePaused.value && !scanBusy.value && !busy.value && !opening &&
+       !stagedRestore.value && !(automatic && output.busy.value)
+   }
+ 
+@@ -284,7 +292,7 @@
+     clearTimeout(timer)
+     const currentGeneration = generation
+     const targetId = canvasId
+-    busy.value = true; error.value = ''; status.value = '正在保存'
++    busy.value = true; error.value = ''; failureStatus.value = 0; status.value = '正在保存'
+     try {
+       if (!pending) {
+         // Finish coalesced arrow edits before capturing their history and geometry.
+@@ -328,6 +336,7 @@
+       return !contentDirty() && !viewDirty.value
+     } catch (cause) {
+       if (!isCurrentGeneration(currentGeneration)) return false
++      failureStatus.value = cause instanceof WorkspaceRequestError ? cause.status : 0
+       status.value = '保存失败，可重试'
+       error.value = cause instanceof Error ? cause.message : '保存失败'
+       return false
+@@ -345,6 +354,10 @@
+   }
+ 
+   async function open(document: StoredDocument, restore = false): Promise<boolean> {
++    if (requestOpen && !bridgeOpening && !restore) { requestOpen(document.canvasId); return false }
++    return openDocument(document, restore)
++  }
++  async function openDocument(document: StoredDocument, restore: boolean): Promise<boolean> {
+     if (busy.value) return false
+     if (document.metadata.formatVersion !== 1) {
+       error.value = '不支持的作品格式，请使用兼容版本打开；原作品未修改。'
+@@ -419,6 +432,56 @@
+     if (document.canvasId !== canvasId) { error.value = '历史列表已过期，请重新读取。'; return }
+     if (await open(document, true)) { await save(); await showHistory() }
+   }
++  function bridgeSnapshot(): CanvasDocumentState & { canvasId: string } {
++    const dirty = contentDirty() || viewDirty.value || Boolean(pending) || stagedRestore.value
++    let state: CanvasDocumentState['state'] = 'editable'
++    if (revision > 0) state = 'saved'
++    if (dirty) state = 'dirty'
++    if (error.value) state = 'save-failed'
++    if (error.value && failureStatus.value === 409) state = 'conflict'
++    if (error.value && failureStatus.value === 503) state = 'offline'
++    if (busy.value) state = 'saving'
++    if (opening) state = 'loading'
++    return { canvasId, state, revision, dirty, ...(error.value ? { error: error.value.slice(0, 1024) } : {}) }
++  }
++  function bridgeBusy() { return busy.value || scanBusy.value || mountBusy.value || output.busy.value || opening }
++  async function saveForBridge() {
++    const deadline = Date.now() + 30000
++    while (bridgeBusy()) {
++      if (disposed || Date.now() >= deadline) throw new Error('Canvas operations did not settle')
++      await new Promise(resolve => { setTimeout(resolve, 20) })
++    }
++    if (disposed) throw new Error('Canvas session is closed')
++    // An untouched draft stays memory-only even after a viewport gesture.
++    if (revision === 0 && !contentDirty() && !pending && !stagedRestore.value) {
++      savedViewVersion.value = viewVersion.value
++      return bridgeSnapshot()
++    }
++    if (contentDirty() || viewDirty.value || pending || stagedRestore.value) {
++      if (!await save()) throw new Error(error.value || 'Canvas save was not confirmed')
++    } else if (error.value) {
++      // A list refresh may fail after a successful commit. Retry that read rather
++      // than leaving a clean document permanently failed or adding a revision.
++      error.value = ''; failureStatus.value = 0
++      await refresh()
++      if (error.value) throw new Error(error.value)
++    }
++    return bridgeSnapshot()
++  }
++  async function openFromBridge(targetId: string) {
++    const response = await request(`/canvases/${targetId}`)
++    const document = v.parse(v.pipe(v.string(), v.parseJson(), documentSchema), await response.text())
++    if (document.canvasId !== targetId) throw new Error('Canvas identity mismatch')
++    bridgeOpening = true
++    try { if (!await open(document)) throw new Error(error.value || 'Canvas did not open') }
++    finally { bridgeOpening = false }
++    return bridgeSnapshot()
++  }
++  function pauseForBridge(paused: boolean) {
++    bridgePaused.value = paused
++    if (paused) clearTimeout(timer)
++    else schedule()
++  }
+   const visibleStatus = computed(() => status.value === '已保存到本机' && (contentDirty() || viewDirty.value)
+     ? '有未保存改动' : status.value)
+   function dispose() {
+@@ -431,7 +494,9 @@
+     clearTimeout(scanTimer); stopMountWatch()
+     disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
+   }
+-  return { packages, filter, output, mountRelink, relink, replacement, busy, mountBusy, mounts, refreshMounts, addMount, openMount, openSelectedFolder, currentMountId, scanBusy, scanStatus, scanFiles, error, status: visibleStatus, documents, history, save, refresh, open, showHistory, restoreVersion, dispose,
++  return { bridgeSnapshot, saveForBridge, openFromBridge, pauseForBridge,
++    setOpenRequest: (handler?: (canvasId: string) => void) => { requestOpen = handler },
++    packages, filter, output, mountRelink, relink, replacement, busy, mountBusy, mounts, refreshMounts, addMount, openMount, openSelectedFolder, currentMountId, scanBusy, scanStatus, scanFiles, error, status: visibleStatus, documents, history, save, refresh, open, showHistory, restoreVersion, dispose,
+     hasUnsavedChanges: () => contentDirty() || viewDirty.value || Boolean(pending) || stagedRestore.value }
+ }
+ 
+diff --git a/src/components/editor/OsCanvasWorkspace.vue b/src/components/editor/OsCanvasWorkspace.vue
+--- a/src/components/editor/OsCanvasWorkspace.vue
++++ b/src/components/editor/OsCanvasWorkspace.vue
+@@ -2,6 +2,7 @@
+ import { computed, nextTick, ref, useTemplateRef } from 'vue'
+ 
+ import { useEditorStore } from '@/app/editor/active-store'
++import { useWorkbenchBridge } from '@/app/runtime/workbench-bridge'
+ import { useLocalLayout } from '@/app/shell/local-layout'
+ import { useLocalTitleFonts } from '@/app/document/local-title-fonts'
+ import { useLocalNoteFonts } from '@/app/document/local-note-fonts'
+@@ -19,6 +20,7 @@
+ import { osCanvasWorkspace } from '@/theme/os-canvas-workspace'
+ 
+ const store = useEditorStore()
++useWorkbenchBridge(store)
+ const { titleFontsLoading, titleFontsFailed, retryTitleFonts } = useLocalTitleFonts(store)
+ const { noteFontFailed, retryNoteFonts } = useLocalNoteFonts(store)
+ const { canConnect, connect, missing } = useLocalConnections(store)
+diff --git a/vite/aliases.ts b/vite/aliases.ts
+--- a/vite/aliases.ts
++++ b/vite/aliases.ts
+@@ -4,6 +4,7 @@
+   const emptyNodeModule = resolve(rootDir, 'vite/empty-node-module.ts')
+ 
+   return [
++    { find: '#workbench', replacement: resolve(rootDir, '../../shared') },
+     { find: /^fs$/, replacement: emptyNodeModule },
+     { find: /^path$/, replacement: emptyNodeModule },
+     { find: '@', replacement: resolve(rootDir, 'src') },
+diff --git a/tsconfig.json b/tsconfig.json
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -23,6 +23,7 @@
+     "noUnusedParameters": true,
+     "noFallthroughCasesInSwitch": true,
+     "paths": {
++      "#workbench/*": ["../../shared/*"],
+       "#vite-config/*": ["./vite/*"],
+       "@/*": [
+         "./src/*"
+diff --git a/src/app/runtime/workbench-bridge.ts b/src/app/runtime/workbench-bridge.ts
+--- /dev/null
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -0,0 +1,101 @@
++import { useIntervalFn } from '@vueuse/core'
++import { onScopeDispose, watch } from 'vue'
++import { osEmbedded } from './embedding'
++import { getLocalWorkspace } from '@/app/document/local-workspace'
++import { CanvasBridgeEndpoint, CanvasBridgeError, type CanvasContext, type CanvasEnvelope } from '#workbench/canvas-bridge'
++
++const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context']
++
++export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0]) {
++  if (!osEmbedded) return
++  const workspace = getLocalWorkspace(store)
++  const instanceId = crypto.randomUUID()
++  let context: CanvasContext = { contextEpoch: 0, projectId: null, canvasId: workspace.bridgeSnapshot().canvasId }
++  let initialized = false, modalBlocked = false, switchBlocked = false, disposed = false
++  const applyInteraction = () => { document.body.inert = !initialized || modalBlocked || switchBlocked }
++  const publish = () => {
++    if (!initialized || disposed) return
++    const { canvasId: _canvasId, ...state } = workspace.bridgeSnapshot()
++    endpoint.notify('DOCUMENT_STATE', state)
++  }
++  const endpoint = new CanvasBridgeEndpoint({ instanceId, origin: location.origin,
++    peer: () => window.parent, context: () => context,
++    send: (message, origin) => window.parent.postMessage(message, origin),
++    onCommand: async message => {
++      switch (message.type) {
++        case 'INIT': {
++          const requested = message.payload.capabilities as string[]
++          if (!capabilities.every(capability => requested.includes(capability))) throw new CanvasBridgeError('incompatible-capabilities', '工作台与画板版本不兼容')
++          initialized = true; ready.pause(); applyInteraction()
++          return { capabilities, document: workspace.bridgeSnapshot() }
++        }
++        case 'SAVE': return { document: await workspace.saveForBridge() }
++        case 'PREPARE_SWITCH':
++          switchBlocked = true; workspace.pauseForBridge(true); applyInteraction()
++          return { document: await workspace.saveForBridge() }
++        case 'OPEN_CONTEXT': {
++          if (!switchBlocked) throw new CanvasBridgeError('switch-not-prepared', '切换前必须确认保存')
++          const target = message.payload.target as CanvasContext
++          if (target.contextEpoch <= context.contextEpoch || !target.canvasId) throw new CanvasBridgeError('invalid-context', '画板上下文无效')
++          const state = await workspace.openFromBridge(target.canvasId)
++          context = { ...target }
++          return { document: state, context }
++        }
++        case 'SET_INTERACTION':
++          modalBlocked = message.payload.blocked as boolean
++          if (message.payload.releaseSwitch) { switchBlocked = false; workspace.pauseForBridge(false) }
++          applyInteraction(); return {}
++        case 'THEME': {
++          const colors = message.payload.colors as Record<string, string>
++          for (const [key, value] of Object.entries(colors)) document.documentElement.style.setProperty(`--wb-${key}`, value)
++          const tokens: Record<string, string> = { canvas: 'background', panel: 'surface', 'panel-secondary': 'surface',
++            'panel-field': 'surface', input: 'surface', surface: 'foreground', muted: 'muted', border: 'border', accent: 'accent' }
++          for (const [token, key] of Object.entries(tokens)) document.documentElement.style.setProperty(`--color-${token}`, colors[key])
++          document.documentElement.style.setProperty('--wb-line-width', `${String(message.payload.lineWidth)}px`)
++          return {}
++        }
++        default: throw new CanvasBridgeError('unsupported-command', '不支持的画板命令')
++      }
++    }
++  })
++  const receive = (event: MessageEvent<CanvasEnvelope>) => { endpoint.receive(event) }
++  const pointer = (event: PointerEvent) => {
++    if (!initialized || modalBlocked || switchBlocked) return
++    endpoint.notify('INTERACTION_STARTED', { kind: 'pointer' })
++    if (event.target instanceof HTMLCanvasElement && event.button <= 1) {
++      try { event.target.setPointerCapture(event.pointerId) } catch (error) { if (!(error instanceof DOMException && error.name === 'NotFoundError')) throw error }
++    }
++  }
++  const keyboard = (event: KeyboardEvent) => {
++    if (!initialized || modalBlocked || switchBlocked) return
++    endpoint.notify('INTERACTION_STARTED', { kind: 'keyboard' })
++    if (!event.isComposing && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
++      event.preventDefault(); event.stopImmediatePropagation()
++      void workspace.saveForBridge().catch(() => { publish() })
++    }
++  }
++  const focus = () => { if (initialized) endpoint.notify('FOCUS_CHANGED', { focused: document.hasFocus() }) }
++  workspace.setOpenRequest(canvasId => { if (initialized) endpoint.notify('REQUEST_OPEN', { canvasId }) })
++  const stop = watch(() => workspace.bridgeSnapshot(), publish, { deep: true })
++  window.addEventListener('message', receive)
++  document.addEventListener('pointerdown', pointer, true)
++  document.addEventListener('keydown', keyboard, true)
++  window.addEventListener('focus', focus); window.addEventListener('blur', focus)
++  applyInteraction()
++  const style = document.createElement('style')
++  style.textContent = ['.border{border-width:', '.border-t{border-top-width:', '.border-b{border-bottom-width:', '.border-l{border-left-width:', '.border-r{border-right-width:']
++    .map(rule => `[data-slot="os-canvas-workspace"] ${rule}var(--wb-line-width,1px)}`).join('\n')
++  document.head.append(style)
++  const announce = () => { if (!initialized) endpoint.notify('READY', { capabilities }) }
++  const ready = useIntervalFn(announce, 250, { immediateCallback: true })
++  onScopeDispose(() => {
++    disposed = true; ready.pause(); stop(); endpoint.dispose()
++    style.remove()
++    workspace.setOpenRequest(); workspace.pauseForBridge(false)
++    window.removeEventListener('message', receive)
++    document.removeEventListener('pointerdown', pointer, true)
++    document.removeEventListener('keydown', keyboard, true)
++    window.removeEventListener('focus', focus); window.removeEventListener('blur', focus)
++    document.body.inert = false
++  })
++}

@@ -1,0 +1,105 @@
+--- a/src/app/document/local-workspace.ts
++++ b/src/app/document/local-workspace.ts
+@@ -369,7 +369,7 @@
+     }
+     return openDocument(document, restore)
+   }
+-  async function openDocument(document: StoredDocument, restore: boolean): Promise<boolean> {
++  async function openDocument(document: StoredDocument, restore: boolean, discardLocal = false): Promise<boolean> {
+     if (busy.value) return false
+     if (document.metadata.formatVersion !== 1) {
+       error.value = '不支持的作品格式，请使用兼容版本打开；原作品未修改。'
+@@ -381,7 +381,7 @@
+       return false
+     }
+     const metadata = parsed.output
+-    if (pending || contentDirty() || viewDirty.value || stagedRestore.value) {
++    if (!discardLocal && (pending || contentDirty() || viewDirty.value || stagedRestore.value)) {
+       error.value = '当前画布有未保存内容，请先保存再打开其他画布。'; return false
+     }
+     clearTimeout(timer)
+@@ -510,6 +510,50 @@
+     finally { bridgeOpening = false; bridgeBeforeCommit = undefined; bridgeReadProject = undefined }
+     return bridgeSnapshot()
+   }
++  async function forkForBridge() {
++    if (busy.value || disposed) throw new Error('画板正在处理其他操作，原画板仍保留')
++    if (failureStatus.value !== 409 || !pending) throw new Error('没有可另存的冲突草稿')
++    let source: Record<string, unknown>
++    try { source = JSON.parse(pending.body) as Record<string, unknown> }
++    catch { throw new Error('冲突草稿无法读取，原画板仍保留') }
++    if (typeof source.sceneBase64 !== 'string' || !source.sceneBase64) throw new Error('冲突草稿没有画面数据，原画板仍保留')
++    const metadata = source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata)
++      ? { ...(source.metadata as Record<string, unknown>) } : {}
++    const base = typeof metadata.name === 'string' && metadata.name.trim() ? metadata.name.trim() : '未命名画布'
++    metadata.name = `${base} 副本`.slice(0, 80)
++    const copyId = crypto.randomUUID()
++    const response = await request(`/canvases/${copyId}`, { method: 'POST', body: JSON.stringify({
++      operationId: crypto.randomUUID(), expectedRevision: 0, sceneBase64: source.sceneBase64, metadata
++    }) })
++    const saved = v.parse(v.pipe(v.string(), v.parseJson(), savedSchema), await response.text())
++    if (saved.canvasId !== copyId || saved.revision < 1) throw new Error('副本保存未确认，原画板仍保留')
++    return copyId
++  }
++  async function reloadForBridge() {
++    if (busy.value || disposed) throw new Error('画板正在处理其他操作，冲突草稿仍保留')
++    if (failureStatus.value !== 409 || !pending) throw new Error('当前没有可重载的冲突草稿')
++    const target = canvasId
++    const response = await request(`/canvases/${target}`)
++    const document = v.parse(v.pipe(v.string(), v.parseJson(), documentSchema), await response.text())
++    if (document.canvasId !== target) throw new Error('重载身份不一致，本地草稿仍保留')
++    const kept = pending
++    pending = undefined
++    failureStatus.value = 0
++    error.value = ''
++    bridgeOpening = true
++    try {
++      const opened = await openDocument(document, false, true)
++      if (!opened || canvasId !== target) throw new Error(error.value || '重载未完成，本地草稿仍保留')
++    } catch (cause) {
++      if (canvasId === target && !pending) {
++        pending = kept
++        failureStatus.value = 409
++        if (!error.value) error.value = '重载未完成，本地草稿仍保留'
++      }
++      throw cause instanceof Error ? cause : new Error('重载未完成，本地草稿仍保留')
++    } finally { bridgeOpening = false }
++    return bridgeSnapshot()
++  }
+   async function importForBridge(scene: Uint8Array, name: string, source: Uint8Array = scene, projectId = bridgeProjectId) {
+     if (!requestOpen) throw new Error('工作台连接尚未就绪')
+     const sameProject = () => {
+@@ -557,6 +601,6 @@
+     disposed = true; clearTimeout(timer); stopDirtyWatch(); stopGraphWatch(); stopViewWatch(); stopPageWatch(); changes.dispose(); identity.dispose()
+   }
+-  return { bridgeSnapshot, saveForBridge, openFromBridge, importForBridge, pauseForBridge,
++  return { bridgeSnapshot, saveForBridge, openFromBridge, importForBridge, forkForBridge, reloadForBridge, pauseForBridge,
+     rememberForBridge: async () => {
+       if (!revision) return
+       try { await request('/context/opened', { method: 'POST', body: JSON.stringify({ canvasId }) }) }
+--- a/src/app/runtime/workbench-bridge.ts
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -5,7 +5,7 @@
+ import { setWorkspaceProject } from '@/app/document/workspace-fetch'
+ import { CanvasBridgeEndpoint, CanvasBridgeError, type CanvasContext, type CanvasEnvelope } from '#workbench/canvas-bridge'
+ 
+-const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch', 'project-scope']
++const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch', 'project-scope', 'conflict-recovery']
+ 
+ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0]) {
+   if (!osEmbedded) return
+@@ -40,6 +40,14 @@
+           return { capabilities, document: workspace.bridgeSnapshot() }
+         }
+         case 'SAVE': return { document: await workspace.saveForBridge() }
++        case 'RESOLVE_CONFLICT': {
++          if (message.payload.action === 'reload') return { document: await workspace.reloadForBridge() }
++          if (message.payload.action === 'fork') {
++            const copyId = await workspace.forkForBridge()
++            return { document: workspace.bridgeSnapshot(), copyId }
++          }
++          throw new CanvasBridgeError('unsupported-command', '不支持的冲突处理')
++        }
+         case 'PREPARE_SWITCH':
+           if (typeof message.payload.switchId !== 'string') throw new CanvasBridgeError('invalid-switch', '缺少切换操作身份')
+           switchLease = { id: message.payload.switchId, cancelled: false }

@@ -1,0 +1,58 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { CanvasService } from '../server/canvas-service.js';
+import { CanvasBindings } from '../server/canvas-bindings.js';
+import { CanvasApi } from '../server/canvas-api.js';
+import { Store, AppError } from '../server/store.js';
+import type { Project } from '../shared/contracts.js';
+
+test('real canvas HTTP proxy isolates projects and reconciles the two-store creation boundary',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'canvas-scoped-api-'));
+  const store=new Store(join(root,'host.sqlite'));
+  const service=new CanvasService({entry:resolve('apps/canvas/local/desktop-entry.mjs'),directory:join(root,'canvas'),origin:'http://private.invalid'});
+  const bindings=new CanvasBindings(store),api=new CanvasApi(bindings);
+  const a=store.create<Project>('project',{name:'A',description:'',archived:false}),b=store.create<Project>('project',{name:'B',description:'',archived:false});
+  let origin='';
+  const server=createServer((req,res)=>{void api.handle(req,res,req.url!,service.transport!,origin).catch(error=>{res.writeHead(error instanceof AppError?error.status:500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:String(error)}));});});
+  try{
+    await service.start();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
+    origin=`http://127.0.0.1:${(server.address() as {port:number}).port}`;
+    const request=(path:string,projectId:string|null=a.id,data?:unknown)=>fetch(origin+path,{method:data===undefined?'GET':'POST',headers:{Origin:origin,'Content-Type':'application/json','X-Canvas-Project':projectId??'personal'},body:data===undefined?undefined:JSON.stringify(data)});
+    const payload=(operationId=randomUUID())=>({operationId,expectedRevision:0,sceneBase64:readFileSync('apps/canvas/local/fixtures/revision-2.fig').toString('base64'),metadata:{formatVersion:1,name:'Isolated'}});
+    const canvasId=randomUUID(),data=payload();
+    assert.equal((await request(`/canvases/${canvasId}`,a.id,data)).status,200);
+    assert.equal((await request('/canvases')).status,200);
+    assert.equal((await (await request('/canvases')).json()).length,1);
+    assert.deepEqual(await (await request('/canvases',b.id)).json(),[]);
+    for(const path of [`/canvases/${canvasId}`,`/canvases/${canvasId}/scene`,`/canvases/${canvasId}/revisions`,`/operations/${data.operationId}`])assert.equal((await request(path,b.id)).status,403,path);
+    assert.equal((await request(`/canvases/${canvasId}`,b.id,{...data,expectedRevision:1})).status,403);
+    assert.equal((await request(`/canvases/${canvasId}`,null)).status,403);
+    const unbound=randomUUID();assert.equal((await service.transport!.json(`/canvases/${unbound}`,'POST',JSON.stringify(payload()))).status,200);
+    assert.equal((await request(`/canvases/${unbound}`,a.id,payload())).status,409);
+    assert.equal(bindings.find(unbound),undefined);
+    assert.equal((await (await request('/unbound')).json()).length,1);
+    assert.equal((await request('/associate',a.id,{canvasId:unbound,operationId:randomUUID()})).status,200);
+    assert.equal((await request('/associate',b.id,{canvasId:unbound,operationId:randomUUID()})).status,403);
+    assert.equal((await request('/context/opened',a.id,{canvasId:unbound})).status,200);
+    assert.equal((await (await request('/context')).json()).canvasId,unbound);
+    assert.equal((await (await request('/context',b.id)).json()).draft,true);
+    const interrupted=randomUUID(),pending=payload();bindings.prepare(a.id,interrupted,pending.operationId);
+    assert.equal((await request(`/canvases/${interrupted}`)).status,409);
+    assert.equal((await service.transport!.json(`/canvases/${interrupted}`,'POST',JSON.stringify(pending))).status,200);
+    assert.equal((await request(`/canvases/${interrupted}`)).status,200);
+    assert.equal(bindings.authorize(a.id,interrupted).state,'ready');
+    const uncertain=randomUUID(),uncertainData=payload(),confirm=bindings.confirm.bind(bindings);let fail=true;
+    bindings.confirm=(...args)=>{if(fail){fail=false;throw new AppError(507,'isolated confirmation failure');}return confirm(...args);};
+    assert.equal((await request(`/canvases/${uncertain}`,a.id,uncertainData)).status,507);
+    assert.equal(bindings.find(uncertain)?.state,'prepared');
+    const retried=await request(`/canvases/${uncertain}`,a.id,uncertainData);assert.equal(retried.status,200);assert.equal((await retried.json()).revision,1);
+    assert.equal(bindings.authorize(a.id,uncertain).revision,1);
+    assert.equal((await fetch(origin+`/canvases/${canvasId}`,{method:'POST',headers:{Origin:'https://wrong.invalid','Content-Type':'application/json'},body:JSON.stringify(data)})).status,403);
+    store.update<Project>('project',a.id,a.revision,{archived:true});assert.equal((await request(`/canvases/${canvasId}`)).status,409);
+  }finally{server.closeAllConnections();await new Promise<void>(done=>server.close(()=>done()));await service.dispose();store.db.close();}
+});

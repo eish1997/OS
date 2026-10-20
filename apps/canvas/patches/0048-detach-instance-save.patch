@@ -1,0 +1,24 @@
+diff --git a/packages/scene-graph/src/instances.ts b/packages/scene-graph/src/instances.ts
+--- a/packages/scene-graph/src/instances.ts
++++ b/packages/scene-graph/src/instances.ts
+@@ -2,6 +2,7 @@
+ import type { NodeCloneMode } from './copy'
+ import {
+   clearInstanceOverrides,
++  cloneInstanceOverrideState,
+   getInstanceOverride,
+   hasInstanceOverride as hasNodeInstanceOverride,
+   setInstanceOverride
+@@ -214,9 +215,9 @@
+   if (node.componentId) {
+     graph.instanceIndex.get(node.componentId)?.delete(instanceId)
+   }
+-  node.type = 'FRAME'
+-  node.componentId = null
+-  clearInstanceOverrides(node.instanceOverrides)
++  const overrides = cloneInstanceOverrideState(node.instanceOverrides)
++  clearInstanceOverrides(overrides)
++  graph.updateNode(instanceId, { type: 'FRAME', componentId: null, instanceOverrides: overrides })
+ }
+ 
+ export function getMainComponent(graph: SceneGraph, instanceId: string): SceneNode | undefined {

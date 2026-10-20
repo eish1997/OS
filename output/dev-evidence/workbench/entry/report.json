@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "at": "2026-10-15T07:30:49.752Z",
+  "browser": "155.0.8059.40",
+  "checks": [
+    "local production default route loads new workspace",
+    "window chooser opens and Escape closes",
+    "legacy route loads original UI",
+    "workbench alias loads new UI",
+    "saved user layout unchanged"
+  ],
+  "errors": []
+}

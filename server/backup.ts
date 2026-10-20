@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, lstatSync } from 'node:fs';
 import { join, relative, resolve, dirname, win32, posix } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
 import { Store, AppError } from './store.js';
 import type { Asset, Run } from '../shared/contracts.js';
 import {closeInteractions} from './plugin-interaction.js';
@@ -8,6 +9,37 @@ import {StorageCapacity} from './storage.js';
 function safePath(path:string){for(let p=resolve(path);;p=dirname(p)){if(existsSync(p)&&lstatSync(p).isSymbolicLink())throw new AppError(400,'备份路径包含链接');if(dirname(p)===p)break;}}
 function files(root: string, path = root): string[] { safePath(path);return readdirSync(path).flatMap(name => { const child = join(path, name);safePath(child); if (statSync(child).isDirectory()) return files(root, child); return [relative(root, child).replaceAll('\\', '/')]; }); }
 const hash = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
+const canvasSqlite=new Set(['workspace.sqlite','mounts.sqlite','files.sqlite','outputs.sqlite','package-imports.sqlite','layout.sqlite']);
+function allowedBackupPath(path:string,schema:number){
+  if(path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(path)||/^sessions\/(?:[a-zA-Z0-9_.-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(path))return true;
+  if(schema<2)return false;
+  return /^canvas\/(?:workspace|mounts|files|outputs|package-imports|layout)\.sqlite$/.test(path)||/^canvas\/scenes\/[a-f0-9]{64}\.fig$/.test(path);
+}
+/** Snapshot managed canvas DBs with VACUUM INTO; skip runtime locks and WAL siblings. */
+function backupCanvas(dataDir:string,target:string){
+  const source=join(dataDir,'canvas');
+  if(!existsSync(source))return false;
+  safePath(source);
+  const out=join(target,'canvas');
+  mkdirSync(out,{recursive:true});
+  for(const name of readdirSync(source)){
+    if(name==='service-owner.sqlite'||name.endsWith('-wal')||name.endsWith('-shm')||!canvasSqlite.has(name))continue;
+    const from=join(source,name),to=join(out,name);safePath(from);
+    try{
+      const db=new DatabaseSync(from,{readOnly:true});
+      try{db.exec(`VACUUM INTO '${to.replaceAll("'", "''")}'`);}finally{db.close();}
+    }catch{throw new AppError(409,'画板数据库正在写入，请稍后备份');}
+  }
+  const scenes=join(source,'scenes');
+  if(existsSync(scenes)){
+    mkdirSync(join(out,'scenes'),{recursive:true});
+    for(const name of readdirSync(scenes)){
+      if(!/^[a-f0-9]{64}\.fig$/.test(name))continue;
+      const from=join(scenes,name);safePath(from);cpSync(from,join(out,'scenes',name));
+    }
+  }
+  return true;
+}
 // Interpret saved addresses using the source OS, never the restoring host's
 // path rules. Return a portable relative address only after containment checks.
 export function backupRelativePath(sourceRoot: string, value?: string): string | undefined {
@@ -34,25 +66,26 @@ function backupSnapshot(store: Store, dataDir: string, destination: string, leas
     if (store.list<Run>('run').some(r => r.status === 'running' || r.status === 'waiting_interaction')) throw new AppError(409, '在途任务需先停止或完成');
     mkdirSync(target, { recursive: true });
     const dbPath = join(target, 'workbench.sqlite'); store.db.exec(`VACUUM INTO '${dbPath.replaceAll("'", "''")}'`);
-    const copy = new Store(dbPath); let assetList:Asset[];
+    const copy = new Store(dbPath); let assetList:Asset[]; let hasCanvas=false;
     try {copy.db.exec('DELETE FROM sessions; DELETE FROM node_tokens; DELETE FROM locks;');
     assetList = copy.list<Asset>('asset').filter(a => !a.contentRemoved); mkdirSync(join(target, 'assets'));
     for (const asset of assetList) { if(!/^[a-zA-Z0-9-]+$/.test(asset.locator))throw new AppError(400,'资产备份路径无效');const from = join(dataDir, 'assets', asset.locator);safePath(from); if (hash(from) !== asset.hash) throw new AppError(422, '备份资产校验失败'); cpSync(from, join(target, 'assets', asset.locator)); }
     // No credentials/auth.json, workspaces, caches or uncontrolled files.
     if (existsSync(join(dataDir, 'sessions'))) {files(join(dataDir,'sessions'));cpSync(join(dataDir, 'sessions'), join(target, 'sessions'), { recursive: true, filter: source => statSync(source).isDirectory() || source.endsWith('.jsonl') });}
+    hasCanvas=backupCanvas(dataDir,target);
     }finally{copy.close();}
-    const manifest = { schema: 1, createdAt: new Date().toISOString(), sourceRoot: resolve(dataDir), node: process.version, includesSecrets: false, files: files(target).filter(p => !p.endsWith('-wal') && !p.endsWith('-shm')).map(path => ({ path, sha256: hash(join(target, path)) })), assetCount: assetList.length };
+    const schema=hasCanvas?2:1;
+    const manifest = { schema, createdAt: new Date().toISOString(), sourceRoot: resolve(dataDir), node: process.version, includesSecrets: false, files: files(target).filter(p => !p.endsWith('-wal') && !p.endsWith('-shm')).map(path => ({ path, sha256: hash(join(target, path)) })), assetCount: assetList.length, hasCanvas };
     writeFileSync(join(target, 'manifest.json'), JSON.stringify(manifest, null, 2)); return manifest;
   } finally { if(!leaseOwner)store.release('scheduler', owner); }
 }
 export function verifyBackup(source:string){
   safePath(source);safePath(join(source,'manifest.json'));if(lstatSync(join(source,'manifest.json')).size>2*1024*1024)throw new AppError(400,'备份清单过大');
   const manifest = JSON.parse(readFileSync(join(source, 'manifest.json'), 'utf8')) as { schema: number; sourceRoot: string; files: { path: string; sha256: string }[] };
-  if (manifest.schema !== 1||typeof manifest.sourceRoot!=='string'||!Array.isArray(manifest.files)||manifest.files.length>100000) throw new AppError(400, '备份版本或清单无效');
+  if (![1,2].includes(manifest.schema)||typeof manifest.sourceRoot!=='string'||!Array.isArray(manifest.files)||manifest.files.length>100000) throw new AppError(400, '备份版本或清单无效');
   const paths=new Set<string>();
   for (const file of manifest.files) {
-    // Sessions may include owned run output under .output (e.g. processes.jsonl); segment dots are required.
-    if(typeof file.path!=='string'||typeof file.sha256!=='string'||!/^[a-f0-9]{64}$/.test(file.sha256)||file.path.includes('..')||paths.has(file.path)||!(file.path==='workbench.sqlite'||/^assets\/[a-zA-Z0-9-]+$/.test(file.path)||/^sessions\/(?:[a-zA-Z0-9_.-]+\/)*[a-zA-Z0-9_.-]+\.jsonl$/.test(file.path)))throw new AppError(400,'备份路径或哈希无效');
+    if(typeof file.path!=='string'||typeof file.sha256!=='string'||!/^[a-f0-9]{64}$/.test(file.sha256)||file.path.includes('..')||paths.has(file.path)||!allowedBackupPath(file.path,manifest.schema))throw new AppError(400,'备份路径或哈希无效');
     paths.add(file.path);safePath(join(source,file.path));
     if (hash(join(source, file.path)) !== file.sha256) throw new AppError(422, '备份文件校验失败');
   }

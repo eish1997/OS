@@ -1,0 +1,19 @@
+diff --git a/src/components/properties/component-properties/ResetInstanceAction.vue b/src/components/properties/component-properties/ResetInstanceAction.vue
+--- a/src/components/properties/component-properties/ResetInstanceAction.vue
++++ b/src/components/properties/component-properties/ResetInstanceAction.vue
+@@ -29,6 +29,7 @@
+ function reset() {
+   if (!canReset()) return
+   error.value = ''
++  const selectedIds = [...editor.state.selectedIds]
+   const finish = editor.captureDocumentChange(editor.state.currentPageId)
+   try {
+     const api = new FigmaAPI(editor.graph)
+@@ -36,6 +37,7 @@
+     editor.runLayoutForNode(node.id)
+   } catch (cause) {
+     editor.restoreDocumentChange(finish(), 'before')
++    editor.select(selectedIds.filter(id => editor.graph.getNode(id)))
+     error.value = cause instanceof Error ? cause.message : '无法重置实例修改'
+     return
+   }

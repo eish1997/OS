@@ -1,0 +1,79 @@
+diff --git a/src/components/DesignPanel.vue b/src/components/DesignPanel.vue
+--- a/src/components/DesignPanel.vue
++++ b/src/components/DesignPanel.vue
+@@ -17,6 +17,7 @@
+ import BehaviourPanel from './properties/component-properties/behaviour/BehaviourPanel.vue'
+ import ComponentPropertiesSection from './properties/component-properties/ComponentPropertiesSection.vue'
+ import ComponentPropertyListSection from './properties/component-properties/ComponentPropertyListSection.vue'
++import ResetInstanceAction from './properties/component-properties/ResetInstanceAction.vue'
+ import InstanceUpdateAction from './properties/component-properties/instance-update/InstanceUpdateAction.vue'
+ import PropertyBindButton from './properties/component-properties/PropertyBindButton.vue'
+ import PropertyBoundField from './properties/component-properties/PropertyBoundField.vue'
+@@ -170,6 +171,7 @@
+           />
+           <SelectionActionsControl />
+           <template v-if="node.type === 'INSTANCE'">
++            <ResetInstanceAction :editor="store" :node="node" />
+             <IconButton
+               :label="goToMainComponent.label"
+               data-test-id="instance-go-to-main"
+diff --git a/src/components/properties/component-properties/ResetInstanceAction.vue b/src/components/properties/component-properties/ResetInstanceAction.vue
+new file mode 100644
+--- /dev/null
++++ b/src/components/properties/component-properties/ResetInstanceAction.vue
+@@ -0,0 +1,55 @@
++<script setup lang="ts">
++import { computed, ref } from 'vue'
++
++import { getNodeEditCapability, isEmptyDocumentChange } from '@open-pencil/core/editor'
++import { FigmaAPI } from '@open-pencil/core/figma-api'
++import type { SceneNode } from '@open-pencil/scene-graph'
++
++import type { EditorStore } from '@/app/editor/active-store'
++import IconButton from '@/components/ui/button/IconButton.vue'
++
++const { editor, node } = defineProps<{ editor: EditorStore; node: SceneNode }>()
++const error = ref('')
++const enabled = computed(() =>
++  node.type === 'INSTANCE' &&
++  !!node.componentId &&
++  !!editor.graph.getNode(node.componentId) &&
++  getNodeEditCapability(editor.graph, node.id).editable
++)
++
++function reset() {
++  if (!enabled.value) return
++  error.value = ''
++  const finish = editor.captureDocumentChange(editor.state.currentPageId)
++  try {
++    const api = new FigmaAPI(editor.graph)
++    api.getNodeById(node.id)?.resetOverrides()
++    editor.runLayoutForNode(node.id)
++  } catch (cause) {
++    editor.restoreDocumentChange(finish(), 'before')
++    error.value = cause instanceof Error ? cause.message : '无法重置实例修改'
++    return
++  }
++  const change = finish()
++  if (!isEmptyDocumentChange(change)) {
++    editor.pushUndoStep({
++      label: 'Reset instance overrides',
++      forward: () => editor.restoreDocumentChange(change, 'after'),
++      inverse: () => editor.restoreDocumentChange(change, 'before')
++    })
++  }
++  editor.requestRender()
++}
++</script>
++
++<template>
++  <IconButton
++    label="重置实例修改"
++    :disabled="!enabled"
++    data-test-id="instance-reset-overrides"
++    @click="reset"
++  >
++    <icon-lucide-rotate-ccw class="size-3.5" />
++  </IconButton>
++  <span v-if="error" role="alert" class="text-xs">{{ error }}</span>
++</template>

@@ -1,0 +1,22 @@
+diff --git a/packages/core/src/editor/clipboard.ts b/packages/core/src/editor/clipboard.ts
+--- a/packages/core/src/editor/clipboard.ts
++++ b/packages/core/src/editor/clipboard.ts
+@@ -231,6 +231,10 @@
+         const pasteTarget = replacementTargets[0]?.parentId ?? resolvePasteTarget(ctx)
+         if (!prepareSlotEdits(ctx, [pasteTarget])) return null
+         const operation = prepareClipboardImport(figma.nodes, ctx.graph, pasteTarget, figma.blobs)
++        // Created observers may replace application identities. Capture the source first.
++        const copies = operation.plan.nodes.map(node => ({
++          source: structuredClone(node.props.pluginData ?? []), targetId: node.id
++        }))
+         let deliveryError: CommittedGraphEventError | undefined
+         try {
+           operation.commit()
+@@ -238,6 +242,7 @@
+           if (!(error instanceof CommittedGraphEventError)) throw error
+           deliveryError = error
+         }
++        ctx.emitEditorEvent('clipboard:nodes-copied', copies)
+         const created = operation.plan.rootIds
+         if (created.length === 0) return null
+ 

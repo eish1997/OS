@@ -1,0 +1,21 @@
+{
+  "directory": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\canvas-bridge-recovery-bx54xO",
+  "errors": [],
+  "failed": [
+    {
+      "url": "http://127.0.0.1:9638/api/canvas/workspace/canvases/ba1c1d42-e7f2-4fd6-9a33-670da5663b86",
+      "status": 503
+    },
+    {
+      "url": "http://127.0.0.1:9638/api/canvas/workspace/canvases",
+      "status": 503
+    }
+  ],
+  "offlineVisible": true,
+  "offlineSnapshotPersistedAutomatically": true,
+  "readFailureRecoveredWithoutExtraRevision": true,
+  "recoveredSameCanvas": true,
+  "beforeRevision": 1,
+  "afterRevision": 2,
+  "passed": true
+}

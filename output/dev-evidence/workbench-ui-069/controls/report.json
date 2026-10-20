@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "exclusive toolbar overlays",
+    "menu dismisses on action",
+    "themed select with 30 projects",
+    "keyboard End/Enter selection",
+    "Escape closes project dropdown",
+    "light theme and 3px borders",
+    "800x600 dropdown stays in viewport"
+  ],
+  "errors": []
+}

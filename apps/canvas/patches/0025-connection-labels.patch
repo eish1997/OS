@@ -1,0 +1,152 @@
+diff --git a/src/app/document/local-connection-data.ts b/src/app/document/local-connection-data.ts
+--- a/src/app/document/local-connection-data.ts
++++ b/src/app/document/local-connection-data.ts
+@@ -6,7 +6,7 @@
+ export type AnchorSide = typeof anchorSides[number]
+ export const connectionRoutes = ['straight', 'elbow', 'curve'] as const
+ export type ConnectionRoute = typeof connectionRoutes[number]
+-export type Connection = { version: 1; source: string; target: string; sourceAnchor?: AnchorSide; targetAnchor?: AnchorSide; route?: ConnectionRoute }
++export type Connection = { version: 1; source: string; target: string; sourceAnchor?: AnchorSide; targetAnchor?: AnchorSide; route?: ConnectionRoute; label?: string }
+ 
+ export function anchorPoint(node: SceneNode, requested: AnchorSide | undefined, fallback: AnchorSide = 'right'): [number, number] {
+   const side = requested ?? fallback
+@@ -28,6 +28,7 @@
+         if (['sourceAnchor', 'targetAnchor'].includes(field) && !anchorSides.some(side => side === anchor)) return undefined
+       }
+       if ('route' in value && !connectionRoutes.some(route => route === value.route)) return undefined
++      if ('label' in value && typeof value.label !== 'string') return undefined
+       return value as Connection
+     }
+   } catch { console.warn('关系连接元数据无法解析，原数据已保留。') }
+diff --git a/src/app/document/local-connections.ts b/src/app/document/local-connections.ts
+--- a/src/app/document/local-connections.ts
++++ b/src/app/document/local-connections.ts
+@@ -3,6 +3,7 @@
+ import { getWorldMatrix, getParentWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+ import Matrix from '@open-pencil/scene-graph/matrix'
+ import { connectionNetwork, sameConnectionNetwork } from './local-connection-route'
++import { syncConnectionLabel } from './local-connection-label'
+ import { localNodeId } from './local-identity'
+ import { pluginId, key, relation, anchorPoint } from './local-connection-data'
+ 
+@@ -25,6 +26,7 @@
+       for (const line of nodes) {
+         const link = relation(line)
+         if (!link) continue
++        syncConnectionLabel(editor, line, link.label)
+         const source = identities.get(link.source), target = identities.get(link.target)
+         // Preserve last geometry and metadata when an endpoint disappears. Undo
+         // restores the identity and reconnects; never delete someone else's work.
+@@ -42,6 +44,7 @@
+           line.rotation === 0 && !line.flipX && !line.flipY && sameConnectionNetwork(line, vectorNetwork)) continue
+         editor.graph.updateNode(line.id, { x, y, width, height, rotation: 0, flipX: false, flipY: false,
+           vectorNetwork })
++        syncConnectionLabel(editor, line, link.label)
+       }
+       missing.value = absent
+     } finally { updating = false }
+diff --git a/src/app/document/local-connection-edit.ts b/src/app/document/local-connection-edit.ts
+--- a/src/app/document/local-connection-edit.ts
++++ b/src/app/document/local-connection-edit.ts
+@@ -1,9 +1,11 @@
+-import { computed } from 'vue'
++import { computed, ref } from 'vue'
+ import type { Editor } from '@open-pencil/core/editor'
++import { waitForConnectionLabel } from './local-connection-label'
+ import { key, pluginId, relation } from './local-connection-data'
+ import type { AnchorSide, Connection, ConnectionRoute } from './local-connection-data'
+ 
+ export function useConnectionEdit(editor: Editor) {
++  const labelBusy = ref(false)
+   const selected = computed(() => {
+     void editor.state.sceneVersion
+     if (editor.state.selectedIds.size !== 1) return undefined
+@@ -38,5 +40,16 @@
+   function setRoute(route: ConnectionRoute) {
+     if ((selected.value?.link.route ?? 'straight') !== route) change({ route })
+   }
+-  return { selected, setAnchor, setRoute }
++  async function setLabel(label: string) {
++    const current = selected.value
++    if (!current || current.locked || labelBusy.value || (current.link.label ?? '') === label) return
++    labelBusy.value = true
++    const graph = editor.graph
++    try {
++      change({ label })
++      await Promise.resolve()
++      await waitForConnectionLabel(graph, current.id)
++    } finally { labelBusy.value = false }
++  }
++  return { selected, setAnchor, setRoute, setLabel, labelBusy }
+ }
+diff --git a/src/app/document/local-connection-label.ts b/src/app/document/local-connection-label.ts
+new file mode 100644
+--- /dev/null
++++ b/src/app/document/local-connection-label.ts
+@@ -0,0 +1,36 @@
++import type { Editor } from '@open-pencil/core/editor'
++import { ensureGraphFonts } from '@/app/editor/fonts'
++import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
++
++const pending = new WeakMap<SceneGraph, Map<string, Promise<void>>>()
++export function waitForConnectionLabel(graph: SceneGraph, id: string) { return pending.get(graph)?.get(id) }
++
++const labelKey = 'os.canvas/connectionLabel'
++/** A real text child travels with the vector through copy, delete, history and FIG export. */
++export function syncConnectionLabel(editor: Editor, line: SceneNode, text = '') {
++  const graph = editor.graph
++  let child = graph.getChildren(line.id).find(node => node.pluginData.some(p => p.pluginId === 'os.canvas' && p.key === labelKey))
++  if (!child && !text) return
++  if (!child) child = graph.createNode('TEXT', line.id, {
++    name: '连接标签', width: 240, height: 36, fontSize: 14, fontFamily: 'Inter',
++    textAlignHorizontal: 'CENTER', textAutoResize: 'HEIGHT', locked: true,
++    fills: [{ type: 'SOLID', color: { r: 0.93, g: 0.93, b: 0.93, a: 1 }, opacity: 1, visible: true }],
++    pluginData: [{ pluginId: 'os.canvas', key: labelKey, value: '1' }]
++  })
++  const x = line.width / 2 - child.width / 2, y = line.height / 2 - child.height - 6
++  if (child.text === text && child.visible === Boolean(text) && Math.abs(child.x - x) < 0.00001 && Math.abs(child.y - y) < 0.00001) return
++  const changedText = child.text !== text
++  graph.updateNode(child.id, { text, visible: Boolean(text), x, y })
++  if (changedText && text) {
++    const id = child.id
++    const task = ensureGraphFonts(graph, [id], editor.renderer).then(() => {
++      if (editor.graph !== graph || graph.getNode(id)?.text !== text) return undefined
++      editor.runLayoutForNode(id)
++      editor.requestRender()
++      return undefined
++    }).catch(() => console.warn('连接标签字体加载失败，文字内容已保留。'))
++    const tasks = pending.get(graph) ?? new Map<string, Promise<void>>()
++    tasks.set(line.id, task); pending.set(graph, tasks)
++    void task.then(() => tasks.get(line.id) === task && tasks.delete(line.id))
++  }
++}
+diff --git a/src/components/editor/LocalConnectionPanel.vue b/src/components/editor/LocalConnectionPanel.vue
+--- a/src/components/editor/LocalConnectionPanel.vue
++++ b/src/components/editor/LocalConnectionPanel.vue
+@@ -1,10 +1,14 @@
+ <script setup lang="ts">
++import { ref, watch } from 'vue'
++import AppInput from '@/components/ui/input/AppInput.vue'
+ import { useEditorStore } from '@/app/editor/active-store'
+ import { useConnectionEdit } from '@/app/document/local-connection-edit'
+ import { anchorSides, connectionRoutes } from '@/app/document/local-connection-data'
+ import AppButton from '@/components/ui/button/AppButton.vue'
+ 
+-const { selected, setAnchor, setRoute } = useConnectionEdit(useEditorStore())
++const { selected, setAnchor, setRoute, setLabel, labelBusy } = useConnectionEdit(useEditorStore())
++const draftLabel = ref('')
++watch(() => [selected.value?.id, selected.value?.link.label], () => { draftLabel.value = selected.value?.link.label ?? '' }, { immediate: true })
+ const routeLabels = { straight: '直线', elbow: '折线', curve: '曲线' }
+ const labels = { top: '上', right: '右', bottom: '下', left: '左' }
+ const endpoints = ['source', 'target'] as const
+@@ -18,6 +22,10 @@
+         :aria-pressed="(selected.link.route ?? 'straight') === route"
+         @click="setRoute(route)">{{ routeLabels[route] }}</AppButton>
+     </div>
++    <div class="mb-2 flex gap-1">
++      <AppInput v-model="draftLabel" aria-label="关系标签" placeholder="关系标签" :disabled="selected.locked" @keydown.enter.stop.prevent="setLabel(draftLabel)" />
++      <AppButton :disabled="selected.locked" :loading="labelBusy" @click="setLabel(draftLabel)">应用标签</AppButton>
++    </div>
+     <p class="mb-2">连接位置</p>
+     <div v-for="endpoint in endpoints" :key="endpoint" class="mb-1 flex items-center gap-1">
+       <span>{{ endpoint === 'source' ? '起点' : '终点' }}</span>

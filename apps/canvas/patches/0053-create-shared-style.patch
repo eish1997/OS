@@ -1,0 +1,93 @@
+diff --git a/packages/vue/src/controls/shared-style/use.ts b/packages/vue/src/controls/shared-style/use.ts
+--- a/packages/vue/src/controls/shared-style/use.ts
++++ b/packages/vue/src/controls/shared-style/use.ts
+@@ -1,7 +1,12 @@
+ import { computed } from 'vue'
++import { getNodeEditCapability } from '@open-pencil/core/editor'
+ 
+ import {
+   getSharedStyles,
++  copyFills,
++  copyEffects,
++  copyLayoutGrids,
++  SHARED_TEXT_STYLE_FIELDS,
+   sharedStyleRefKey,
+   sharedStyleTypeForKind,
+   type SceneNode,
+@@ -58,5 +63,47 @@
+     update(`Detach ${kind} style`, () => sharedStyleDetachPatch(kind))
+   }
+ 
+-  return { kind, active, styleId, styles, bind, unbind }
++  function create() {
++    if (!active.value || nodes.value.length !== 1) return
++    const source = nodes.value[0]
++    if (!getNodeEditCapability(store.graph, source.id).editable) return
++    for (let current: SceneNode | undefined = source; current;) {
++      if (current.locked) return
++      current = current.parentId ? store.graph.getNode(current.parentId) : undefined
++    }
++    const fields: Partial<SceneNode> = {}
++    if (kind === 'fill') fields.fills = copyFills(source.fills)
++    else if (kind === 'stroke') fields.fills = source.strokes.map(stroke => ({
++      type: 'SOLID', color: { ...stroke.color }, opacity: stroke.opacity, visible: stroke.visible
++    }))
++    else if (kind === 'effect') fields.effects = copyEffects(source.effects)
++    else if (kind === 'grid') fields.layoutGrids = copyLayoutGrids(source.layoutGrids)
++    else Object.assign(fields, Object.fromEntries(SHARED_TEXT_STYLE_FIELDS.map(key => [key, structuredClone(source[key])])))
++    const label = `${source.name} / ${kind}`
++    const names = new Set(styles.value.map(style => style.name))
++    let name = label
++    for (let suffix = 2; names.has(name); suffix++) name = `${label} ${suffix}`
++    const finish = store.captureDocumentChange(store.state.currentPageId)
++    try {
++      const style = store.graph.createNode(kind === 'text' ? 'TEXT' : (kind === 'grid' ? 'FRAME' : 'RECTANGLE'), store.state.currentPageId, {
++        ...fields, name, internalOnly: true, sharedStyleType: sharedStyleTypeForKind(kind)
++      })
++      store.graph.updateNode(style.id, { source: { ...style.source, id: crypto.randomUUID() } })
++      store.graph.updateNode(source.id, { [refKey]: style.source.id })
++    } catch (error) {
++      store.restoreDocumentChange(finish(), 'before')
++      store.select([source.id])
++      throw error
++    }
++    const change = finish()
++    store.pushUndoStep({
++      label: `Create ${kind} style`,
++      forward: () => store.restoreDocumentChange(change, 'after'),
++      inverse: () => store.restoreDocumentChange(change, 'before')
++    })
++    store.requestRender()
++  }
++
++  const canCreate = computed(() => active.value && nodes.value.length === 1)
++  return { kind, active, styleId, styles, bind, unbind, create, canCreate }
+ }
+diff --git a/src/components/properties/shared-style/useSharedStylePicker.ts b/src/components/properties/shared-style/useSharedStylePicker.ts
+--- a/src/components/properties/shared-style/useSharedStylePicker.ts
++++ b/src/components/properties/shared-style/useSharedStylePicker.ts
+@@ -8,7 +8,7 @@
+   const binding = useSharedStyleBinding(kind)
+   const { active, styleId, styles } = binding
+   const visible = computed(
+-    () => active.value && (styles.value.length > 0 || styleId.value !== null)
++    () => active.value
+   )
+   const hasStyle = computed(() => styleId.value !== null)
+   const value = computed(() => (styleId.value === MIXED ? 'MIXED' : (styleId.value ?? 'NONE')))
+@@ -17,6 +17,7 @@
+       { value: 'NONE', label: panels.value.none }
+     ]
+     if (styleId.value === MIXED) result.unshift({ value: 'MIXED', label: panels.value.mixed })
++    if (binding.canCreate.value) result.push({ value: 'CREATE', label: '从当前对象创建样式' })
+     for (const style of styles.value) result.push({ value: style.id, label: style.name })
+     if (
+       typeof styleId.value === 'string' &&
+@@ -28,6 +29,7 @@
+   })
+   function update(next: string) {
+     if (next === 'MIXED') return
++    if (next === 'CREATE') { binding.create(); return }
+     if (next === 'NONE') binding.unbind()
+     else binding.bind(next)
+   }

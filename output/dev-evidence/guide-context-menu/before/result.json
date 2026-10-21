@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('[data-test-id=\"context-copy\"]')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('[data-test-id=\"context-copy\"]') with timeout 5000ms\n  - waiting for locator('[data-test-id=\"context-copy\"]')\n",
+  "errors": []
+}

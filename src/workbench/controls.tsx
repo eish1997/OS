@@ -2,6 +2,12 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './icons';
 
+/** Layout pixels per viewport pixel. CSS zoom on `html` reports 0.75; unsupported engines report 1. */
+export function uiScale(){
+  const zoom=Number.parseFloat(getComputedStyle(document.documentElement).zoom);
+  return Number.isFinite(zoom)&&zoom>0?zoom:1;
+}
+
 export function useWorkbenchDialog(){
   const [pending,setPending]=useState<{title:string;value?:string;resolve:(value:string|null)=>void}>();
   const element=useRef<HTMLDialogElement>(null);
@@ -32,9 +38,14 @@ export function Select({children,value,onValueChange,'aria-label':label}: {
   const search=useRef({text:'',time:0});
   const selected=options.findIndex(o=>o.value===value);
   function place(){
+    const scale=uiScale();
     const r=trigger.current!.getBoundingClientRect(),below=innerHeight-r.bottom-12,above=r.top-12;
-    const height=Math.min(280,Math.max(below,above));
-    setRect({left:Math.max(8,Math.min(r.left,innerWidth-Math.max(220,r.width)-8)),top:below>=Math.min(280,options.length*36+8)?r.bottom+4:Math.max(8,r.top-Math.min(height,options.length*36+8)-4),width:Math.min(innerWidth-16,Math.max(220,r.width)),maxHeight:height});
+    const row=36*scale,wanted=Math.min(280*scale,options.length*row+8);
+    const height=Math.min(wanted,Math.max(below,above));
+    const width=Math.min(innerWidth-16,Math.max(220*scale,r.width));
+    const left=Math.max(8,Math.min(r.left,innerWidth-width-8));
+    const top=below>=wanted?r.bottom+4:Math.max(8,r.top-height-4);
+    setRect({left:left/scale,top:top/scale,width:width/scale,maxHeight:height/scale});
   }
   function show(){place();setActive(Math.max(0,selected));setOpen(true);}
   useEffect(()=>{

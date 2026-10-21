@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-21T04:06:09.190Z",
+  "node": "v22.20.0",
+  "kind": "documentation-only",
+  "productImplementationStarted": false,
+  "realModelCalls": 0,
+  "checks": {
+    "tasks17": true,
+    "taskLedgerMatches": true,
+    "scenarios24": true,
+    "acceptanceMatches": true,
+    "allTodo": true,
+    "allScenariosPending": true,
+    "dependencyGraphValid": true,
+    "planLinksExist": true,
+    "singleAgent": true,
+    "historicalEvidenceProtected": true,
+    "isolatedBuild": true
+  },
+  "missingLinks": []
+}

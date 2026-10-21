@@ -1,0 +1,63 @@
+{
+  "phase": "after",
+  "at": "2026-10-20T16:33:35.786Z",
+  "health": {
+    "ready": true,
+    "pid": 43904,
+    "instanceId": "a5ce0cf8-d47e-46cb-b836-712161698651",
+    "launchId": "abf2208f-d364-4d4f-bc3f-9f8a10504256"
+  },
+  "collections": {
+    "projects": {
+      "count": 22,
+      "digest": "9086a0d07f5147ec4e465e8ccaadda764d33a55f78bac8bdd1762671137ba164"
+    },
+    "summaries": {
+      "count": 2,
+      "digest": "61e34194ecb2d169c737f7db566361824826c9259b6d3acd2aa997f94e38696d"
+    },
+    "tasks": {
+      "count": 45,
+      "digest": "06c701cd64a47ecda10547837de0d611ca04be4544492530f532f36101c3535f"
+    },
+    "assets": {
+      "count": 56,
+      "digest": "057574a64cae2017a502c20fe767a063237aecde54f11160cdc1d2bb4c4a129e"
+    },
+    "memories": {
+      "count": 5,
+      "digest": "7621e0a12be189d85008febdf00d17f8fdd38652800183cef6af383688edccf3"
+    },
+    "drafts": {
+      "count": 16,
+      "digest": "f97ce9dbb1d0308edc1e7e3d52b321032a0bc0777e8deaa0bb4b1c16874a8e82"
+    },
+    "inbox": {
+      "count": 2,
+      "digest": "0bf1312c77e8ef0f15362108d0cac861f84d4252ff254d453cf8aa82e287ec3f"
+    },
+    "operations": {
+      "count": 84,
+      "digest": "0b8d6c31aa4dd7a228db518a3d7339f9d1e5e71023ba616ccceaf987f4a32d5a"
+    }
+  },
+  "activeRuns": [],
+  "backupBusy": false,
+  "canvas": {
+    "enabled": true,
+    "state": "ready"
+  },
+  "resources": [
+    {
+      "path": "/",
+      "status": 200,
+      "assets": 1
+    },
+    {
+      "path": "/canvas/",
+      "status": 200,
+      "assets": 7
+    }
+  ],
+  "canvasPackage": "F:\\AI\\OS\\.runtime\\canvas-workbench-package-071-guide"
+}

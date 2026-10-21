@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-21T04:06:09.114Z",
+  "node": "v22.20.0",
+  "kind": "documentation-only",
+  "reviewers": [
+    "review_ux_scope",
+    "review_loop_dependencies",
+    "review_validation_safety"
+  ],
+  "scopedFollowupReview": {
+    "review_ux_scope": "R03-R08 verified",
+    "review_loop_dependencies": "R01/R02/R09/R10 verified",
+    "review_validation_safety": "R01/R11/R12/R13 verified"
+  },
+  "consolidatedItems": 13,
+  "productImplementationStarted": false,
+  "realModelCalls": 0,
+  "checks": {
+    "version11": true,
+    "tasks17": true,
+    "taskLedgerMatches": true,
+    "scenarios24": true,
+    "acceptanceMatches": true,
+    "allTodo": true,
+    "allScenariosPending": true,
+    "declaredDependencyGraphValid": true,
+    "offlineGateExcludesModelAndDeployment": true,
+    "originalImplicitGateRejected": true,
+    "separateCompletionStates": true,
+    "reviewItems13": true,
+    "measurableContract": true,
+    "versionToolAndAttachmentContract": true,
+    "preImportIsolation": true,
+    "linksExist": true
+  },
+  "missingLinks": []
+}

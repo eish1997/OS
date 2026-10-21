@@ -1,0 +1,135 @@
+diff --git a/src/app/shell/theme.ts b/src/app/shell/theme.ts
+index d0eb7d1..b10890b 100644
+--- a/src/app/shell/theme.ts
++++ b/src/app/shell/theme.ts
+@@ -1,5 +1,5 @@
+ import { useLocalStorage, usePreferredDark } from '@vueuse/core'
+-import { computed, watch } from 'vue'
++import { computed, ref, watch } from 'vue'
+ 
+ import type { RulerTheme } from '@open-pencil/core/canvas'
+ import { IS_BROWSER } from '@open-pencil/core/constants'
+@@ -18,8 +18,23 @@ const DEFAULT_THEME: AppTheme = 'dark'
+ 
+ const theme = useLocalStorage<AppTheme>(THEME_STORAGE_KEY, DEFAULT_THEME)
+ const prefersDark = usePreferredDark()
++/** Set by the workbench THEME command. Absent means the embedded canvas stays dark. */
++const hostTheme = ref<'dark' | 'light' | null>(null)
++let hostBackground: { r: number; g: number; b: number; a: number } | null = null
++let paintedBackground: { r: number; g: number; b: number; a: number } | null = null
++const defaultPageColors = [
++  { r: 0.96, g: 0.96, b: 0.96 },
++  { r: 1, g: 1, b: 1 },
++  { r: 0x1e / 255, g: 0x1e / 255, b: 0x1e / 255 },
++  { r: 0x10 / 255, g: 0x10 / 255, b: 0x10 / 255 }
++]
++function nearColor(left: { r: number; g: number; b: number }, right: { r: number; g: number; b: number }): boolean {
++  const scale = (value: number) => Math.round(value * 255)
++  return Math.abs(scale(left.r) - scale(right.r)) <= 1 && Math.abs(scale(left.g) - scale(right.g)) <= 1 && Math.abs(scale(left.b) - scale(right.b)) <= 1
++}
+ /** The theme in effect; a stored value that is not a theme reads as the default dark. */
+ export const resolvedAppTheme = computed<'dark' | 'light'>(() => {
++  if (hostTheme.value) return hostTheme.value
+   if (appRuntimeConfig.osCanvas) return 'dark'
+   if (theme.value === 'auto') return prefersDark.value ? 'dark' : 'light'
+   return theme.value === 'light' ? 'light' : 'dark'
+@@ -43,11 +58,38 @@ function updateCanvasTheme(): void {
+   store.state.rulerTheme = readRulerTheme() ?? undefined
+   store.state.theme = resolvedAppTheme.value
+   store.state.selectionTheme = appRuntimeConfig.osCanvas
+-    ? { color: parseColor('#EEEEEE'), foreground: parseColor('#24231F') }
++    ? resolvedAppTheme.value === 'light'
++      ? { color: parseColor('#24231F'), foreground: parseColor('#FFFFFF') }
++      : { color: parseColor('#EEEEEE'), foreground: parseColor('#24231F') }
+     : accentPalette.value.selection
++  paintHostPageBackground()
+   store.requestRepaint()
+ }
+ 
++/** Follow the workbench palette. Default page fills are presentation-only and are not written into the document. */
++export function applyHostCanvasTheme(background: string): void {
++  if (!/^#[\da-f]{6}$/i.test(background)) return
++  const color = parseColor(background)
++  const luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
++  hostBackground = { ...color, a: 1 }
++  hostTheme.value = luminance > 0.6 ? 'light' : 'dark'
++  paintHostPageBackground()
++}
++
++export function paintHostPageBackground(): void {
++  if (!hostBackground) return
++  const store = getActiveEditorStoreOrNull()
++  if (!store) return
++  const current = store.state.pageColor
++  const replaceable = defaultPageColors.some(color => nearColor(current, color)) || (paintedBackground !== null && nearColor(current, paintedBackground))
++  if (!replaceable) return
++  paintedBackground = hostBackground
++  if (nearColor(current, hostBackground)) return
++  store.state.pageColor = { ...hostBackground }
++  // Repaint keeps the pan snapshot, which still has the old white clear baked in.
++  store.requestRender()
++}
++
+ export function getAppTheme(): AppTheme {
+   return theme.value
+ }
+@@ -57,6 +99,7 @@ export function setAppTheme(value: AppTheme): void {
+ }
+ 
+ function applyAccent(palette: AccentPalette): void {
++  if (hostTheme.value) return
+   const style = document.documentElement.style
+   const tokens = appRuntimeConfig.osCanvas ? {
+     '--color-accent': '#EEEEEE',
+diff --git a/src/theme/tokens.css b/src/theme/tokens.css
+index 29bccae..d964ea7 100644
+--- a/src/theme/tokens.css
++++ b/src/theme/tokens.css
+@@ -102,8 +102,7 @@
+ }
+ 
+ /* OS Factory + ASCII shell: scope the prototype to its workspace. */
+-html[data-os-canvas='true'],
+-.os-canvas-workspace {
++html[data-os-canvas='true'] {
+   --color-panel: #191919;
+   --color-panel-secondary: #141414;
+   --color-panel-field: #242321;
+diff --git a/src/app/runtime/workbench-bridge.ts b/src/app/runtime/workbench-bridge.ts
+index 001244b..d45b8d1 100644
+--- a/src/app/runtime/workbench-bridge.ts
++++ b/src/app/runtime/workbench-bridge.ts
+@@ -4,6 +4,7 @@ import { osEmbedded } from './embedding'
+ import { getLocalWorkspace } from '@/app/document/local-workspace'
+ import { setWorkspaceProject } from '@/app/document/workspace-fetch'
+ import { CanvasBridgeEndpoint, CanvasBridgeError, type CanvasContext, type CanvasEnvelope } from '#workbench/canvas-bridge'
++import { applyHostCanvasTheme, paintHostPageBackground } from '@/app/shell/theme'
+ 
+ const capabilities = ['save-barrier', 'document-state', 'interaction', 'theme', 'open-context', 'cancel-switch', 'project-scope', 'conflict-recovery']
+ 
+@@ -20,6 +21,8 @@ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0
+     }
+   }
+   const applyInteraction = () => { document.body.inert = !initialized || modalBlocked || switchBlocked }
++  const stopGraph = store.onEditorEvent('graph:replaced', () => paintHostPageBackground())
++  const stopNode = store.onEditorEvent('node:updated', id => { if (id === store.state.currentPageId) paintHostPageBackground() })
+   const publish = () => {
+     if (!initialized || disposed) return
+     const { canvasId, ...state } = workspace.bridgeSnapshot()
+@@ -86,6 +89,7 @@ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0
+             'panel-field': 'surface', input: 'surface', surface: 'foreground', muted: 'muted', border: 'border', accent: 'accent' }
+           for (const [token, key] of Object.entries(tokens)) document.documentElement.style.setProperty(`--color-${token}`, colors[key])
+           document.documentElement.style.setProperty('--wb-line-width', `${String(message.payload.lineWidth)}px`)
++          applyHostCanvasTheme(colors.background)
+           return {}
+         }
+         default: throw new CanvasBridgeError('unsupported-command', '不支持的画板命令')
+@@ -126,7 +130,7 @@ export function useWorkbenchBridge(store: Parameters<typeof getLocalWorkspace>[0
+   const announce = () => { if (!initialized) endpoint.notify('READY', { capabilities }) }
+   const ready = useIntervalFn(announce, 250, { immediateCallback: true })
+   onScopeDispose(() => {
+-    disposed = true; ready.pause(); stop(); endpoint.dispose()
++    disposed = true; ready.pause(); stop(); stopGraph(); stopNode(); endpoint.dispose()
+     style.remove()
+     workspace.setOpenRequest(); workspace.pauseForBridge(false)
+     window.removeEventListener('message', receive)

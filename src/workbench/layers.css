@@ -1,6 +1,6 @@
 /* Three visual layers. Transparent wrappers never own input; content explicitly opts in. */
 .wb-surface{isolation:isolate;background:transparent}
-.wb-canvas-layer{position:absolute;inset:0;z-index:0;background:var(--bg-canvas);overflow:hidden;touch-action:none}
+.wb-canvas-layer{position:absolute;inset:0;z-index:0;background:var(--bg-canvas);overflow:hidden;touch-action:none;zoom:calc(1 / .75)}
 .wb-canvas-frame{display:block;width:100%;height:100%;border:0;background:var(--bg-canvas)}
 .wb-dock-scroll{z-index:1}
 .wb-root.canvas-focus :is(.wb-dock-scroll,.wb-floating,.wb-floating-icon,.wb-collection){visibility:hidden;pointer-events:none}
@@ -32,3 +32,13 @@
 .wb-surface:has(.wb-welcome) .wb-dock-scroll{visibility:hidden}
 /* Modal backdrops deliberately block the canvas; dialogs are not workspace windows. */
 .wb-canvas-error{position:absolute;left:16px;bottom:16px;max-width:420px;padding:12px;background:var(--bg-surface);color:var(--text-primary);border:var(--line-width,1px) solid var(--border);pointer-events:auto;z-index:2}
+/* Canvas is the page. Status sits in one cluster; region tools float so they do not reserve a strip. */
+.wb-root.canvas-on .wb-toolbar{height:auto;flex-wrap:wrap;row-gap:8px}
+.wb-root.canvas-on .wb-toolbar-actions{flex-wrap:wrap;row-gap:8px}
+.wb-root.canvas-on .wb-region:not(:has(.wb-panel)) .wb-region-tools{position:absolute;right:8px;bottom:8px;z-index:6;min-height:0;border:var(--line-width,1px) solid var(--border-subtle);border-radius:4px;background:var(--bg-surface);box-shadow:0 4px 16px #0006}
+.wb-root.canvas-on .wb-region:not(:has(.wb-panel)) .wb-region-tools button{min-width:32px;min-height:32px}
+.wb-root.canvas-on .wb-status{height:28px;font-size:12px}
+.wb-root.canvas-on .wb-status span:last-child{display:none}
+.wb-root.canvas-focus .wb-nav,.wb-root.canvas-focus .wb-status,.wb-root.canvas-focus .wb-layout-cluster,.wb-root.canvas-focus .wb-context{display:none}
+.wb-root.canvas-focus .wb-toolbar{height:44px;min-height:44px;flex-wrap:nowrap;padding:0 16px;background:var(--bg-sidebar)}
+.wb-root.canvas-focus .wb-canvas-cluster{border:0;margin:0;padding:0}

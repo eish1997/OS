@@ -154,7 +154,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:900px){.wb-toolbar{padding:6px 8px}.wb-toolbar-actions{gap:2px;flex-wrap:wrap}.wb-nav{padding:0 4px 12px}.wb-breadcrumb{display:none}.wb-reading{padding:16px}.wb-status{gap:8px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}.wb-assets-pane{container-type:inline-size}
 @container (min-width:640px){.wb-assets-content{flex-direction:row}.wb-files{width:220px;flex:0 0 220px;max-height:none;border-bottom:0;border-right:var(--line-width, 1px) solid var(--border-subtle)}.wb-preview{min-width:0}.wb-assets-pane>input{max-width:320px}}/* Appearance and revised workspace hierarchy. */
-.wb-root{overflow:hidden;display:flex;height:100dvh;color:var(--text-primary);background:var(--bg-canvas);--line-width:1px}
+html{zoom:.75}body{margin:0}.wb-root{overflow:hidden;display:flex;width:100%;height:calc(100dvh / .75);color:var(--text-primary);background:var(--bg-canvas);--line-width:1px}
 .wb-icon{display:inline-block;width:16px;height:16px;flex:none;vertical-align:middle}
 .wb-nav{flex-shrink:0;background:var(--bg-sidebar);border-right:var(--line-width, 1px) solid var(--border-subtle);display:flex;flex-direction:column;width:208px;align-items:stretch;padding:0 12px 12px;gap:8px}
 .wb-logo{margin:0;font:23px var(--font-mono);align-items:center;display:flex;font-size:26px;font-weight:700;position:relative;margin-bottom:16px;height:56px;flex-shrink:0;padding:0 8px;color:var(--text-primary)}
@@ -172,10 +172,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .nav-collapsed .wb-nav-label{display:none}
 .nav-collapsed .wb-nav-action,.nav-collapsed .wb-nav-spaces button{justify-content:center;padding:10px}
 .nav-collapsed .wb-logo{padding:0;justify-content:center}
-.wb-toolbar{display:flex;justify-content:space-between;align-items:center;border-bottom:var(--line-width, 1px) solid var(--border-subtle);background:var(--bg-surface);height:56px;min-height:56px;flex-shrink:0;padding:6px 24px;gap:12px}
+.wb-toolbar{display:flex;justify-content:space-between;align-items:center;border-bottom:var(--line-width, 1px) solid var(--border-subtle);background:var(--bg-surface);height:56px;min-height:56px;flex-shrink:0;padding:6px 24px;gap:16px}
 .wb-space-name{padding:6px 4px;font-size:14px;font-weight:500}
-.wb-toolbar-actions{display:flex;align-items:center;gap:12px}
-.wb-toolbar-actions>button,.wb-toolbar summary{font-size:13px;min-height:32px;padding:6px 10px}
+.wb-toolbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex:1;min-width:0}
+.wb-context,.wb-layout-cluster,.wb-canvas-cluster{display:flex;align-items:center;gap:8px;min-width:0}
+.wb-canvas-cluster{margin-right:4px;padding-right:12px;border-right:var(--line-width,1px) solid var(--border-subtle)}
+.wb-canvas-cluster .wb-save{border-color:transparent;color:var(--text-muted);font-size:12px;padding:4px 8px;min-height:28px}
+.wb-canvas-cluster .wb-save.is-alert{color:var(--status-danger)}
+.wb-layout-cluster>button,.wb-toolbar summary,.wb-context>button{font-size:13px;min-height:32px;padding:6px 10px}
 .wb-save{color:var(--text-secondary);padding-right:8px;font-size:12px}
 button.wb-primary,.wb-chat-composer>div>button:last-child,.wb-login button{background:var(--action-bg,var(--bg-paper));color:var(--action-text,var(--text-ink));border-color:var(--action-bg,var(--bg-paper))}
 button.wb-primary:hover,.wb-chat-composer>div>button:last-child:hover{background:var(--action-bg,var(--bg-paper));filter:brightness(1.08)}

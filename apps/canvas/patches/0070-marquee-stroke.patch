@@ -1,0 +1,26 @@
+diff --git a/packages/core/src/canvas/overlays/feedback.ts b/packages/core/src/canvas/overlays/feedback.ts
+index 490873f..1c4af1d 100644
+--- a/packages/core/src/canvas/overlays/feedback.ts
++++ b/packages/core/src/canvas/overlays/feedback.ts
+@@ -49,6 +49,8 @@ export function drawMarquee(r: SkiaRenderer, canvas: Canvas, marquee?: Rect | nu
+ 
+   r.auxFill.setColor(r.selColor(MARQUEE_FILL_ALPHA))
+   canvas.drawRect(rect, r.auxFill)
++  // A single selected layer leaves this shared paint at 1/zoom for its scene-space outline.
++  r.selectionPaint.setStrokeWidth(1)
+   canvas.drawRect(rect, r.selectionPaint)
+ }
+ 
+diff --git a/packages/core/src/canvas/overlays/selection.ts b/packages/core/src/canvas/overlays/selection.ts
+index 7112ac7..307c905 100644
+--- a/packages/core/src/canvas/overlays/selection.ts
++++ b/packages/core/src/canvas/overlays/selection.ts
+@@ -119,6 +119,8 @@ function drawSingleSelection(
+     r.drawSelectionLabels(canvas, graph, selectedIds, overlays)
+   }
+   r.selectionPaint.setColor(r.selColor())
++  // The marquee is drawn afterwards in screen pixels and shares this paint.
++  r.selectionPaint.setStrokeWidth(1)
+ }
+ 
+ export function drawSelection(

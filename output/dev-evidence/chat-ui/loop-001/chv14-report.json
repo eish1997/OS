@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-21T16:22:54.235Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "seededMessages": 55,
+  "deepPagination": {
+    "pages": 1,
+    "foundOldest": true
+  },
+  "searchCancel": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

@@ -1,10 +1,16 @@
-import { setGlobalProxyFromEnv } from 'node:http';
+import * as nodeHttp from 'node:http';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
 type SystemProxy = { enabled: boolean; server?: string; pac?: boolean };
 type ProxyEnv = { HTTP_PROXY: string; HTTPS_PROXY: string; NO_PROXY: string };
+type ProxyFromEnv = (env: NodeJS.ProcessEnv) => unknown;
 let selected: ProxyEnv | undefined;
+/** Node 24.14+ ships this; older 24.x must not fail module load for offline/direct harnesses. */
+function proxyFromEnvApi(): ProxyFromEnv | undefined {
+  const candidate = (nodeHttp as { setGlobalProxyFromEnv?: ProxyFromEnv }).setGlobalProxyFromEnv;
+  return typeof candidate === 'function' ? candidate : undefined;
+}
 /** Reuse deployment/user network configuration; never change the Windows settings. */
 export function selectProxy(env: NodeJS.ProcessEnv, system?: SystemProxy): ProxyEnv {
   const mode = env.WORKBENCH_PROXY_MODE || 'auto';
@@ -37,7 +43,11 @@ export function initializeNetwork() {
   if (selected) return;
   const explicit = process.env.http_proxy || process.env.HTTP_PROXY || process.env.https_proxy || process.env.HTTPS_PROXY;
   selected = selectProxy(process.env, process.platform === 'win32' && !explicit && (!process.env.WORKBENCH_PROXY_MODE || process.env.WORKBENCH_PROXY_MODE === 'auto') ? windowsProxy() : undefined);
-  if (typeof setGlobalProxyFromEnv !== 'function') throw new Error('Network proxy support requires Node.js 24.14+');
+  const setGlobalProxyFromEnv = proxyFromEnvApi();
+  if (!setGlobalProxyFromEnv) {
+    if (selected.HTTP_PROXY || selected.HTTPS_PROXY) throw new Error('Network proxy support requires Node.js 24.14+');
+    return;
+  }
   setGlobalProxyFromEnv(selected);
 }
 /** Only the chosen route reaches the restricted worker, without inherited global credentials. */

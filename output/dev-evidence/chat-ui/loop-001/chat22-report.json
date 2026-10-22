@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-21T17:16:32.477Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "backup": {
+    "includesSecrets": false,
+    "fileCount": 1,
+    "secretsExcluded": true
+  },
+  "restore": {
+    "restored": true,
+    "dataDir": "C:\\Users\\ZYF\\AppData\\Local\\Temp\\chat-ui-chat22-B7b4ft\\restored",
+    "credentialsMustBeConfigured": true
+  },
+  "restoredApiHistory": true,
+  "restoredUiHistory": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

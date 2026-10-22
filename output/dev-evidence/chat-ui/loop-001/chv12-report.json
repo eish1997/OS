@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-21T16:21:25.927Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "toolSeeded": {
+    "id": "73c8aaa6-e71e-400d-a7f9-65d11f1defca:cf95b259b558b484786ee66f2f5008fa6a8da802488bdfae2a370ef0c1335c4b",
+    "outcomeUnknown": true
+  },
+  "recoveryHint": true,
+  "reconciled": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

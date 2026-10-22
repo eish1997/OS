@@ -1,0 +1,15 @@
+(node:14892) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+F:\AI\OS\server\network.ts:48
+    if (selected.HTTP_PROXY || selected.HTTPS_PROXY) throw new Error('Network proxy support requires Node.js 24.14+');
+                                                           ^
+
+
+Error: Network proxy support requires Node.js 24.14+
+    at initializeNetwork (F:\AI\OS\server\network.ts:48:60)
+    at <anonymous> (F:\AI\OS\server\index.ts:7:1)
+    at ModuleJob.run (node:internal/modules/esm/module_job:371:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:669:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.5.0

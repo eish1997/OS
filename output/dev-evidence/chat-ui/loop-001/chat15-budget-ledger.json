@@ -1,0 +1,25 @@
+{
+  "totalCalls": 16,
+  "totalSpentUsd": 0.0067474679999999995,
+  "totalSpentCnyApprox": 0.0486,
+  "sessions": [
+    {
+      "at": "2026-10-22T03:06:49.530Z",
+      "calls": 10,
+      "spentUsd": 0.004471619999999999,
+      "stages": [
+        "ui-tool-write_asset",
+        "ui-steer-or-queue",
+        "ui-image",
+        "ui-cancel-recover"
+      ]
+    },
+    {
+      "at": "2026-10-22T03:11:07.205Z",
+      "kind": "steer-queue",
+      "calls": 6,
+      "spentUsd": 0.002275848
+    }
+  ],
+  "at": "2026-10-22T03:07:56.128Z"
+}

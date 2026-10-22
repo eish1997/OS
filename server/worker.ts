@@ -96,7 +96,7 @@ process.on('message', async (message: unknown) => {
       stage='model_auth';const initialCredential=await rpc('credential') as {apiKey:string};dialogs.protect([initialCredential.apiKey]);await runtime.setRuntimeApiKey(input.model.provider,initialCredential.apiKey);
       const model = runtime.getModel(input.model.provider, input.model.id); if (!model) throw new Error('固定版本中没有该模型');
       stage='image_validation';
-      const attached=input.run.sessionAction==='compact'?{images:[],provenance:[]}:await rpc('image_attachments',{supportsImages:model.input.includes('image')}) as Awaited<ReturnType<typeof imageAttachments>>;
+      const attached=input.run.sessionAction==='compact'||input.run.sessionAction==='regenerate'?{images:[],provenance:[]}:await rpc('image_attachments',{supportsImages:model.input.includes('image')}) as Awaited<ReturnType<typeof imageAttachments>>;
       if(cancelled)throw new Error('执行已取消');
       const imageSources=attached.provenance.length?'\n图片来源（依附件顺序，原图资产与发送尺寸）：'+JSON.stringify(attached.provenance):'';
       let sessionQuota: ReturnType<typeof guardSessionPersistence> | undefined;
@@ -138,7 +138,9 @@ process.on('message', async (message: unknown) => {
           const store=new Store(join(capacity.dataDir,'workbench.sqlite'),{readOnly:true});
           try{return forkImportedSession(pi,store,capacity,input.run.projectId,source.importId,source.sha256,source.entryId);}finally{store.close();}
         }
-        return input.run.continuation?forkNative(pi,input.continuationPath!,input.run.continuation,input.run.projectId,input.cwd,input.sessionDir,capacity!):pi.SessionManager.create(input.cwd,input.sessionDir);
+        if(!input.run.continuation)return pi.SessionManager.create(input.cwd,input.sessionDir);
+        const forkOptions=input.run.sessionAction==='regenerate'?{versionKind:'regenerate' as const}:input.run.versionKind==='edit_resend'?{versionKind:'edit_resend' as const}:undefined;
+        return forkNative(pi,input.continuationPath!,input.run.continuation,input.run.projectId,input.cwd,input.sessionDir,capacity!,forkOptions);
       })();
       if (input.storage) sessionQuota = guardSessionPersistence(manager, new StorageCapacity(input.storage.dataDir, input.storage.limits,1000));
       if(input.run.importedContinuation&&!model.input.includes('image')&&contextImageCount(manager.buildSessionContext().messages))throw new Error('导入历史含图片，当前模型不支持图片');
@@ -207,6 +209,12 @@ process.on('message', async (message: unknown) => {
         if (!input.run.continuation) throw new Error('手动压缩缺少源会话');
         stage = 'session_compaction';
         await session.compact(input.run.compactionFocus);
+      } else if (input.run.sessionAction === 'regenerate') {
+        if (!input.run.continuation?.entryId) throw new Error('重新生成缺少合法原生基点');
+        if(cancelled)throw new Error('执行已取消');
+        stage = 'session_regenerate';
+        // Continue from user/toolResult leaf: keeps completed tools, does not append a new user prompt.
+        await session.agent.continue();
       } else {
         if(cancelled)throw new Error('执行已取消');
         // Keep slash-command text intact. Provenance is a native custom entry,
@@ -231,6 +239,7 @@ process.on('message', async (message: unknown) => {
       dialogs?.stop();await session.extensionRunner.emit({ type: 'session_shutdown', reason: 'quit' }); sessionShutdown = true;
       if (pluginError) throw new Error(pluginError);
       if (input.run.sessionAction === 'compact') send({ type: 'text', text: '上下文已压缩，原会话历史保留。可以继续当前话题。' });
+      if (input.run.sessionAction === 'regenerate') send({ type: 'text', text: '已在独立副本上重新生成答复；原话题与工具结果保留。' });
     }
     // Await the host's durable terminal receipt before exiting; an exit timer can
     // otherwise race the last IPC message when the host is busy writing evidence.

@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-21T16:22:21.401Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "taskPosts": 1,
+  "commandId": "86afe28f-707a-45d0-835c-c55c6f186fa7",
+  "taskCount": 1,
+  "runCount": 1,
+  "retryAfterLostReceipt": true,
+  "retryCommandId": "cab1c8fb-57d1-4864-8547-4234ebd7ddc9",
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

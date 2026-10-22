@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-21T16:19:35.595Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "before": {
+    "windows": 2,
+    "floating": 1
+  },
+  "after": {
+    "windows": 3,
+    "floating": 1,
+    "preservedWindows": true,
+    "preservedFloating": true
+  },
+  "noSilentRearrange": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

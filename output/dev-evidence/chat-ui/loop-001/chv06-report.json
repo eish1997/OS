@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-22T05:51:13.083Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "firstRunToolExpand": {
+    "runId": "5110b710-6cab-4777-950c-47e63ec487ef",
+    "opened": true
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

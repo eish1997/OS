@@ -102,8 +102,18 @@ $taskListener=[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loop
 try { $taskListener.Start() } catch { throw 'Port is occupied; no process was changed' } finally { $taskListener.Stop() }
 $taskRuntime=Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
 $taskCandidate=(Get-Command node -ErrorAction SilentlyContinue).Source
-if ($taskCandidate -and [int]((& $taskCandidate --version).TrimStart('v').Split('.')[0]) -ge 24) { $taskRuntime=$taskCandidate }
-if (-not (Test-Path -LiteralPath $taskRuntime) -or [int]((& $taskRuntime --version).TrimStart('v').Split('.')[0]) -lt 24) { throw 'Node.js 24+ is required' }
+# Prefer the newest Node 24+ among bundled runtime and PATH; PATH-only 24.5 lacks setGlobalProxyFromEnv (needs 24.14+).
+function Get-NodeScore([string]$exe) {
+  if (-not $exe -or -not (Test-Path -LiteralPath $exe)) { return -1 }
+  $parts=(& $exe --version).TrimStart('v').Split('.')
+  return ([int64]$parts[0]*1000000)+([int64]$parts[1]*1000)+[int64]$parts[2]
+}
+$taskChoices=@()
+if ((Get-NodeScore $taskRuntime) -ge 0) { $taskChoices += @{ path=$taskRuntime; score=(Get-NodeScore $taskRuntime) } }
+if ($taskCandidate -and (Get-NodeScore $taskCandidate) -ge 0) { $taskChoices += @{ path=$taskCandidate; score=(Get-NodeScore $taskCandidate) } }
+$taskBest=$taskChoices | Sort-Object { $_.score } -Descending | Select-Object -First 1
+if (-not $taskBest -or $taskBest.score -lt 24000000) { throw 'Node.js 24+ is required' }
+$taskRuntime=$taskBest.path
 if (-not $DataDir) { $DataDir=Read-Setting 'DATA_DIR'; if (-not $DataDir) { $DataDir=Join-Path $taskWorkspace 'data' } }
 if (-not [IO.Path]::IsPathRooted($DataDir)) { $DataDir=Join-Path $taskWorkspace $DataDir }
 if (-not $Origin) { $Origin=Read-Setting 'PUBLIC_ORIGIN'; if (-not $Origin) { $Origin=$taskUrl } }

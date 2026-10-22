@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-21T17:16:23.263Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "legacyRunStripped": true,
+  "initialConnected": true,
+  "statusBeforeDrop": "● 已连接\n1 个窗口 · 0 个全局浮窗\n浮窗拖动只移动 · 按钮停靠 · Shift 拖出 · Esc 取消",
+  "serviceDownUi": true,
+  "historyWhileDisconnected": true,
+  "noFakeEmptyOrDupWhileDown": true,
+  "runsWhileDown": 1,
+  "serviceRecovered": true,
+  "legacyReadableAfterReload": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

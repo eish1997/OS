@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-21T16:23:20.561Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "targets": {
+    "editBase": null,
+    "regenBase": "61c29dc4",
+    "keptTools": 1
+  },
+  "regenerateApi": true,
+  "editResendApi": true,
+  "idempotent": true,
+  "actionsVisible": true,
+  "regenerateForm": true,
+  "editResendForm": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

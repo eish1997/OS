@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-21T16:21:06.013Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "note": "Browser Selection API only; OS clipboard still external-blocked",
+  "selectionQuote": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

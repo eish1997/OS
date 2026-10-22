@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-22T05:35:01.298Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "api": {
+    "renamed": "阿尔法已改名",
+    "listed": [
+      "阿尔法已改名"
+    ],
+    "hitCount": 1
+  },
+  "autoTitle": "对话 · 2026/10/22 13:35:02",
+  "ui": {
+    "renamed": true,
+    "switched": true,
+    "searchLocated": true
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

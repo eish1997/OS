@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-21T17:17:32.635Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "secondWindowPath": "toolbar-plus-window",
+  "layoutFixtureUsed": false,
+  "systemIme": "external-blocked-see-ime-clipboard-capability.json",
+  "systemClipboard": "external-blocked-see-ime-clipboard-capability.json",
+  "designVersion": "2026-10-21-chat-02",
+  "firstWindowToolbar": true,
+  "secondWindowToolbar": true,
+  "windowCountStatus": "● 已连接\n2 个窗口 · 0 个全局浮窗\n浮窗拖动只移动 · 按钮停靠 · Shift 拖出 · Esc 取消",
+  "sameTopicTwoWindows": true,
+  "secondWindowPlacement": "docked-empty-leaf",
+  "twoTopicsIsolated": true,
+  "crossProject": true,
+  "focusRestore": true,
+  "narrow": {
+    "ok": true,
+    "zoom": 0.75,
+    "paneHeight": 493.484375,
+    "inputVisualPx": 79.5
+  },
+  "imeCompositionGuard": true,
+  "canvasLayerSmoke": {
+    "canvasOn": false,
+    "hasChatPane": true,
+    "hasFloating": false
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-21T16:23:10.625Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "importMenu": true,
+  "compactEntry": true,
+  "branchFromMessage": true,
+  "exportLinkVisible": true,
+  "openSourceControl": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

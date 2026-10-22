@@ -17,7 +17,7 @@ export function acceptRunInput(store:Store,runId:string,conversationId:string,co
   const result=store.command(key,digest,()=>{
     const run=store.get<Run>('run',runId);
     if(run.conversationId!==conversationId)throw new AppError(403,'指导目标不属于当前话题');
-    if(run.mode!=='pi'||!isLiveExecution(run.status)||run.cancelRequested||run.timedOutAt||run.sessionAction==='compact')throw new AppError(409,'目标执行已结束、正在停止或不能接收指导；请明确选择新任务');
+    if(run.mode!=='pi'||!isLiveExecution(run.status)||run.cancelRequested||run.timedOutAt||run.sessionAction==='compact'||run.sessionAction==='regenerate')throw new AppError(409,'目标执行已结束、正在停止或不能接收指导；请明确选择新任务');
     if(store.list<RunInput>('run_input',run.projectId).filter(i=>i.runId===runId&&['accepted','queued'].includes(i.state)).length>=32)throw new AppError(409,'待应用指导过多，请等待处理');
     const input=store.create<RunInput>('run_input',{schemaVersion:1,projectId:run.projectId,runId,conversationId,commandId,text,state:'accepted'});
     store.event('run.input',{id:input.id},{projectId:run.projectId,runId});return {id:input.id};

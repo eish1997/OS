@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-21T16:19:25.511Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "seeded": {
+    "q1": "chv05-q1",
+    "q2": "chv05-q2",
+    "expired": "chv05-expired"
+  },
+  "bothQuestionsVisible": true,
+  "uiAnswerBlockedWithoutWorker": true,
+  "answeredQ2First": true,
+  "answeredQ1Second": true,
+  "doubleAnswerRejected": true,
+  "expiredVisible": true,
+  "expiredState": "pending",
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

@@ -1,0 +1,178 @@
+{
+  "at": "2026-10-21T16:20:14.121Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "cells": [
+    {
+      "theme": "render",
+      "lineWidth": 0.5,
+      "cssLineWidth": "0.5px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "render",
+      "lineWidth": 1,
+      "cssLineWidth": "1px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "render",
+      "lineWidth": 1.5,
+      "cssLineWidth": "1.5px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "render",
+      "lineWidth": 2,
+      "cssLineWidth": "2px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "render",
+      "lineWidth": 2.5,
+      "cssLineWidth": "2.5px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "render",
+      "lineWidth": 3,
+      "cssLineWidth": "3px",
+      "hasChat": true,
+      "bg": "#191919"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 0.5,
+      "cssLineWidth": "0.5px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 1,
+      "cssLineWidth": "1px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 1.5,
+      "cssLineWidth": "1.5px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 2,
+      "cssLineWidth": "2px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 2.5,
+      "cssLineWidth": "2.5px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "warm",
+      "lineWidth": 3,
+      "cssLineWidth": "3px",
+      "hasChat": true,
+      "bg": "#24211d"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 0.5,
+      "cssLineWidth": "0.5px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 1,
+      "cssLineWidth": "1px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 1.5,
+      "cssLineWidth": "1.5px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 2,
+      "cssLineWidth": "2px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 2.5,
+      "cssLineWidth": "2.5px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "graphite",
+      "lineWidth": 3,
+      "cssLineWidth": "3px",
+      "hasChat": true,
+      "bg": "#202630"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 0.5,
+      "cssLineWidth": "0.5px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 1,
+      "cssLineWidth": "1px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 1.5,
+      "cssLineWidth": "1.5px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 2,
+      "cssLineWidth": "2px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 2.5,
+      "cssLineWidth": "2.5px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    },
+    {
+      "theme": "light",
+      "lineWidth": 3,
+      "cssLineWidth": "3px",
+      "hasChat": true,
+      "bg": "#ffffff"
+    }
+  ],
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

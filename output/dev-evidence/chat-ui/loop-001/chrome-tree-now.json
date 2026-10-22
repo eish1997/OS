@@ -1,0 +1,44 @@
+﻿{
+  "id": "66ce6a4c-768d-457e-bae3-540502607e87",
+  "ok": true,
+  "result": {
+    "snapshot": {
+      "id": "6082bab3-0dc8-435a-8976-ace0c6cd5407",
+      "app": {
+        "name": "chrome",
+        "bundleId": "chrome",
+        "pid": 30552
+      },
+      "window": {
+        "title": "宸ヤ綔鍙?/ Studio - Google Chrome",
+        "id": 131838,
+        "index": null,
+        "x": 298,
+        "y": 8,
+        "width": 1437,
+        "height": 1032,
+        "isMinimized": null,
+        "isOffscreen": null,
+        "screenIndex": null
+      },
+      "coordinateSpace": "window",
+      "treeText": "App=chrome (pid 30552)\nWindow: \"宸ヤ綔鍙?/ Studio - Google Chrome\", App: chrome.\n\n0 绐楀彛 宸ヤ綔鍙?/ Studio - Google Chrome\n\t1 绐楁牸\n\t2 鍖哄煙 宸ヤ綔鍙?/ Studio - Google Chrome - 姣涘効\n\t\t3 鍖哄煙\n\t\t\t4 鍖哄煙\n\t\t\t\t5 鍖哄煙\n\t\t\t\t\t6 鎸夐挳 鏈€灏忓寲\n\t\t\t\t\t7 鎸夐挳 鏈€澶у寲\n\t\t\t\t\t8 鎸夐挳 鍏抽棴\n\t\t\t\t9 鍖哄煙\n\t\t\t\t\t10 鍖哄煙\n\t\t\t\t\t\t11 宸ュ叿鏍?view_1000\n\t\t\t\t\t\t\t12 鎸夐挳 杩斿洖\n\t\t\t\t\t\t\t13 鎸夐挳 鍓嶈繘\n\t\t\t\t\t\t\t14 鎸夐挳 閲嶆柊鍔犺浇\n\t\t\t\t\t\t\t15 缁刓n\t\t\t\t\t\t\t\t16 鎸夐挳 鏌ョ湅缃戠珯淇℃伅\n\t\t\t\t\t\t\t\t17 缂栬緫 鍦板潃鍜屾悳绱㈡爮, Value: 127.0.0.1:11181/workbench, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t18 鍖哄煙\n\t\t\t\t\t\t\t\t\t19 鎸夐挳\n\t\t\t\t\t\t\t\t\t20 鎸夐挳 涓烘鏍囩椤垫坊鍔犱功绛綷n\t\t\t\t\t\t\t21 鍖哄煙\n\t\t\t\t\t\t\t\t22 鎸夐挳 鏀惰棌鍒?Pinterest 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t23 鎸夐挳 Google缈昏瘧 宸﹂敭鐐瑰嚮鍗冲彲缈昏瘧锛?鍙抽敭鐐瑰嚮鍗冲彲鏌ョ湅閫夐」銆?鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t24 鎸夐挳 Debug with Spector 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t25 鎸夐挳 鏂版爣绛鹃〉 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t26 鎸夐挳 B绔欎笅杞藉姪鎵媆n\t\t\t\t\t\t\t\t27 鎸夐挳 Vimeo Record - Screen & Webcam Recorder 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t28 鎸夐挳 Open OpenClaw Copilot 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t29 鎸夐挳 crxMouse Top Gestures 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t30 鎸夐挳 璋锋瓕涓婄綉鍔╂墜 寮€鍙戠増\n\t\t\t\t\t\t\t\t31 鎸夐挳 ChatGPT 鍙互璁块棶姝ょ綉绔橽n\t\t\t\t\t\t\t\t32 鎸夐挳 鎵╁睍绋嬪簭\n\t\t\t\t\t\t\t33 鍖哄煙\n\t\t\t\t\t\t\t34 鎸夐挳 姣涘効\n\t\t\t\t\t\t\t35 鎸夐挳 Chrome\n\t\t\t\t\t36 鍖哄煙\n\t\t\t\t\t\t37 鍖哄煙\n\t\t\t\t\t\t\t38 鍖哄煙\n\t\t\t\t\t\t\t39 鏂囨。 宸ヤ綔鍙?/ Studio, Value: http://127.0.0.1:11181/workbench, Secondary Actions: SetValue, Scroll\n\t\t\t\t\t\t\t\t40 缁刓n\t\t\t\t\t\t\t\t\t41 缁?root\n\t\t\t\t\t\t\t\t\t\t42 缁刓n\t\t\t\t\t\t\t\t\t\t\t43 琛ュ厖\n\t\t\t\t\t\t\t\t\t\t\t\t44 閾炬帴 S 路 宸ヤ綔鍙? Value: http://127.0.0.1:11181/workbench, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t\t45 鏂囨湰 宸ヤ綔绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t46 鎸夐挳 鍒囨崲绌洪棿 璧勪骇绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t47 鎸夐挳 鏂板缓绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t48 鎸夐挳 璁剧疆\n\t\t\t\t\t\t\t\t\t\t\t\t49 閾炬帴 鏃х増宸ヤ綔鍙? Value: http://127.0.0.1:11181/legacy, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t\t50 鎸夐挳 鎶樺彔瀵艰埅\n\t\t\t\t\t\t\t\t\t\t\t51 涓昏\n\t\t\t\t\t\t\t\t\t\t\t\t52 绔犺妭鏍囬\n\t\t\t\t\t\t\t\t\t\t\t\t\t53 鏂囨湰 宸ヤ綔鍙?/\n\t\t\t\t\t\t\t\t\t\t\t\t\t54 鎸夐挳 璧勪骇绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t\t55 缁勫悎妗?褰撳墠椤圭洰, Value: OS GUI 楠屾敹, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t56 鏂囨湰 OS GUI 楠屾敹\n\t\t\t\t\t\t\t\t\t\t\t\t\t57 鎸夐挳 鏂板缓椤圭洰\n\t\t\t\t\t\t\t\t\t\t\t\t\t58 鐘舵€?甯冨眬鐘舵€乗n\t\t\t\t\t\t\t\t\t\t\t\t\t\t59 鏂囨湰 甯冨眬宸蹭繚瀛榎n\t\t\t\t\t\t\t\t\t\t\t\t\t60 鎸夐挳 锛?绐楀彛\n\t\t\t\t\t\t\t\t\t\t\t\t\t61 鍒囨崲鎸夐挳 绐楀彛鍒楄〃\n\t\t\t\t\t\t\t\t\t\t\t\t\t62 璇︾粏淇℃伅\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t63 寮€鍚堜笁瑙掓爣璁?甯冨眬\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t64 鏂囨湰 甯冨眬\n\t\t\t\t\t\t\t\t\t\t\t\t\t65 鎸夐挳 鏀舵嫝娴獥\n\t\t\t\t\t\t\t\t\t\t\t\t66 璀︽姤\n\t\t\t\t\t\t\t\t\t\t\t\t\t67 鏂囨湰 TypeError: Failed to fetch\n\t\t\t\t\t\t\t\t\t\t\t\t68 缁?鐢绘澘宸ヤ綔鍖篭n\t\t\t\t\t\t\t\t\t\t\t\t69 鏂囨湰 璧勪骇绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t70 鏍囬 瀹夋帓浣犵殑宸ヤ綔绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t71 鏂囨湰 鎶婅祫鏂欍€侀槄璇诲拰瀵硅瘽鏀惧湪涓€璧凤紝鎸変綘鐨勪範鎯皟鏁翠綅缃€俓n\t\t\t\t\t\t\t\t\t\t\t\t72 鎸夐挳 娣诲姞绐楀彛\n\t\t\t\t\t\t\t\t\t\t\t\t73 鎸夐挳 鐩存帴缂栬緫甯冨眬\n\t\t\t\t\t\t\t\t\t\t\t\t74 鏍囬 璧勬枡涓庨槄璇籠n\t\t\t\t\t\t\t\t\t\t\t\t75 鏂囨湰 閫夋嫨椤圭洰鏂囦欢锛岄瑙堝唴瀹癸紝鍙戦€佸埌鎸囧畾瀵硅瘽銆俓n\t\t\t\t\t\t\t\t\t\t\t\t76 鏍囬 Pi 瀵硅瘽\n\t\t\t\t\t\t\t\t\t\t\t\t77 鏂囨湰 鐙珛鐨勫璇濅笂涓嬫枃锛屾敹璧风獥鍙ｅ悗浠嶅彲缁х画杩愯銆俓n\t\t\t\t\t\t\t\t\t\t\t\t78 鏂囨湰 浠庡竷灞€寮€濮媆n\t\t\t\t\t\t\t\t\t\t\t\t79 鎸夐挳 涓诲尯 + 涓や晶杈呭姪\n\t\t\t\t\t\t\t\t\t\t\t\t80 鎸夐挳 绌虹櫧绌洪棿\n\t\t\t\t\t\t\t\t\t\t\t\t81 绔犺妭椤佃剼\n\t\t\t\t\t\t\t\t\t\t\t\t\t82 鏂囨湰 鈼廫n\t\t\t\t\t\t\t\t\t\t\t\t\t83 鏂囨湰 姝ｅ湪閲嶈繛\n\t\t\t\t\t\t\t\t\t\t\t\t\t84 鏂囨湰 0\n\t\t\t\t\t\t\t\t\t\t\t\t\t85 鏂囨湰 涓獥鍙?路\n\t\t\t\t\t\t\t\t\t\t\t\t\t86 鏂囨湰 0\n\t\t\t\t\t\t\t\t\t\t\t\t\t87 鏂囨湰 涓叏灞€娴獥\n\t\t\t\t\t\t\t\t\t\t\t\t\t88 鏂囨湰 娴獥鎷栧姩鍙Щ鍔?路 鎸夐挳鍋滈潬 路 Shift 鎷栧嚭 路 Esc 鍙栨秷\n\t\t\t\t\t\t\t\t\t89 缁?crx-mouse-redesign-content-root\n\t\t\t\t\t\t\t\t90 涓昏\n\t\t\t\t\t\t\t\t91 缁刓n\t\t\t\t\t\t\t\t\t92 鏂囨湰 00:53\n\t\t\t\t\t\t\t93 鏂囨。 RootWebArea, Value: chrome://newtab-footer/, Secondary Actions: SetValue, Scroll\n\t\t\t\t\t\t\t\t94 閾炬帴 iTab鏂版爣绛鹃〉, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t95 鍒囨崲鎸夐挳 鑷畾涔?Chrome, Secondary Actions: Scroll, Toggle\n\t\t\t\t\t\t\t\t\t96 鍥惧舰 baseSvg\n\t\t\t\t\t\t\t\t\t97 鏂囨湰 鑷畾涔?Chrome\n\t\t\t\t\t\t98 鍖哄煙\n\t\t\t\t\t99 鍖哄煙\n\t\t\t\t\t\t100 鍖哄煙\n\t\t\t\t\t\t\t101 鎸夐挳 鏍囩椤垫悳绱n\t\t\t\t\t\t102 鍖哄煙 view_21\n\t\t\t\t\t\t\t103 閫夐」鍗n\t\t\t\t\t\t\t\t104 閫夐」鍗￠」鐩?鈥嶁仭鈥嶁仯鈥仮锘库仱鈥嶁仯鈥屸仮鈥嬧仭锘库仯鈦ｂ€嬶豢鈥€嬧€屸€屸仭鈦ｂ€嶁€嬧€豢鈦も仭鈥嶁仱鈦も€嬶豢鈥嬧€嶁仭鈦⑩€豢鈥屸€嬧仯鈦ｂ仮鈦ｂ仭锘挎祦绋嬪浘锛圓ll In One锛?- 椋炰功浜戞枃妗?- 鍐呭瓨鐢ㄩ噺 - 603 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t105 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t106 閫夐」鍗￠」鐩?Untitled 鈥?Figma - 鍐呭瓨鐢ㄩ噺 - 474 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t107 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t108 閫夐」鍗￠」鐩?OpenPencil 鈥?浠庢彁绀鸿瘝鍒?鍙紪杈戠殑浜у搧鐣岄潰銆?- 鍐呭瓨鐢ㄩ噺 - 81.0 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t109 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t110 閫夐」鍗￠」鐩?@mutmutco/pi-plugin 路 Packages 路 Pi - 鍐呭瓨鐢ㄩ噺 - 64.9 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t111 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t112 閫夐」鍗￠」鐩?ChatGPT Pro 100 缇庡厓妗?鍝釜鍦板尯鏈€渚垮疁锛熷悇鍥藉畼鏂逛环鏍煎姣?| PriceAI - 鍐呭瓨鐢ㄩ噺 - 91.6 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t113 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t114 閫夐」鍗￠」鐩?宸ヤ綔鍙?/ Studio - 鍐呭瓨鐢ㄩ噺 - 605 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t115 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t116 閫夐」鍗￠」鐩?GitHub - 鍐呭瓨鐢ㄩ噺 - 165 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t117 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t118 閫夐」鍗￠」鐩?宸ヤ綔鍙?/ Studio - 鍐呭瓨鐢ㄩ噺 - 597 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t119 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t120 閫夐」鍗￠」鐩?宸ヤ綔鍙?/ Studio - 鍐呭瓨鐢ㄩ噺 - 76.6 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t121 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t122 閫夐」鍗￠」鐩?鐧诲綍 - 鑵捐浜?- 鍐呭瓨鐢ㄩ噺 - 137 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t123 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t\t124 閫夐」鍗￠」鐩?Edit Profile | Cursor - The best way to code with AI - 鍐呭瓨鐢ㄩ噺 - 448 MB, Secondary Actions: Select\n\t\t\t\t\t\t\t\t\t125 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t\t126 鍖哄煙\n\t\t\t\t\t\t127 鎸夐挳 鏂版爣绛鹃〉\n\t\t\t\t\t\t128 鍖哄煙\n\t\t\t\t\t129 鍖哄煙\n\t\t130 绐楁牸 瑕佷繚瀛樺瘑鐮佸悧锛焅n\t\t\t131 绐楁牸\n\t\t\t132 璀︽姤 瑕佷繚瀛樺瘑鐮佸悧锛焅n\t\t\t\t133 鍖哄煙\n\t\t\t\t\t134 鍖哄煙\n\t\t\t\t\t\t135 鍖哄煙\n\t\t\t\t\t\t\t136 鏍囬 瑕佷繚瀛樺瘑鐮佸悧锛焅n\t\t\t\t\t\t137 鎸夐挳 鍏抽棴\n\t\t\t\t\t\t138 鍖哄煙\n\t\t\t\t\t\t\t139 鍖哄煙, Value: [redacted]\n\t\t\t\t\t\t\t\t140 鍖哄煙\n\t\t\t\t\t\t\t\t\t141 鍖哄煙\n\t\t\t\t\t\t\t\t\t\t142 鏂囨湰 鐢ㄦ埛鍚峔n\t\t\t\t\t\t\t\t\t\t143 缁勫悎妗?鐢ㄦ埛鍚? Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t144 缂栬緫 鐢ㄦ埛鍚? Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t145 鍖哄煙\n\t\t\t\t\t\t\t\t\t146 鍖哄煙\n\t\t\t\t\t\t\t\t\t\t147 鏂囨湰 瀵嗙爜\n\t\t\t\t\t\t\t\t\t\t148 缁勫悎妗?瀵嗙爜, Value: [redacted], Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t149 缂栬緫 瀵嗙爜, Value: [redacted], Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t\t\t\t150 鍖哄煙\n\t\t\t\t\t\t\t\t\t\t\t\t151 鎸夐挳 鏄剧ず瀵嗙爜, Secondary Actions: Toggle\n\t\t\t\t\t\t\t152 鍖哄煙\n\t\t\t\t\t\t\t\t153 鎸夐挳 涓€寰嬩笉\n\t\t\t\t\t\t\t\t154 鎸夐挳 淇濆瓨\n\t\t\t\t\t\t\t\t155 鎸夐挳 涓嶇敤浜哱n\t\t\t\t\t\t156 鍖哄煙\n\t\t\t\t\t\t\t157 缁?绯荤粺浼氬皢瀵嗙爜淇濆瓨鍒版璁惧涓婄殑 Google 瀵嗙爜绠＄悊宸ュ叿涓€俓n\t\t\t\t\t\t\t\t158 鏂囨湰 绯荤粺浼氬皢瀵嗙爜淇濆瓨鍒版璁惧涓婄殑\n\t\t\t\t\t\t\t\t159 閾炬帴 Google 瀵嗙爜绠＄悊宸ュ叿, Secondary Actions: SetValue\n\t\t\t\t\t\t\t\t160 鏂囨湰 涓€?,
+      "elementCount": 161,
+      "focusedElementId": null,
+      "truncation": {
+        "truncated": false,
+        "maxNodes": 1200,
+        "maxDepth": 64,
+        "maxDepthReached": false
+      }
+    },
+    "screenshot": null,
+    "screenshotStatus": {
+      "state": "skipped",
+      "reason": "no_screenshot_flag"
+    }
+  },
+  "_meta": {
+    "runtimeId": "ef66140c-a017-4717-84fb-90fe194e1221"
+  }
+}

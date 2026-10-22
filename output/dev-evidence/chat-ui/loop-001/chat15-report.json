@@ -1,0 +1,164 @@
+{
+  "at": "2026-10-22T03:06:49.530Z",
+  "chv": "CHV-23",
+  "staticDir": "output/chat-ui-build",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "keyPresent": true,
+  "keyLength": 35,
+  "caps": {
+    "maxCallsSession": 20,
+    "budgetUsdSession": 1.35,
+    "cumulativeMaxCalls": 50,
+    "cumulativeBudgetUsd": 1.35,
+    "cnyCap": 10,
+    "usdPerCny": 7.2,
+    "ledgerBefore": {
+      "calls": 0,
+      "spentUsd": 0
+    }
+  },
+  "stages": [
+    {
+      "name": "ui-tool-write_asset",
+      "status": "completed",
+      "stopped": "terminal",
+      "calls": 2,
+      "spentUsd": 0.0014305799999999997,
+      "toolOk": true,
+      "sessionBound": true
+    },
+    {
+      "name": "ui-steer-or-queue",
+      "run2Status": "completed",
+      "steerOk": false,
+      "queueOk": false,
+      "calls": 5,
+      "spentUsd": 0.0021164159999999994
+    },
+    {
+      "name": "ui-image",
+      "skipped": false,
+      "status": "completed",
+      "calls": 2,
+      "spentUsd": 0.0011591999999999998,
+      "note": "1x1 png smoke; not digit recognition"
+    },
+    {
+      "name": "ui-cancel-recover",
+      "cancelledStatus": "running",
+      "recoverStatus": "completed",
+      "recoverOk": true,
+      "calls": 10,
+      "spentUsd": 0.004471619999999999
+    }
+  ],
+  "realModelRequests": 10,
+  "catalog": {
+    "modelId": "deepseek-flash",
+    "input": [
+      "text",
+      "image"
+    ],
+    "visionSupported": true
+  },
+  "sessionUsage": {
+    "calls": 10,
+    "spentUsd": 0.004471619999999999,
+    "reservedUsd": 0,
+    "accountedUsd": 0.004471619999999999
+  },
+  "receipts": [
+    {
+      "runId": "580ecc0d-f6e3-4efc-8afd-3ac2885e9253",
+      "callNumber": 1,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.0012894359999999997,
+      "tokens": 4336
+    },
+    {
+      "runId": "580ecc0d-f6e3-4efc-8afd-3ac2885e9253",
+      "callNumber": 2,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.000141144,
+      "tokens": 4460
+    },
+    {
+      "runId": "8bc38d11-7e72-4dcb-94ed-8497bafb42d2",
+      "callNumber": 1,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.000308208,
+      "tokens": 4643
+    },
+    {
+      "runId": "8bc38d11-7e72-4dcb-94ed-8497bafb42d2",
+      "callNumber": 2,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.00017148,
+      "tokens": 4737
+    },
+    {
+      "runId": "8bc38d11-7e72-4dcb-94ed-8497bafb42d2",
+      "callNumber": 3,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.000206148,
+      "tokens": 4915
+    },
+    {
+      "runId": "1835b8e1-76ab-4010-9663-7a395d153a16",
+      "callNumber": 1,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.0007036439999999999,
+      "tokens": 5495
+    },
+    {
+      "runId": "1835b8e1-76ab-4010-9663-7a395d153a16",
+      "callNumber": 2,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.0004555559999999999,
+      "tokens": 5977
+    },
+    {
+      "runId": "85fc442d-c8ae-4ea3-bf69-6fa056188c17",
+      "callNumber": 1,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.0006291480000000001,
+      "tokens": 6130
+    },
+    {
+      "runId": "182b76dd-38d5-45db-80c6-2f06bc8519d5",
+      "callNumber": 1,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.000310992,
+      "tokens": 6265
+    },
+    {
+      "runId": "182b76dd-38d5-45db-80c6-2f06bc8519d5",
+      "callNumber": 2,
+      "state": "settled",
+      "purpose": "agent",
+      "costUsd": 0.000255864,
+      "tokens": 6478
+    }
+  ],
+  "pageErrors": [],
+  "steerOrQueue": {
+    "steerOk": false,
+    "queueOk": false
+  },
+  "passed": true,
+  "cumulative": {
+    "calls": 10,
+    "spentUsd": 0.004471619999999999,
+    "spentCnyApprox": 0.0322
+  }
+}

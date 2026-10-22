@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-21T16:21:59.939Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "storeStates": {
+    "answered": "answered",
+    "delivered": "delivered",
+    "revision": 2
+  },
+  "uiAnswered": true,
+  "uiDelivered": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

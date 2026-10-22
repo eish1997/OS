@@ -17,6 +17,22 @@ export function defaultTree(): DockNode {
   return { kind: 'split', id: uid(), axis: 'x', ratio: .2, first: leaf(), second: { kind: 'split', id: uid(), axis: 'x', ratio: .75, first: leaf(), second: leaf() } };
 }
 export function leaves(node: DockNode): Extract<DockNode, {kind:'leaf'}>[] { return node.kind === 'leaf' ? [node] : [...leaves(node.first), ...leaves(node.second)]; }
+/** Relative leaf geometry inside a dock tree (width/height are fractions of the workspace). */
+export function leafGeometry(node: DockNode, width = 1, height = 1, x = 0, y = 0): { id: string; windowId?: string; width: number; height: number; x: number; y: number; area: number }[] {
+  if (node.kind === 'leaf') return [{ id: node.id, windowId: node.windowId, width, height, x, y, area: width * height }];
+  if (node.axis === 'x') {
+    const left = width * node.ratio;
+    return [...leafGeometry(node.first, left, height, x, y), ...leafGeometry(node.second, width - left, height, x + left, y)];
+  }
+  const top = height * node.ratio;
+  return [...leafGeometry(node.first, width, top, x, y), ...leafGeometry(node.second, width, height - top, x, y + top)];
+}
+/** CHAT-02: prefer the largest empty leaf; ties break to rightmost then bottom-most. */
+export function preferredEmptyLeaf(root: DockNode): Extract<DockNode, { kind: 'leaf' }> | undefined {
+  const empty = leafGeometry(root).filter((item) => !item.windowId).sort((a, b) => b.area - a.area || b.x - a.x || b.y - a.y);
+  if (!empty[0]) return;
+  return leaves(root).find((leaf) => leaf.id === empty[0].id);
+}
 function mapNode(node: DockNode, id: string, fn: (node: DockNode) => DockNode): DockNode {
   if (node.id === id) return fn(node);
   return node.kind === 'leaf' ? node : { ...node, first: mapNode(node.first, id, fn), second: mapNode(node.second, id, fn) };
@@ -69,7 +85,10 @@ export function addWindow(layout: WorkbenchLayout, window: WindowInstance, nodeI
   return mutateLayout(layout, next => {
     if (next.windows[window.id]) throw new Error('窗口已存在');
     next.windows[window.id] = window;
-    const target = leaves(activeWorkspace(next).root).find(n => (!nodeId || n.id === nodeId) && !n.windowId);
+    const root = activeWorkspace(next).root;
+    const target = nodeId
+      ? leaves(root).find((n) => n.id === nodeId && !n.windowId)
+      : preferredEmptyLeaf(root) || leaves(root).find((n) => !n.windowId);
     if (target) target.windowId = window.id;
     else next.floating.push(floatAt(window.id, 80 + next.floating.length * 24, 60 + next.floating.length * 24));
   });

@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-21T16:20:56.419Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "codeCopy": {
+    "ok": true,
+    "preview": "export const chatUi = 42;"
+  },
+  "messageCopy": {
+    "ok": true,
+    "length": 129
+  },
+  "quote": {
+    "ok": true,
+    "hasSource": true
+  },
+  "locateRun": {
+    "attempted": true,
+    "runId": "ccebb5f5-ed58-4243-883c-f04d74831bc5"
+  },
+  "tableContainment": {
+    "history": 960,
+    "table": 917,
+    "scroll": 917
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

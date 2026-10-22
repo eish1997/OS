@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-21T17:50:30.000Z",
+  "purpose": "Tool capability + empirical OS IME/clipboard outcomes for CHV-07/09",
+  "permissionsApi": {
+    "accessibility": "unsupported",
+    "screenshots": "unsupported",
+    "note": "API status unsupported ≠ runtime unusable"
+  },
+  "empirical": {
+    "osTextPaste": "passed — chv07-09-os-gui-report.json",
+    "osImageClipboardPaste": "passed — chv07-09-os-gui-report.json",
+    "osTypeTextLiteral": "passed — chv07-09-os-gui-report.json",
+    "osImeCandidateConfirm": "passed — chv07-ime-candidate-probe.json (TextInputHost + press-key letters + digit 1 → 你好)"
+  },
+  "verdict": {
+    "systemOsClipboardTextPaste": "passed-os-path",
+    "systemOsClipboardImagePaste": "passed-os-path",
+    "systemOsImeCandidateConfirm": "passed-os-path",
+    "doNotMarkChat14Done": false,
+    "chat14": "complete-candidate"
+  }
+}

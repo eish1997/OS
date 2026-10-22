@@ -27,7 +27,7 @@ export function ToolExecutionDetails({run}:{run:Run}){
     // Run snapshots change on the existing shared event connection; no second SSE connection.
   },[run,open,after,refresh]);
   return <details className="wb-plugin-run-details" data-workbench-interactive onToggle={event=>setOpen(event.currentTarget.open)}>
-    <summary>实际工具调用</summary>
+    <summary>本轮工具过程</summary>
     <p>每项是一次实际调用。预览可能缩短；完整记录保存工具返回的内容与附加信息。</p>
     <button onClick={()=>setRefresh(n=>n+1)}>刷新工具进度</button>
     {run.status==='interrupted'&&!run.error?.includes('已对账')&&<p><button onClick={async()=>{try{await request(`/runs/${encodeURIComponent(run.id)}/reconcile`,{});setError('');setRefresh(n=>n+1);}catch(e){setError(String(e));}}}>核对进程与成果</button>：先保存下方每个待核对工具的实际结果，再检查执行进程和已登记成果。通过后可在任务额度中恢复。</p>}

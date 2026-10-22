@@ -1,0 +1,103 @@
+{
+  "at": "2026-10-21T17:25:29.358Z",
+  "staticDir": "output/chat-ui-build",
+  "base": "http://127.0.0.1:5483",
+  "projectId": "09836aea-60c8-493f-9707-3d0819430be6",
+  "realModelRequests": 0,
+  "driver": "playwright headed Chrome focus + orca computer paste-text/type-text",
+  "chromePidsBefore": [
+    30552
+  ],
+  "capabilityCorrection": {
+    "permissionsApiSaid": "accessibility/screenshots unsupported",
+    "getAppStateOk": true,
+    "note": "get-app-state works; web content tree may be shallow — use Playwright for DOM setup"
+  },
+  "playwrightPid": 54748,
+  "newChromePids": [
+    54748
+  ],
+  "titleMarker": "OSGUI-5483-UNIQUE",
+  "chromeApps": [
+    30552,
+    54748
+  ],
+  "targetWindow": {
+    "appSel": "pid:54748",
+    "hit": {
+      "index": 0,
+      "app": {
+        "name": "chrome",
+        "bundleId": "chrome",
+        "pid": 54748
+      },
+      "id": 38407948,
+      "title": "OSGUI-5483-UNIQUE - Google Chrome",
+      "x": -8,
+      "y": -8,
+      "width": 1936,
+      "height": 1056,
+      "isMinimized": false,
+      "isOffscreen": false,
+      "screenIndex": null,
+      "platform": {
+        "backend": "uia",
+        "nativeWindowHandle": 38407948
+      }
+    },
+    "pwPid": 54748
+  },
+  "a11yProbeAttempts": 2,
+  "a11yTreeLen": 3532,
+  "a11yInputIndex": 91,
+  "focusClick": {
+    "ok": true,
+    "mode": "a11y",
+    "index": 91
+  },
+  "osPaste": {
+    "commandOk": true,
+    "raw": "{\n  \"id\": \"6055c0df-20ac-4e23-b7b6-739e0b5cae16\",\n  \"ok\": true,\n  \"result\": {\n    \"snapshot\": {\n      \"id\": \"d389c15d-71c7-4c8b-9b11-5d5258584bf6\",\n      \"app\": {\n        \"name\": \"chrome\",\n        \"bundleId\": \"chrome\",\n        \"pid\": 54748\n      },\n      \"window\": {\n        \"title\": \"OSGUI-5483-UNIQUE - Google Chrome\",\n        \"id\": 38407948,\n        \"index\": null,\n        \"x\": 10,\n        \"y\": 10,\n        \"width\": 945,\n        \"height\": 1020,\n        \"isMinimized\": null,\n        \"isOffscreen\": null,\n        \"screenIndex\": null\n      },\n      \"coordinateSpace\": \"window\",\n      \"treeText\": \"App=chrome (pid 54748)\\nWindow: \\\"OSGUI-5483-UNIQUE - Google Chrome\\\", App: chrome.\\n\\n0 窗口 OSGUI-5483-UNIQUE - Google Chrome\\n\\t1 窗格\\n\\t2 区域 OSGUI-5483-UNIQUE - Google Chrome\\n\\t\\t3 区域\\n\\t\\t\\t4 区域\\n\\t\\t\\t\\t5 区域\\n\\t\\t\\t\\t\\t6 按钮 最小化\\n\\t\\t\\t\\t\\t7 按钮 最大化\\n\\t\\t\\t\\t\\t8 按钮 关闭\\n\\t\\t\\t\\t9 区域\\n\\t\\t\\t\\t\\t10 区域\\n\\t\\t\\t\\t\\t\\t11 工具栏 view_1000\\n\\t\\t\\t\\t\\t\\t\\t12 按钮 返回\\n\\t\\t\\t\\t\\t\\t\\t13 按钮 前进\\n\\t\\t\\t\\t\\t\\t\\t14 按钮 重新加载\\n\\t\\t\\t\\t\\t\\t\\t15 组\\n\\t\\t\\t\\t\\t\\t\\t\\t16 按钮 查看网站信息\\n\\t\\t\\t\\t\\t\\t\\t\\t17 编辑 地址和搜索栏, Value: 127.0.0.1:5483/workbench, Secondary Actions: SetValue\\n\\t\\t\\t\\t\\t\\t\\t\\t18 区域\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t19 按钮 为此标签页添加",
+    "windowArgs": [
+      "--app",
+      "pid:54748",
+      "--window-id",
+      "38407948"
+    ],
+    "retry": {
+      "commandOk": true,
+      "raw": "{\n  \"id\": \"9bba6404-18f6-4ba8-b7d7-544fa67833a0\",\n  \"ok\": true,\n  \"result\": {\n    \"snapshot\": {\n      \"id\": \"dc915d90-c50d-4bd2-8cdc-f1651645e0ea\",\n      \"app\": {\n        \"name\": \"chrome\",\n        \"bundleId\": \"chrome\",\n        \"pid\": 54748\n      },\n      \"window\": {\n        \"title\": \"OSGUI-5483-UNIQUE - Google Chrome\",\n        \"id\": 38407948,\n        \"index\": null,\n        \"x\": 10,\n        \"y\": 10,\n        \"width\": 945,\n        \"height\": 1020,\n        \"isMinimized\": null,\n        \"isOffscreen\": null,\n        \"screenIndex\": null\n      },\n      \"coordinateSpace\": \"window\",\n      \"treeText\": \"App=chrome (pid 54748)\\nWindow: \\\"OSGUI-5483-UNIQUE - Google Chrome\\\", App: chrome.\\n\\n0 窗口 OSGUI-5483-UNIQUE - Google Chrome\\n\\t1 窗格\\n\\t2 区域 OSGUI-5483-UNIQUE - Google Chrome\\n\\t\\t3 区域\\n\\t\\t\\t4 区域\\n\\t\\t"
+    },
+    "value": "OS粘贴UNIQUE_OS_PASTE_七",
+    "verified": true
+  },
+  "osTypeText": {
+    "commandOk": true,
+    "note": "type-text injects literal Unicode via OS input path; not Windows IME candidate-confirm",
+    "value": "-噀.eUNIQUE_OS_TYPE",
+    "verified": true
+  },
+  "osClipboardImagePrep": {
+    "exit": 0,
+    "out": "ContainsImage=True\r\n"
+  },
+  "osClipboardImagePaste": {
+    "playwrightCtrlV": true,
+    "orcaHotkey": null,
+    "chipVisible": true,
+    "chipText": "image.png\nimage/png · 137 B\n移除",
+    "note": "WinForms Clipboard.SetImage + Control+V; not synthetic DataTransfer / not paste-text",
+    "verified": true
+  },
+  "systemImeCandidateUi": {
+    "status": "not-automatable-with-available-tools",
+    "reason": "Windows IME candidate window not driven; composition confirm ≠ type-text/paste-text; capabilities.surfaces has no IME"
+  },
+  "passed": true,
+  "partial": {
+    "osPasteTextIntoComposer": true,
+    "osTypeLiteralChinese": true,
+    "osImeCandidateConfirm": false,
+    "osClipboardImagePaste": true
+  }
+}

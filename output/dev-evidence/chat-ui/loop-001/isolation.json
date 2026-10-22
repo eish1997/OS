@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-21T16:19:06.954Z",
+  "isolated": true,
+  "skipDotenv": true,
+  "dataRootOwned": true,
+  "model": "gpt-5.6-sol",
+  "apiKeyIsOfflinePlaceholder": true,
+  "offsiteDisabled": true,
+  "canvasDisabled": true,
+  "blockedExternalConnects": 1,
+  "realModelRequests": 0
+}

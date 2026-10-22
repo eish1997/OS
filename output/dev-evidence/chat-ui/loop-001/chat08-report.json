@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-22T05:49:04.664Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "allRuns": {
+    "before": 0,
+    "after": 4
+  },
+  "recoveryEntries": {
+    "toolProcess": true,
+    "modelRequests": true,
+    "plainRetry": true,
+    "budgetRecovery": true
+  },
+  "limitSummary": "提交前限制：剩余约 1 次 · 费用含预留约 $3.2000 / $4.0000",
+  "limitHint": "连接剩余约 1 次模型请求，接近上限",
+  "limitHintVisible": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

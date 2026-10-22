@@ -4,11 +4,12 @@ import {inputView} from './run-input.js';
 import type {RunInput} from '../shared/run-input.js';
 import type { ModelRequestPurpose, ModelRequestReceipt, TaskBudgetAddition, TaskBudgetGrant, TaskBudgetSnapshot } from '../shared/pi-runtime.js';
 import { createHash } from 'node:crypto';
-import type { Project, ProjectSummary, ConversationMessage, ConversationPage, Task, Run, Policy, Memory, Draft, InboxItem, Asset, Operation, WorkbenchEvent, ModelUsage } from '../shared/contracts.js';
+import type { Project, ProjectSummary, ConversationMessage, ConversationPage, ConversationSearchHit, ConversationSearchPage, Task, Run, Policy, Memory, Draft, InboxItem, Asset, Operation, WorkbenchEvent, ModelUsage } from '../shared/contracts.js';
 import { canTransition, isLiveExecution } from '../shared/contracts.js';
 import { Store, AppError } from './store.js';
 import { Assets } from './assets.js';
-import { continuationFor,pendingContinuation,prepareSource,assertBranchPoint } from './native-session.js';
+import { continuationFor,pendingContinuation,prepareSource,assertBranchPoint,assertVersionBase } from './native-session.js';
+import { versionTargetsForRun } from './native-version-ops.js';
 import {dirname} from 'node:path';
 import type { Conversation } from '../shared/contracts.js';
 export const fingerprint = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -39,6 +40,70 @@ export class Service {
       this.store.event('conversation.created',{id:conversation.id},{projectId});return conversation;
     });
   }
+  renameConversation(id:string,revision:number,title:string):Conversation {
+    text(title,'对话标题',120);
+    return this.store.transaction(()=>{
+      const current=this.store.get<Conversation>('conversation',id);
+      this.project(current.projectId);
+      const next=this.store.update<Conversation>('conversation',id,revision,{title});
+      this.store.event('conversation.updated',{id:next.id,title:next.title},{projectId:next.projectId,revision:next.revision});
+      return next;
+    });
+  }
+  listConversations(projectId:string,query?:string):Conversation[] {
+    this.project(projectId);
+    const all=this.store.list<Conversation>('conversation',projectId);
+    const needle=query?.trim().toLowerCase();
+    if(!needle)return all;
+    return all.filter(c=>c.title.toLowerCase().includes(needle));
+  }
+  searchConversation(projectId:string,conversationId:string,query:string,after=0,limit=20,signal?:AbortSignal):ConversationSearchPage {
+    this.project(projectId);
+    this.scope(this.store.get<Conversation>('conversation',conversationId),projectId);
+    const needle=text(query,'查找内容',200).toLowerCase();
+    const pageLimit=Math.min(Math.max(1,limit),50);
+    const start=Math.max(0,after);
+    const rows=this.store.db.prepare(
+      "SELECT sequence,body FROM events WHERE json_extract(body,'$.projectId')=? AND sequence>? AND json_extract(body,'$.schemaVersion')=1 AND json_extract(body,'$.type') IN ('task.accepted','assistant.text','assistant.message','run.input') AND json_extract(body,'$.runId') IN (SELECT id FROM entities WHERE kind='run' AND json_extract(body,'$.conversationId')=?) ORDER BY sequence ASC LIMIT ?",
+    ).all(projectId,start,conversationId,pageLimit*8);
+    const hits:ConversationSearchHit[]=[];
+    for(const row of rows){
+      signal?.throwIfAborted();
+      const e=JSON.parse(String(row.body)) as WorkbenchEvent;
+      const sequence=Number(row.sequence);
+      let role:'user'|'assistant'='assistant';
+      let messageId=e.eventId;
+      let textBody='';
+      if(e.type==='run.input'){
+        const input=inputView(this.store,this.store.get<RunInput>('run_input',(e.data as {id:string}).id));
+        role='user';messageId=input.id;textBody=input.text;
+      }else if(e.type==='assistant.message'&&(e.data as {messageId?:string}).messageId){
+        const message=this.store.get<import('../shared/run-stream.js').RunMessage>('run_message',(e.data as {messageId:string}).messageId);
+        role='assistant';messageId=message.id;textBody=message.preview;
+      }else if(e.type==='task.accepted'){
+        role='user';textBody=(e.data as {task?:Task}).task?.goal??'';
+      }else{
+        textBody=(e.data as {text?:string}).text??'';
+      }
+      if(!textBody.toLowerCase().includes(needle))continue;
+      const at=Math.max(0,textBody.toLowerCase().indexOf(needle));
+      const from=Math.max(0,at-24);
+      const to=Math.min(textBody.length,at+needle.length+48);
+      hits.push({
+        messageId,
+        sequence,
+        role,
+        snippet:`${from>0?'…':''}${textBody.slice(from,to)}${to<textBody.length?'…':''}`,
+        at:e.at,
+        runId:e.runId,
+        conversationId,
+      });
+      if(hits.length>=pageLimit)break;
+    }
+    const lastScanned=rows.length?Number(rows[rows.length-1].sequence):start;
+    const nextAfter=rows.length>=pageLimit*8||hits.length>=pageLimit?lastScanned:undefined;
+    return {query:needle,hits,nextAfter};
+  }
   branchConversation(projectId:string,sourceRunId:string,entryId:string,sourceHash:string,title:string,goal:string,commandId:string,policy:Policy){
     text(commandId,'命令ID',120);text(entryId,'历史节点',120);text(title,'话题名称',120);text(goal,'目标');
     return this.store.command(`branch:${commandId}`,fingerprint({projectId,sourceRunId,entryId,sourceHash,title,goal,policy}),()=>{
@@ -54,6 +119,91 @@ export class Service {
       this.store.event('conversation.branched',{id:conversation.id,...branch},{projectId,runId:run.id});
       return {conversation,task:submitted.task,run};
     });
+  }
+  /** Independent copy for edit-resend / answer regenerate. Never rewrites the native original. */
+  versionConversation(
+    projectId: string,
+    sourceRunId: string,
+    kind: 'edit_resend' | 'regenerate',
+    sourceHash: string,
+    title: string,
+    goal: string,
+    commandId: string,
+    policy: Policy,
+    assetIds: string[] = [],
+  ) {
+    text(commandId, '命令ID', 120);
+    text(title, '话题名称', 120);
+    text(goal, '目标');
+    text(sourceHash, '原会话校验值', 64);
+    if (kind === 'regenerate' && assetIds.length) throw new AppError(400, '重新生成复用历史附件，不能另附新资料冒充');
+    return this.store.command(
+      `version:${commandId}`,
+      fingerprint({ projectId, sourceRunId, kind, sourceHash, title, goal, assetIds, policy }),
+      () => {
+        const source = this.scope(this.store.get<Run>('run', sourceRunId), projectId);
+        const targets = versionTargetsForRun(this.store, source);
+        if (targets.unavailableReason) throw new AppError(409, targets.unavailableReason);
+        if (targets.sourceHash !== sourceHash) throw new AppError(409, '原会话已变化，请重新读取版本目标');
+        const base = continuationFor(this.store, projectId, policy, sourceRunId);
+        if (!base || base.sha256 !== sourceHash) throw new AppError(409, '原会话已变化，请重新选择');
+        let baseEntryId: string | null;
+        let sourceEntryId: string;
+        let sessionAction: Run['sessionAction'];
+        let versionKind: Run['versionKind'] = kind;
+        if (kind === 'edit_resend') {
+          if (!targets.editResend) throw new AppError(409, '当前执行没有可编辑重发的用户输入');
+          baseEntryId = targets.editResend.baseEntryId;
+          sourceEntryId = targets.editResend.userEntryId;
+          sessionAction = undefined;
+          for (const id of assetIds) {
+            const asset = this.scope(this.store.get<Asset>('asset', id), projectId);
+            if (asset.status !== 'ready') throw new AppError(410, '输入资产已删除');
+          }
+        } else {
+          if (!targets.regenerate) throw new AppError(409, '当前执行没有可重新生成的最终答复');
+          baseEntryId = targets.regenerate.baseEntryId;
+          sourceEntryId = targets.regenerate.targetEntryId;
+          sessionAction = 'regenerate';
+        }
+        assertVersionBase(
+          source.sessionPath!,
+          base.sessionId,
+          sourceHash,
+          baseEntryId,
+          projectId,
+          dirname(this.store.path),
+          kind,
+        );
+        const branch = {
+          sourceRunId,
+          sourceEntryId,
+          sourceConversationId: source.conversationId,
+          sourceHash,
+          versionKind: kind,
+        };
+        const conversation = this.store.create<Conversation>('conversation', { projectId, title, branch });
+        this.store.event('conversation.created', { id: conversation.id }, { projectId });
+        const submitted = this.submit(
+          projectId,
+          goal,
+          `version_${fingerprint({ commandId })}`,
+          'pi',
+          policy,
+          kind === 'edit_resend' ? assetIds : [],
+          undefined,
+          { view: 'project' },
+          null,
+          conversation.id,
+        );
+        const patch: Partial<Run> = { versionKind };
+        if (sessionAction) patch.sessionAction = sessionAction;
+        if (baseEntryId !== null) patch.continuation = { ...base, entryId: baseEntryId };
+        const run = this.store.update<Run>('run', submitted.run.id, submitted.run.revision, patch);
+        this.store.event('conversation.versioned', { id: conversation.id, kind, ...branch }, { projectId, runId: run.id });
+        return { conversation, task: submitted.task, run, targets };
+      },
+    );
   }
   conversation(projectId: string, before?: number, limit = 50, conversationId?:string): ConversationPage {
     this.project(projectId);
@@ -181,7 +331,7 @@ export class Service {
         if (!Number.isSafeInteger(policy.maxCalls) || !Number.isFinite(policy.maxCostUsd)) throw new AppError(400, '累计额度超出有效范围');
       }
       const continuation=run.mode==='pi'&&run.sessionPath&&run.sessionId?continuationFor(this.store,run.projectId,run.policy,run.id):undefined;
-      const next = this.store.create<Run>('run', { projectId: run.projectId, conversationId: run.conversationId, taskId: run.taskId, mode: run.mode, status: 'queued', attempt: run.attempt + 1, parentRunId: id, continuation: continuation ?? (run.sessionAction === 'compact' || run.continuation?.entryId ? run.continuation : undefined),importedContinuation:continuation?undefined:run.importedContinuation,continueAfterRunId:continuation?undefined:run.continueAfterRunId,sessionAction:run.sessionAction,compactionFocus:run.compactionFocus,cancelRequested: false, resultAssetIds: [], policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId: run.nodeId });
+      const next = this.store.create<Run>('run', { projectId: run.projectId, conversationId: run.conversationId, taskId: run.taskId, mode: run.mode, status: 'queued', attempt: run.attempt + 1, parentRunId: id, continuation: continuation ?? (run.sessionAction === 'compact' || run.sessionAction === 'regenerate' || run.continuation?.entryId ? run.continuation : undefined),importedContinuation:continuation?undefined:run.importedContinuation,continueAfterRunId:continuation?undefined:run.continueAfterRunId,sessionAction:run.sessionAction,compactionFocus:run.compactionFocus,versionKind:run.versionKind,cancelRequested: false, resultAssetIds: [], policy, calls: 0, reservedUsd: 0, spentUsd: 0, nodeId: run.nodeId });
       if (addition) {
         const grant = this.store.create<TaskBudgetGrant>('task_budget_grant', { schemaVersion: 1, projectId: run.projectId, taskId: run.taskId, sourceRunId: id, resumedRunId: next.id, commandId, addition,
           before: { maxCalls: run.policy.maxCalls, maxCostUsd: run.policy.maxCostUsd }, after: { maxCalls: policy.maxCalls, maxCostUsd: policy.maxCostUsd } });

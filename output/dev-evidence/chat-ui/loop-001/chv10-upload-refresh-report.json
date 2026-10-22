@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-21T16:37:06.798Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "uploadInterrupted": {
+    "recoveryUi": true
+  },
+  "uploadResumed": {
+    "assetId": "e751e932-0772-467a-a7d9-f17d856d0fca"
+  },
+  "refreshKeepsDraftAndAttachment": {
+    "draft": "CHV10 刷新草稿 UNIQUE_DRAFT_KEEP",
+    "assetId": "e751e932-0772-467a-a7d9-f17d856d0fca"
+  },
+  "lateResponseKeepsNewInput": {
+    "value": "CHV10 late UNIQUE_NEWER_INPUT"
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

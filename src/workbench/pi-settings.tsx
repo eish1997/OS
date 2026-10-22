@@ -100,7 +100,54 @@ function PiSettingsFilePreview({ revision, onImported }: { revision?: number; on
 export function PiRunSettings({ run }: { run: Run }) {
   if (run.mode !== 'pi') return null;
   const profile = run.policy.piRuntime;
-  return <><small className="wb-caption">思考：{thinkingLabels[profile?.thinkingLevel ?? 'off']}{!profile && '（旧任务设置）'}{profile && profile.requestedThinkingLevel !== profile.thinkingLevel && ` · 原选择${thinkingLabels[profile.requestedThinkingLevel]}，按模型能力调整`}</small><RunTimeStatus run={run}/>{run.compaction && <small role="status">上下文压缩：{{ running: '进行中', completed: '已完成', cancelled: '已取消', failed: '失败，历史保留' }[run.compaction.phase]} · {{ manual: '手动', threshold: '接近上下文上限', overflow: '上下文溢出恢复' }[run.compaction.reason]}</small>}<PiRequestDetails run={run}/></>;
+  return <>
+    <small className="wb-caption" data-chat-run-frozen>
+      本次冻结：{run.policy.modelBinding ? `${run.policy.modelBinding.kind === 'chatgpt' ? 'ChatGPT' : 'API'} · ${run.policy.modelBinding.model}` : '模型未记录'}
+      {' · '}
+      思考 {thinkingLabels[profile?.thinkingLevel ?? 'off']}
+      {!profile && '（旧任务设置）'}
+      {profile && profile.requestedThinkingLevel !== profile.thinkingLevel && ` · 原选择${thinkingLabels[profile.requestedThinkingLevel]}，按模型能力调整`}
+      {run.policy.piRuntime?.executionMode === 'long' ? ' · 长任务时限' : ''}
+    </small>
+    <RunTimeStatus run={run}/>
+    {run.compaction && <small role="status">上下文压缩：{{ running: '进行中', completed: '已完成', cancelled: '已取消', failed: '失败，历史保留' }[run.compaction.phase]} · {{ manual: '手动', threshold: '接近上下文上限', overflow: '上下文溢出恢复' }[run.compaction.reason]}</small>}
+    <ToolExecutionDetails run={run}/>
+    <PiRequestDetails run={run}/>
+    <ManualCompaction run={run}/>
+    <PlainRetry run={run}/>
+    <TaskBudgetDetails run={run}/>
+  </>;
+}
+
+function PlainRetry({ run }: { run: Run }) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const command = useRef<string | undefined>(undefined);
+  if (!['failed', 'cancelled', 'interrupted'].includes(run.status)) return null;
+  if (run.status === 'interrupted' && !run.error?.includes('已对账')) {
+    return <p className="wb-caption" data-chat-recovery-hint>中断恢复：请先在「本轮工具过程」完成核对，再使用额度恢复或普通重试。</p>;
+  }
+  const retry = async () => {
+    if (busy) return;
+    command.current ??= crypto.randomUUID();
+    setBusy(true);
+    setMessage('');
+    try {
+      await request(`/runs/${encodeURIComponent(run.id)}/retry`, { commandId: command.current });
+      setMessage('已提交普通重试（不追加额度），可在执行列表查看新尝试。');
+    } catch (error) {
+      if (error instanceof ApiError && error.status >= 400 && error.status < 500) command.current = undefined;
+      setMessage(String(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return <div className="wb-chat-recovery" data-chat-plain-retry>
+    <button type="button" className="wb-chat-hit" disabled={busy} onClick={() => void retry()}>
+      {busy ? '重试提交中…' : '普通重试（不追加额度）'}
+    </button>
+    {message && <p role="status">{message}</p>}
+  </div>;
 }
 
 function RunTimeStatus({run}: {run: Run}) {
@@ -142,9 +189,6 @@ function PiRequestDetails({ run }: { run: Run }) {
     {page && !page.items.length && <p>{page.calls ? '这部分历史没有逐次记录，不能据此判断用量为零。' : '尚无模型请求。'}</p>}
     <ol>{page?.items.map(item => <li key={item.id}>第 {item.callNumber} 次 · {purposes[item.purpose]} · {item.state === 'settled' ? '已结算' : item.state === 'unknown' ? '回执不完整' : '尚无结算回执'}<br/>{item.usage ? `${item.usage.totalTokens} tokens${item.usage.complete ? '' : '（不完整）'}` : '用量未知'}{run.policy.modelBinding?.kind !== 'chatgpt' && (item.costUsd !== undefined ? ` · 实际 $${item.costUsd.toFixed(4)}` : ` · 预留 $${item.reservedUsd.toFixed(4)}，实际费用未知`)}</li>)}</ol>
     {page?.nextAfter !== undefined && <button disabled={busy} onClick={() => void read(page.nextAfter)}>下一页请求</button>}
-    <ManualCompaction run={run}/>
-    <TaskBudgetDetails run={run}/>
-    <ToolExecutionDetails run={run}/>
   </details>;
 }
 
@@ -166,7 +210,7 @@ function TaskBudgetDetails({ run }: { run: Run }) {
     } catch(e) { if (e instanceof ApiError && e.status >= 400 && e.status < 500) pending.current = undefined; setMessage(String(e)); } finally { setBusy(false); }
   };
   return <details onToggle={event => { if (event.currentTarget.open && !budget && !busy) void read(); }}>
-    <summary>任务总额度与恢复</summary>
+    <summary>追加额度后恢复</summary>
     <p>这里累计同一任务的所有尝试。未知费用仍占用预留额度；追加不会修改旧执行记录，也不会提高连接总额度。</p>
     {budget && <><p>请求：已用 {budget.usedCalls} / {budget.maxCalls} 次，剩余 {budget.remainingCalls} 次。{!subscription && ` 费用含预留：$${budget.accountedUsd.toFixed(4)} / $${budget.maxCostUsd.toFixed(4)}，剩余 $${budget.remainingUsd.toFixed(4)}。`}</p>
       <ul>{budget.grants.map(g=><li key={g.id}>{g.addition.reason}：请求 {g.before.maxCalls} → {g.after.maxCalls}{!subscription && `；费用 $${g.before.maxCostUsd} → $${g.after.maxCostUsd}`}</li>)}</ul></>}
@@ -201,6 +245,7 @@ function ManualCompaction({ run }: { run: Run }) {
     <p>手动压缩会使用模型请求额度，并创建可继续的新会话副本，原历史保留。</p>
     <label>摘要重点（可选） <textarea aria-label="摘要重点" rows={3} maxLength={2000} value={focus} disabled={busy || accepted} onChange={event => setFocus(event.target.value)} placeholder="例如：保留文件路径与未完成步骤" /></label>
     <p className="wb-caption">会随摘要请求一并发送；宿主仍会附加记忆守卫。留空则只用默认压缩说明。</p>
-    <button disabled={busy || accepted} onClick={() => void compact()}>压缩上下文</button>{message && <p role="status">{message}</p>}
+    <button type="button" className="wb-chat-hit" data-chat-compact-run disabled={busy || accepted} onClick={() => void compact()}>压缩上下文</button>
+    {message && <p role="status">{message}</p>}
   </div>;
 }

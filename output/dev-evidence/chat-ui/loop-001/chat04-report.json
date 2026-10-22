@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-21T16:19:54.362Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "passed": true,
+  "follow": {
+    "nearBottomAfterStream": true,
+    "jumpLatestWorked": true
+  }
+}

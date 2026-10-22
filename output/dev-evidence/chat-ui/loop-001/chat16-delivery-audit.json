@@ -1,0 +1,40 @@
+﻿{
+    "healthReady":  true,
+    "dailyIndex":  "index-Be7gnRRk.js",
+    "chat16Passed":  true,
+    "chat15Calls":  16,
+    "chat15Usd":  0.0067474679999999995,
+    "chat15Cny":  0.0486,
+    "backlog15":  "| CHAT-15 | done | 14、模型与开发预算授权 | CHV-23：`chat15-report`+`chat15-steer-queue-report`+`chat15-budget-ledger`；DeepSeek 累计 16 次 / ≈¥0.049 |",
+    "backlog16":  "| CHAT-16 | done | 14、15、本机应用授权 | CHV-24：`chat16-report.json` passed；候选已应用到 `F:\\AI\\OS`；业务摘要不变；回退包 `AI-OS-Backups\\chat16-20261022-112312` |",
+    "currentHeadline":  {
+                            "value":  "",
+                            "PSPath":  "C:\\Users\\ZYF\\orca\\workspaces\\OS\\coffinfish\\doc\\dev\\current.md",
+                            "PSParentPath":  "C:\\Users\\ZYF\\orca\\workspaces\\OS\\coffinfish\\doc\\dev",
+                            "PSChildName":  "current.md",
+                            "PSDrive":  {
+                                            "CurrentLocation":  "Users\\ZYF\\orca\\workspaces\\OS\\coffinfish",
+                                            "Name":  "C",
+                                            "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                            "Root":  "C:\\",
+                                            "Description":  "系统",
+                                            "MaximumSize":  null,
+                                            "Credential":  "System.Management.Automation.PSCredential",
+                                            "DisplayRoot":  null
+                                        },
+                            "PSProvider":  {
+                                               "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                               "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                               "Name":  "FileSystem",
+                                               "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                               "ModuleName":  "Microsoft.PowerShell.Core",
+                                               "Module":  null,
+                                               "Description":  "",
+                                               "Capabilities":  52,
+                                               "Home":  "C:\\Users\\ZYF",
+                                               "Drives":  "C D E F G H I M Z"
+                                           },
+                            "ReadCount":  3
+                        },
+    "keyInRepo":  false
+}

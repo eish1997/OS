@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-21T16:23:29.806Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "tolerancePx": 8,
+  "anchor": {
+    "before": {
+      "scrollTop": 685.3333129882812,
+      "offsetInView": -449.5,
+      "messageId": "f70cb46b-ca19-40ad-bf8e-8aa606d916d7"
+    },
+    "after": {
+      "scrollTop": 685.3333129882812,
+      "offsetInView": -449.5
+    },
+    "offsetDelta": 0,
+    "scrollDelta": 0,
+    "tol": 8,
+    "toolRunId": "37f116fd-9ab3-4967-8c92-6f243df153df"
+  },
+  "toolExpanded": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

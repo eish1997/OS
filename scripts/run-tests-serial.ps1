@@ -1,8 +1,17 @@
 # Serial test runner via cmd to avoid PowerShell NativeCommandError on node stderr.
+param(
+  [string]$EvidenceDir = ''
+)
 $ErrorActionPreference = 'SilentlyContinue'
 $root = if ($PSScriptRoot) { (Resolve-Path (Join-Path $PSScriptRoot '..')).Path } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 Set-Location $root
-$outDir = Join-Path $root 'output/dev-evidence/pi-parity/loop-169'
+if (-not $EvidenceDir) {
+  if ($env:CHAT_UI_SERIAL_EVIDENCE) { $EvidenceDir = $env:CHAT_UI_SERIAL_EVIDENCE }
+  elseif ($env:SERIAL_TEST_EVIDENCE) { $EvidenceDir = $env:SERIAL_TEST_EVIDENCE }
+  else { $EvidenceDir = 'output/dev-evidence/pi-parity/loop-169' }
+}
+if (-not [System.IO.Path]::IsPathRooted($EvidenceDir)) { $EvidenceDir = Join-Path $root $EvidenceDir }
+$outDir = $EvidenceDir
 $log = Join-Path $outDir 'npm-test-serial.log'
 $summary = Join-Path $outDir 'npm-test-serial-summary.json'
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null

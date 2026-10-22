@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-21T16:20:37.104Z",
+  "staticDir": "output/chat-ui-build",
+  "evidence": "C:\\Users\\ZYF\\orca\\workspaces\\OS\\coffinfish\\output\\dev-evidence\\chat-ui\\loop-001",
+  "designVersion": "2026-10-21-chat-02",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "note": "paste/drop use in-page DataTransfer; not OS clipboard",
+  "picker": {
+    "thumbnail": true,
+    "pureImageHint": true,
+    "primaryDisabled": true,
+    "assetId": "0590cedd-c2c0-4358-ad67-b46c469dad34"
+  },
+  "pasteSynthetic": {
+    "attached": true
+  },
+  "dropSynthetic": {
+    "attached": true
+  },
+  "nonImageRejected": {
+    "alert": "仅支持 PNG、JPEG、GIF 或 WebP 图片；其他文件不会添加",
+    "chips": 0
+  },
+  "libraryAttach": {
+    "assetId": "0590cedd-c2c0-4358-ad67-b46c469dad34",
+    "chipVisible": true
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

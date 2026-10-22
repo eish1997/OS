@@ -1,7 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultLayout, activeWorkspace, leaves, addWindow, createWindow, splitRegion, floatWindow, dockWindow, collectWindows, mutateLayout, duplicateWorkspace, resetWorkspace, deleteWorkspace, validateLayout } from '../shared/workbench-layout.js';
+import { defaultLayout, activeWorkspace, leaves, addWindow, createWindow, splitRegion, floatWindow, dockWindow, collectWindows, mutateLayout, duplicateWorkspace, resetWorkspace, deleteWorkspace, validateLayout, preferredEmptyLeaf, leafGeometry } from '../shared/workbench-layout.js';
 import { defaultAppearance } from '../shared/workbench-appearance.js';
+
+test('CHAT-02 default placement prefers the largest empty leaf on a new space', () => {
+  const layout = defaultLayout();
+  const preferred = preferredEmptyLeaf(activeWorkspace(layout).root)!;
+  const geometry = leafGeometry(activeWorkspace(layout).root).find((item) => item.id === preferred.id)!;
+  assert.ok(geometry.area >= 0.6, `middle pane should be ~0.6 of area, got ${geometry.area}`);
+  const next = addWindow(layout, createWindow('chat', 'Pi 对话'));
+  const placed = leaves(activeWorkspace(next).root).find((leaf) => leaf.windowId);
+  assert.equal(placed?.id, preferred.id);
+});
 
 test('appearance accepts legacy layouts and survives workspace edits while rejecting invalid settings',()=>{
   const legacy=defaultLayout();validateLayout(legacy);
@@ -33,7 +43,7 @@ test('workspace copy/reset/delete preserve global floats without creating busine
 });
 test('corrupt layout rejects duplicate references, bad graphs and oversized state',()=>{
   let l=addWindow(defaultLayout(),createWindow('demo','A'));const id=Object.keys(l.windows)[0];
-  const duplicate=structuredClone(l);leaves(activeWorkspace(duplicate).root)[1].windowId=id;assert.throws(()=>validateLayout(duplicate));
+  const duplicate=structuredClone(l);const other=leaves(activeWorkspace(duplicate).root).find(n=>!n.windowId)!;other.windowId=id;assert.throws(()=>validateLayout(duplicate));
   const bad=structuredClone(l);bad.windows[id].view={text:'x'.repeat(190000)};assert.throws(()=>validateLayout(bad));
   const badRatio=structuredClone(l);if(badRatio.workspaces[0].root.kind==='split')badRatio.workspaces[0].root.ratio=NaN;assert.throws(()=>validateLayout(badRatio));
   assert.throws(()=>dockWindow(l,id,'missing'));validateLayout(l);

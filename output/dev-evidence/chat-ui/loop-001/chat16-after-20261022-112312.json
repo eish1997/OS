@@ -1,0 +1,64 @@
+﻿{
+    "backupStatus":  {
+                         "enabled":  false,
+                         "waitingForIdle":  false,
+                         "intervalHours":  24,
+                         "retainCount":  7,
+                         "retained":  0,
+                         "pruned":  3,
+                         "offsite":  {
+                                         "enabled":  false,
+                                         "pending":  0,
+                                         "running":  false
+                                     },
+                         "lastSuccessAt":  "2026-10-21T06:04:15.175Z",
+                         "restoreCheckedAt":  "2026-10-21T06:04:15.175Z",
+                         "error":  "备份位置或访问权限需要检查，已有内容保留",
+                         "checking":  false
+                     },
+    "health":  {
+                   "instanceId":  "9ea64bee-3dab-4d72-bcf3-01990ae8373c",
+                   "pid":  55196,
+                   "ready":  true,
+                   "launchId":  null
+               },
+    "activeRuns":  [
+
+                   ],
+    "modelConfigured":  true,
+    "model":  "gpt-5.6-sol",
+    "collections":  {
+                        "assets":  {
+                                       "count":  56,
+                                       "digest":  "057574a64cae2017a502c20fe767a063237aecde54f11160cdc1d2bb4c4a129e"
+                                   },
+                        "projects":  {
+                                         "count":  22,
+                                         "digest":  "9086a0d07f5147ec4e465e8ccaadda764d33a55f78bac8bdd1762671137ba164"
+                                     },
+                        "drafts":  {
+                                       "count":  16,
+                                       "digest":  "f97ce9dbb1d0308edc1e7e3d52b321032a0bc0777e8deaa0bb4b1c16874a8e82"
+                                   },
+                        "operations":  {
+                                           "count":  84,
+                                           "digest":  "0b8d6c31aa4dd7a228db518a3d7339f9d1e5e71023ba616ccceaf987f4a32d5a"
+                                       },
+                        "inbox":  {
+                                      "count":  2,
+                                      "digest":  "0bf1312c77e8ef0f15362108d0cac861f84d4252ff254d453cf8aa82e287ec3f"
+                                  },
+                        "summaries":  {
+                                          "count":  2,
+                                          "digest":  "61e34194ecb2d169c737f7db566361824826c9259b6d3acd2aa997f94e38696d"
+                                      },
+                        "memories":  {
+                                         "count":  5,
+                                         "digest":  "7621e0a12be189d85008febdf00d17f8fdd38652800183cef6af383688edccf3"
+                                     },
+                        "tasks":  {
+                                      "count":  51,
+                                      "digest":  "9fe077ab5ab9536ba7faff0748a64415d9587068b7faf5d7c114d5301f3059ee"
+                                  }
+                    }
+}

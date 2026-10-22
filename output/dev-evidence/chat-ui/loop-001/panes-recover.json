@@ -1,0 +1,97 @@
+{
+  "applied": 2,
+  "failedCount": 17,
+  "failed": [
+    {
+      "reason": "old_string missing",
+      "preview": "import { NativeImportPanel } from './native-import';\nimport { Select } from './c",
+      "applied": 0
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  const project=snapshot?.projects.find(p=>p.id===w.binding.projectId);const con",
+      "applied": 0
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "import { selectVisibleRuns } from '../../shared/chat-visible-runs';\nimport type ",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  async function send(kind:'task'|'steer'='task'){if(busy||!input.trim()||!conve",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "import { selectVisibleRuns } from '../../shared/chat-visible-runs';\nimport { CHA",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  const [history,setHistory]=useState<ConversationPage>();const [error,setError]",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "{history?.olderThan&&<button disabled={loadingOlder} onClick={()=>void older()}>",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "{history?.messages.map(m=><article key={m.id} className={`wb-message ${m.role}`}",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  useEffect(()=>{if(thread.current&&history)thread.current.scrollTop=Number(w.vi",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  return <div className=\"wb-chat-pane\" data-chat-design={CHAT_UI_DESIGN.version}",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  useEffect(()=>{\n    const el=thread.current;if(!el||!history)return;\n    if(!s",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  const stickToBottom=useRef(w.view.stickToBottom!==false);const scrollRestored=",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "<div className=\"wb-chat-history\" ref={thread} onScroll={e=>{const el=e.currentTa",
+      "applied": 1
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  return <div className=\"wb-chat-pane\" data-chat-design={CHAT_UI_DESIGN.version}",
+      "applied": 2
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "  const composerExpanded=Boolean(w.view.composerExpanded);\n  const pureImageBloc",
+      "applied": 2
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "{(['running','waiting_interaction','queued','waiting_user','waiting_node'].inclu",
+      "applied": 2
+    },
+    {
+      "reason": "old_string missing",
+      "preview": "onKeyDown={e=>{if(e.nativeEvent.isComposing||e.keyCode===229)return;if(e.key==='",
+      "applied": 2
+    }
+  ],
+  "bytes": 13971,
+  "hasSelectVisible": false,
+  "hasRunAction": false,
+  "hasTurns": false,
+  "hasJumpLatest": false,
+  "hasComposerExpand": false
+}

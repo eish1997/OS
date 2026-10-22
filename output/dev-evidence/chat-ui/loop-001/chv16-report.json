@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-21T16:23:48.961Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "exportExact": true,
+  "importStored": true,
+  "preview": {
+    "sessionId": "01a15f46-aa97-705e-bc53-acb331967588",
+    "sha256": "c37ca1a440b780e0c53506ea7230c2adf7b872b124ba9c2cade3c3c8829fb5d4",
+    "bytes": 861,
+    "entryCount": 2,
+    "messageCount": 2,
+    "imageCount": 0,
+    "toolCallCount": 0,
+    "compactionCount": 0,
+    "contextEditCount": 0,
+    "customEntryCount": 0,
+    "environmentVerified": false
+  },
+  "restoredConversationId": "ee67bae8-71c7-40e1-9834-054bf54a09d8",
+  "restoreCreated": true,
+  "sourcePreserved": true,
+  "importUiReachable": true,
+  "compactEntryReachable": true,
+  "reopenedViaTopicSwitch": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

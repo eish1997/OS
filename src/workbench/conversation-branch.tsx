@@ -6,9 +6,16 @@ import {InheritedHistory} from './inherited-history';
 import {BranchTree} from './branch-tree';
 
 type Intent={projectId:string;sourceId:string;entryId:string;sourceHash:string;title:string;goal:string;commandId:string};
-export function ConversationBranch({projectId,conversation,runs,onOpen,refresh,enabled}: {projectId:string;conversation?:Conversation;runs:Run[];onOpen:(conversation:Conversation)=>void;refresh:()=>Promise<void>;enabled:boolean}){
+export function ConversationBranch({projectId,conversation,runs,onOpen,onOpenSource,refresh,enabled,presetSource,forceOpen}: {projectId:string;conversation?:Conversation;runs:Run[];onOpen:(conversation:Conversation)=>void;onOpenSource?:(conversation:Conversation)=>void;refresh:()=>Promise<void>;enabled:boolean;presetSource?:string;forceOpen?:boolean}){
   const key=`wb-branch-v1:${projectId}:${conversation?.id}`;
   const [open,setOpen]=useState(false),[source,setSource]=useState(''),[points,setPoints]=useState<NativeBranchPoint[]>([]),[hash,setHash]=useState(''),[offset,setOffset]=useState<number>(),[selected,setSelected]=useState(''),[title,setTitle]=useState(''),[goal,setGoal]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  useEffect(()=>{
+    if(forceOpen)setOpen(true);
+  },[forceOpen]);
+  useEffect(()=>{
+    if(presetSource&&presetSource!==source)void load(presetSource);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load intentionally when preset changes
+  },[presetSource]);
   const [pending,setPending]=useState<Intent|undefined>(()=>{try{const saved=JSON.parse(localStorage.getItem(key)||'null');return saved?.projectId===projectId&&typeof saved?.commandId==='string'?saved:undefined;}catch{return undefined;}});
   const [created,setCreated]=useState<Conversation>();const active=useRef(false),abort=useRef<AbortController|undefined>(undefined),mounted=useRef(true);
   const [sourceError,setSourceError]=useState(''),[openingSource,setOpeningSource]=useState(false);
@@ -20,7 +27,7 @@ export function ConversationBranch({projectId,conversation,runs,onOpen,refresh,e
       const all=await request<Conversation[]>('/conversations');
       const parent=all.find(c=>c.id===conversation?.branch?.sourceConversationId&&c.projectId===projectId);
       if(!parent)throw new Error('来源话题已不可用，分支记录仍保留');
-      if(mounted.current)onOpen(parent);
+      if(mounted.current)(onOpenSource||onOpen)(parent);
     }catch(e){if(mounted.current)setSourceError(String(e));}finally{if(mounted.current)setOpeningSource(false);}
   }
   async function load(id:string,next?:number){
@@ -42,14 +49,14 @@ export function ConversationBranch({projectId,conversation,runs,onOpen,refresh,e
     finally{active.current=false;if(mounted.current)setBusy(false);}
   }
   if(!sources.length&&!pending&&!conversation?.branch&&!conversation?.importedFrom)return null;
-  return <section className="wb-branch">
+  return <section className="wb-branch" data-chat-branch-panel>
     {conversation?.importedFrom&&<><p className="wb-caption">导入来源：原件 {conversation.importedFrom.importId.slice(0,8)} · 历史节点 {conversation.importedFrom.sourceEntryId}</p><InheritedHistory conversationId={conversation.id} origin="import"/></>}
     {conversation?.branch&&<p className="wb-caption">分支来源：执行 {conversation.branch.sourceRunId.slice(0,8)} · 历史节点 {conversation.branch.sourceEntryId}</p>}
-    {conversation?.branch?.sourceConversationId&&<button disabled={openingSource} onClick={()=>void openSource()}>{openingSource?'正在打开来源…':'打开来源话题'}</button>}
+    {conversation?.branch?.sourceConversationId&&<button type="button" className="wb-chat-hit" data-chat-open-source disabled={openingSource} onClick={()=>void openSource()}>{openingSource?'正在打开来源…':'打开来源话题'}</button>}
     {conversation?.branch&&!conversation.branch.sourceConversationId&&<p className="wb-caption">来源是项目级执行，没有独立话题窗口。</p>}
     {sourceError&&<p role="alert">{sourceError}</p>}
     {conversation?.branch&&<InheritedHistory conversationId={conversation.id}/>}
-    <button aria-expanded={open} onClick={()=>setOpen(!open)}>从历史另开话题</button>
+    <button type="button" className="wb-chat-hit" data-chat-branch-toggle aria-expanded={open} onClick={()=>setOpen(!open)}>从历史另开话题</button>
     {(open||pending)&&<div className="wb-branch-form">
       <p>选择历史位置，在新窗口继续。新目标会立即提交执行，原话题保留。</p>
       {created?<><p role="status">已创建：{created.title}</p><button onClick={()=>onOpen(created)}>打开新话题</button></>:<>

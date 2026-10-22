@@ -7,7 +7,7 @@ import type {Conversation} from '../../shared/contracts';
 type Upload={id:string;name:string;bytes:number;sha256:string;received:number;revoked?:boolean};
 type Preview={sessionId:string;messageCount:number;entryCount:number;imageCount:number;compactionCount:number;contextEditCount:number};
 type Intent={projectId:string;name:string;bytes:number;sha256:string;commandId:string};
-export function NativeImportPanel({projectId,onOpen}:{projectId:string;onOpen?:(conversation:Conversation)=>void}){
+export function NativeImportPanel({projectId,onOpen,forceOpen}:{projectId:string;onOpen?:(conversation:Conversation)=>void;forceOpen?:boolean}){
   const [open,setOpen]=useState(false),[rows,setRows]=useState<Upload[]>([]),[selected,setSelected]=useState(''),[file,setFile]=useState<File>(),[busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState(''),[preview,setPreview]=useState<Preview>();
   const control=useRef<AbortController|null>(null);const live=useRef(true);const key=`wb-native-import-v1:${projectId}`;
   useEffect(()=>{live.current=true;return()=>{live.current=false;control.current?.abort();};},[]);
@@ -21,6 +21,11 @@ export function NativeImportPanel({projectId,onOpen}:{projectId:string;onOpen?:(
     }catch(e){if(live.current&&!controller.signal.aborted)setError(e instanceof Error?e.message:String(e));}
     finally{control.current=null;if(live.current){setBusy(false);if(controller.signal.aborted)setStatus('已暂停，可重新选择原文件继续上传。');}}
   }
+  useEffect(()=>{
+    if(!forceOpen)return;
+    setOpen(true);
+    void act(signal=>refresh(signal));
+  },[forceOpen]);
   async function upload(signal:AbortSignal){
     if(!file)throw new Error('请先选择原生会话文件');
     if(!file.name.endsWith('.jsonl')||!file.size||file.size>128*1024*1024)throw new Error('请选择不超过128 MiB的JSONL文件');
@@ -48,8 +53,8 @@ export function NativeImportPanel({projectId,onOpen}:{projectId:string;onOpen?:(
     if(live.current){setPreview(result.preview);setStatus('原件已保存，结构校验通过。');}
   }
   const current=rows.find(row=>row.id===selected);
-  return <section className="wb-branch">
-    <button aria-expanded={open} onClick={()=>{setOpen(!open);if(!open)void act(signal=>refresh(signal));}}>导入原生会话</button>
+  return <section className="wb-branch" data-chat-import-panel>
+    <button type="button" className="wb-chat-hit" data-chat-import-toggle aria-expanded={open} onClick={()=>{setOpen(!open);if(!open)void act(signal=>refresh(signal));}}>导入原生会话</button>
     {open&&<div className="wb-branch-form">
       <p>保存 Pi 原生会话原件并查看校验结果。当前环境尚未核对，此步骤不会启动模型或执行历史命令。</p>
       <label>导入记录<select aria-label="导入记录" value={selected} disabled={busy} onChange={e=>{setSelected(e.target.value);setPreview(undefined);setStatus('');setFile(undefined);}}><option value="">新建导入</option>{rows.map(row=><option key={row.id} value={row.id}>{row.name} · {row.revoked?'已撤销':`${row.received}/${row.bytes} 字节`} · {row.id.slice(0,8)}</option>)}</select></label>

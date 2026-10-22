@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { activeWorkspace, addWindow, addWorkspace, closeRegion, closeWindow, collectWindows, createWindow, deleteWorkspace, dockWindow, duplicateWorkspace, floatWindow, leaves, mutateLayout, resetWorkspace, resizeRegion, splitRegion, type DockNode, type Edge, type FloatingWindow, type WindowInstance, type WorkbenchLayout } from '../../shared/workbench-layout';
+import { activeWorkspace, addWindow, addWorkspace, closeRegion, closeWindow, collectWindows, createWindow, deleteWorkspace, dockWindow, duplicateWorkspace, floatWindow, leaves, mutateLayout, preferredEmptyLeaf, resetWorkspace, resizeRegion, splitRegion, type DockNode, type Edge, type FloatingWindow, type WindowInstance, type WorkbenchLayout } from '../../shared/workbench-layout';
 import { request, useLayoutStorage, useWorkbenchData } from './client';
 import type { Conversation, Asset } from '../../shared/contracts';
 import type { ViewPatch } from './window-contract';
@@ -103,13 +103,25 @@ function Workbench(){
   function openConversation(c:Conversation){
     const current=layoutRef.current;if(!current)return;
     const existing=Object.values(current.windows).find(w=>w.type==='chat'&&w.binding.conversationId===c.id);
-    if(existing){focusWindow(existing.id);return;}
+    if(existing){
+      change(l=>mutateLayout(l,n=>{const win=n.windows[existing.id];if(win)win.title=c.title;}));
+      focusWindow(existing.id);
+      return;
+    }
     const w=windowRegistry.chat.create(c.projectId);w.binding.conversationId=c.id;w.title=c.title;
     change(l=>addWindow(l,w));
   }
+  function bindConversation(windowId:string,c:Conversation){
+    change(l=>mutateLayout(l,n=>{
+      const win=n.windows[windowId];
+      if(!win)return;
+      updateProjectWindow(win,win.binding.projectId,{},c.id);
+      win.title=c.title;
+    }));
+  }
   function content(w:WindowInstance){
     const definition=windowRegistry[w.type];const Component=definition?.component;
-    if(Component){const props={window:definition.restore(w),snapshot:data.snapshot,patch:(p:ViewPatch)=>patchView(w.id,w.binding.projectId,p),targets:Object.values(layout!.windows).filter(w=>w.type==='chat'),onSend:sendAsset,refresh:data.refresh};return w.type==='chat'?<ChatWindow key={`${w.id}:${w.binding.projectId}:${w.binding.conversationId}`} {...props} onOpen={openConversation} onBind={id=>change(l=>mutateLayout(l,n=>{if(n.windows[w.id])updateProjectWindow(n.windows[w.id],w.binding.projectId,{},id);}))}/>:<Component key={`${w.id}:${w.binding.projectId}`} {...props}/>;}
+    if(Component){const props={window:definition.restore(w),snapshot:data.snapshot,patch:(p:ViewPatch)=>patchView(w.id,w.binding.projectId,p),targets:Object.values(layout!.windows).filter(w=>w.type==='chat'),onSend:sendAsset,refresh:data.refresh};const floating=layout!.floating.find(f=>f.windowId===w.id);return w.type==='chat'?<ChatWindow key={`${w.id}:${w.binding.projectId}:${w.binding.conversationId}`} {...props} chatFocused={Boolean(floating&&w.view.focusRestoreLeaf)} onFocusChat={()=>change(l=>{const leaf=leaves(activeWorkspace(l).root).find(n=>n.windowId===w.id);const staged=mutateLayout(l,n=>{const win=n.windows[w.id];if(win)win.view={...win.view,focusRestoreLeaf:leaf?.id||''};});const floated=floatWindow(staged,w.id,72,48);return mutateLayout(floated,n=>{const item=n.floating.find(f=>f.windowId===w.id);if(item){item.width=Math.max(item.width,720);item.height=Math.max(item.height,640);}});})} onRestoreChat={()=>change(l=>{const leafId=String(l.windows[w.id]?.view.focusRestoreLeaf||'');const root=activeWorkspace(l).root;const target=leaves(root).find(n=>n.id===leafId&&!n.windowId)||preferredEmptyLeaf(root)||leaves(root).find(n=>!n.windowId);if(!target)return l;const docked=dockWindow(l,w.id,target.id);return mutateLayout(docked,n=>{const win=n.windows[w.id];if(win){const view={...win.view};delete view.focusRestoreLeaf;win.view=view;}});})} onOpen={openConversation} onSwitch={c=>bindConversation(w.id,c)} onTitle={title=>change(l=>mutateLayout(l,n=>{const win=n.windows[w.id];if(win)win.title=title;}))} onBind={id=>change(l=>mutateLayout(l,n=>{if(n.windows[w.id])updateProjectWindow(n.windows[w.id],w.binding.projectId,{},id);}))}/>:<Component key={`${w.id}:${w.binding.projectId}`} {...props}/>;}
     return <div className="wb-empty"><p>窗口类型尚未接入：{w.type}</p><p>配置已保留，可以关闭此窗口。</p></div>;
   }
   function header(w:WindowInstance,f?:FloatingWindow){return <div className="wb-window-title" tabIndex={-1} onPointerDown={e=>{if((e.target as HTMLElement).closest('button,select,input'))return;const p=position(e);const r=e.currentTarget.getBoundingClientRect(),s=surface.current!.getBoundingClientRect();begin(e,{kind:'window',id:w.id,...p,originX:f?.x??(r.left-s.left)/uiScale(),originY:f?.y??(r.top-s.top)/uiScale()});}}><span className="wb-grip"><Icon name="grip"/></span><strong>{w.title}</strong><div className="wb-window-actions">{f?<><button title="置顶" aria-label="置顶" aria-pressed={f.pinned} onClick={()=>patchFloat(w.id,n=>{n.pinned=!n.pinned;})}><Icon name="pin"/></button><button title="收起为图标" aria-label="收起为图标" onClick={()=>patchFloat(w.id,n=>{n.mode='icon';n.iconX=n.x;n.iconY=n.y;})}><Icon name="minus"/></button><button title="停靠到当前空间" aria-label="停靠到当前空间" onClick={()=>change(l=>dockWindow(l,w.id,leaves(activeWorkspace(l).root)[0].id,'right'))}><Icon name="dock"/></button></>:<button title="悬浮" aria-label="悬浮" onClick={()=>change(l=>floatWindow(l,w.id))}><Icon name="float"/></button>}<button title="关闭窗口" aria-label="关闭窗口" onClick={()=>close(w)}><Icon name="close"/></button></div></div>;}

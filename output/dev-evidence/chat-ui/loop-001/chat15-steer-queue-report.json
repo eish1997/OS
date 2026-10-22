@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-22T03:11:07.205Z",
+  "purpose": "CHAT-15 steer+queue live supplement",
+  "model": "deepseek-flash",
+  "keyPresent": true,
+  "runStarted": {
+    "id": "a0824fa5-2b4b-4990-9111-6d79d30ec22e",
+    "status": "running",
+    "calls": 0
+  },
+  "steer": {
+    "ok": true,
+    "count": 1,
+    "uiVisible": true
+  },
+  "queue": {
+    "ok": true,
+    "childId": "1d1a976d-fc8f-48ec-a1f7-0d4fc1b82653",
+    "childStatus": "queued"
+  },
+  "firstFinal": "completed",
+  "childFinal": "completed",
+  "usage": {
+    "calls": 6,
+    "spentUsd": 0.002275848
+  },
+  "passed": true
+}

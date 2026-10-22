@@ -9,6 +9,7 @@ import { AppError } from './store.js';
 import { requireToolReconciliation } from './tool-progress.js';
 import type { PiModule } from './pi-adapter.js';
 import type { StorageCapacity } from './storage.js';
+import { isRegenerateBaseMessage, type ChatVersionNativeMessage } from '../shared/chat-version-ops.js';
 
 const compatible=(a:Policy,b:Policy)=>a.version===b.version&&a.modelBinding?.kind===b.modelBinding?.kind&&a.modelBinding?.provider===b.modelBinding?.provider&&a.modelBinding?.model===b.modelBinding?.model&&a.modelBinding?.connectionId===b.modelBinding?.connectionId;
 export function sourceInspection(store: Store, run: Run) {
@@ -58,6 +59,47 @@ export function assertBranchPoint(path:string,continuation:Pick<NativeContinuati
   if(!valid)throw new AppError(400,'此历史节点不存在或不是可分支的用户消息/已完成回复');
 }
 export type NativeForkSource=Pick<NativeContinuation,'sessionId'|'sha256'|'entryId'>&({runId:string;importId?:never}|{importId:string;runId?:never});
+export type NativeForkOptions={versionKind?:'edit_resend'|'regenerate'};
+export function assertVersionBase(path:string,sessionId:string,sha256:string,entryId:string|null,projectId:string,root:string,kind:'edit_resend'|'regenerate'){
+  if(entryId===null){
+    if(kind!=='edit_resend')throw new AppError(400,'重新生成需要明确的原生基点');
+    const inspected=scanNative({path,sessionId,root,projectId});
+    if(inspected.sha256!==sha256)throw new AppError(409,'原生会话已变化，请重新选择');
+    return;
+  }
+  let found=false;
+  let messageBase:ChatVersionNativeMessage|undefined;
+  const chain: {id:string;parentId:string|null}[]=[];
+  const inspected=scanNative({path,sessionId,root,projectId},row=>{
+    if(row.type==='session')return;
+    chain.push({id:String(row.id),parentId:(row.parentId as string|null)??null});
+    if(row.id!==entryId)return;
+    found=true;
+    if(row.type==='message'){
+      const message=row.message as {role?:string;stopReason?:string;content?:unknown;toolName?:string;isError?:boolean};
+      if(message?.role&&['user','assistant','toolResult'].includes(message.role)){
+        messageBase={id:String(row.id),parentId:(row.parentId as string|null)??null,role:message.role as ChatVersionNativeMessage['role'],stopReason:message.stopReason,content:message.content,toolName:message.toolName,isError:message.isError===true};
+      }
+    }
+  });
+  if(inspected.sha256!==sha256)throw new AppError(409,'原生会话已变化，请重新选择');
+  if(!found)throw new AppError(400,'版本基点不存在');
+  if(kind==='regenerate'){
+    if(!messageBase||!isRegenerateBaseMessage(messageBase))throw new AppError(400,'重新生成基点必须是用户消息或已完成的工具结果');
+    return;
+  }
+  // edit_resend may sit on a custom workbench_branch marker; only require the id exists on a parent chain tip.
+  const hasChild=new Set(chain.map(e=>e.parentId).filter((id):id is string=>Boolean(id)));
+  const tip=[...chain].reverse().find(e=>!hasChild.has(e.id))??chain.at(-1);
+  const ancestors=new Set<string>();
+  let current=tip;
+  const byId=new Map(chain.map(e=>[e.id,e]));
+  while(current){
+    ancestors.add(current.id);
+    current=current.parentId?byId.get(current.parentId):undefined;
+  }
+  if(!ancestors.has(entryId))throw new AppError(400,'编辑重发基点不在当前会话路径上');
+}
 // One new session file. Sanitizing rewrites that copy in place, so the original and the copy are the peak.
 export const nativeForkGrowth=(source:{bytes:number;entryCount:number})=>source.bytes+source.entryCount*512+8192;
 export function requireSessionRoom(capacity:StorageCapacity|undefined,growth:number){
@@ -234,14 +276,15 @@ export function reconcileUnpublishedSessions(store:Store){
     }
   }
 }
-export function forkNative(pi:PiModule,path:string,continuation:NativeForkSource,projectId:string,cwd:string,sessionDir:string,capacity:StorageCapacity) {
+export function forkNative(pi:PiModule,path:string,continuation:NativeForkSource,projectId:string,cwd:string,sessionDir:string,capacity:StorageCapacity,options?:NativeForkOptions) {
   const before=inspectNative(path,continuation.sessionId,capacity.dataDir,projectId);
   const torn=before.tornTailBytes??0;
   return capacity.write('sessions',nativeForkGrowth(before)+(torn?before.bytes-torn:0),()=>{
     const native=inspectNative(path,continuation.sessionId,capacity.dataDir,projectId);
     if(native.sha256!==continuation.sha256)throw new AppError(409,'原生会话提交后发生变化，停止接续并保留原件');
     if(continuation.entryId){
-      assertBranchPoint(path,continuation,projectId,capacity.dataDir);
+      if(options?.versionKind)assertVersionBase(path,continuation.sessionId,continuation.sha256,continuation.entryId,projectId,capacity.dataDir,options.versionKind);
+      else assertBranchPoint(path,continuation,projectId,capacity.dataDir);
     }
     let unpublishedPath:string|undefined;
     let readablePath:string|undefined;

@@ -1,0 +1,319 @@
+{
+  "at": "2026-10-21T16:24:42.238Z",
+  "staticDir": "output/chat-ui-build",
+  "candidateApp": "app-AqefWaEb.js",
+  "realModelRequests": 0,
+  "dailyServiceRestarted": false,
+  "gitCommit": false,
+  "deferred": {
+    "systemIme": "CHV-07/OS IME: see ime-clipboard-capability.json; orca computer a11y/screenshots unsupported",
+    "systemClipboard": "CHV-09/13 OS clipboard: Playwright in-page API only; OS paste needs granted computer-use GUI",
+    "realSubscription": "CHV-11 real OAuth/subscription success path needs separate auth"
+  },
+  "results": [
+    {
+      "id": "build",
+      "npm": "build:chat-ui",
+      "chv": [
+        "CHV-01"
+      ],
+      "exitCode": 0,
+      "ms": 5660
+    },
+    {
+      "id": "isolation",
+      "npm": "test:chat-ui-isolation",
+      "chv": [
+        "CHV-01"
+      ],
+      "exitCode": 0,
+      "ms": 1804
+    },
+    {
+      "id": "visible-runs",
+      "npm": "test:chat-visible-runs",
+      "chv": [
+        "CHV-04"
+      ],
+      "exitCode": 0,
+      "ms": 1100
+    },
+    {
+      "id": "version-ops",
+      "npm": "test:chat-version-ops",
+      "chv": [
+        "CHV-15"
+      ],
+      "exitCode": 0,
+      "ms": 1003
+    },
+    {
+      "id": "chv04",
+      "npm": "test:chat-ui-chv04",
+      "chv": [
+        "CHV-04"
+      ],
+      "exitCode": 0,
+      "ms": 10154
+    },
+    {
+      "id": "chv05",
+      "npm": "test:chat-ui-chv05",
+      "chv": [
+        "CHV-05"
+      ],
+      "exitCode": 0,
+      "ms": 8118
+    },
+    {
+      "id": "chv01",
+      "npm": "test:chat-ui-chv01",
+      "chv": [
+        "CHV-01"
+      ],
+      "exitCode": 0,
+      "ms": 11368
+    },
+    {
+      "id": "chat02",
+      "npm": "test:chat-ui-chat02",
+      "chv": [
+        "CHV-02",
+        "CHV-20"
+      ],
+      "exitCode": 0,
+      "ms": 8142
+    },
+    {
+      "id": "chat04",
+      "npm": "test:chat-ui-chat04",
+      "chv": [
+        "CHV-18"
+      ],
+      "exitCode": 0,
+      "ms": 8857
+    },
+    {
+      "id": "chat18",
+      "npm": "test:chat-ui-chat18",
+      "chv": [
+        "CHV-18"
+      ],
+      "exitCode": 0,
+      "ms": 10482
+    },
+    {
+      "id": "chat20",
+      "npm": "test:chat-ui-chat20",
+      "chv": [
+        "CHV-20"
+      ],
+      "exitCode": 0,
+      "ms": 10463
+    },
+    {
+      "id": "chat05",
+      "npm": "test:chat-ui-chat05",
+      "chv": [
+        "CHV-07"
+      ],
+      "exitCode": 0,
+      "ms": 12844
+    },
+    {
+      "id": "chat06",
+      "npm": "test:chat-ui-chat06",
+      "chv": [
+        "CHV-09"
+      ],
+      "exitCode": 0,
+      "ms": 9704
+    },
+    {
+      "id": "chv06",
+      "npm": "test:chat-ui-chv06",
+      "chv": [
+        "CHV-06"
+      ],
+      "exitCode": 0,
+      "ms": 8550
+    },
+    {
+      "id": "chat07",
+      "npm": "test:chat-ui-chat07",
+      "chv": [
+        "CHV-13"
+      ],
+      "exitCode": 0,
+      "ms": 10188
+    },
+    {
+      "id": "chv13-select",
+      "npm": "test:chat-ui-chv13-select",
+      "chv": [
+        "CHV-13"
+      ],
+      "exitCode": 0,
+      "ms": 11025
+    },
+    {
+      "id": "chat08",
+      "npm": "test:chat-ui-chat08",
+      "chv": [
+        "CHV-12"
+      ],
+      "exitCode": 0,
+      "ms": 10016
+    },
+    {
+      "id": "chv12",
+      "npm": "test:chat-ui-chv12",
+      "chv": [
+        "CHV-12"
+      ],
+      "exitCode": 0,
+      "ms": 34487
+    },
+    {
+      "id": "chv08",
+      "npm": "test:chat-ui-chv08",
+      "chv": [
+        "CHV-08"
+      ],
+      "exitCode": 0,
+      "ms": 8370
+    },
+    {
+      "id": "chat09",
+      "npm": "test:chat-ui-chat09",
+      "chv": [
+        "CHV-11"
+      ],
+      "exitCode": 0,
+      "ms": 12275
+    },
+    {
+      "id": "chv10",
+      "npm": "test:chat-ui-chv10",
+      "chv": [
+        "CHV-10"
+      ],
+      "exitCode": 0,
+      "ms": 11433
+    },
+    {
+      "id": "chv10-upload",
+      "npm": "test:chat-ui-chv10-upload",
+      "chv": [
+        "CHV-10"
+      ],
+      "exitCode": 0,
+      "ms": 10812
+    },
+    {
+      "id": "chat10",
+      "npm": "test:chat-ui-chat10",
+      "chv": [
+        "CHV-14"
+      ],
+      "exitCode": 0,
+      "ms": 10206
+    },
+    {
+      "id": "chv14-deep",
+      "npm": "test:chat-ui-chv14-deep",
+      "chv": [
+        "CHV-14"
+      ],
+      "exitCode": 0,
+      "ms": 16670
+    },
+    {
+      "id": "chat11",
+      "npm": "test:chat-ui-chat11",
+      "chv": [
+        "CHV-15",
+        "CHV-16"
+      ],
+      "exitCode": 0,
+      "ms": 8858
+    },
+    {
+      "id": "chat12",
+      "npm": "test:chat-ui-chat12",
+      "chv": [
+        "CHV-15"
+      ],
+      "exitCode": 0,
+      "ms": 10393
+    },
+    {
+      "id": "chv03",
+      "npm": "test:chat-ui-chv03",
+      "chv": [
+        "CHV-03"
+      ],
+      "exitCode": 0,
+      "ms": 9822
+    },
+    {
+      "id": "chv15",
+      "npm": "test:chat-ui-chv15",
+      "chv": [
+        "CHV-15"
+      ],
+      "exitCode": 0,
+      "ms": 9125
+    },
+    {
+      "id": "chv16",
+      "npm": "test:chat-ui-chv16",
+      "chv": [
+        "CHV-16"
+      ],
+      "exitCode": 0,
+      "ms": 20125
+    },
+    {
+      "id": "chv19",
+      "npm": "test:chat-ui-chv19",
+      "chv": [
+        "CHV-19"
+      ],
+      "exitCode": 0,
+      "ms": 9050
+    },
+    {
+      "id": "chat13",
+      "npm": "test:chat-ui-chat13",
+      "chv": [
+        "CHV-17",
+        "CHV-18",
+        "CHV-20"
+      ],
+      "exitCode": 0,
+      "ms": 10153
+    },
+    {
+      "id": "chat21",
+      "npm": "test:chat-ui-chat21",
+      "chv": [
+        "CHV-21"
+      ],
+      "exitCode": 0,
+      "ms": 11746
+    },
+    {
+      "id": "chat22",
+      "npm": "test:chat-ui-chat22",
+      "chv": [
+        "CHV-22"
+      ],
+      "exitCode": 0,
+      "ms": 9197
+    }
+  ],
+  "passed": true,
+  "partialCandidate": true,
+  "note": "CHAT-14 remains a partial verification candidate per plan §完成标准: system IME/clipboard and real subscription stay pending; cannot close CHAT-14 without those."
+}

@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-21T17:40:22.202Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "realChatGptLogin": false,
+  "authorization": "controlled offline fixture",
+  "blockedExternalConnectsBefore": 0,
+  "connectFlow": {
+    "draftPreserved": true,
+    "legacyOnly": false,
+    "oauthClicked": false,
+    "path": "return-without-login"
+  },
+  "nextSettings": {
+    "draftPreserved": true,
+    "frozen": "本次冻结：API · gpt-5.6-sol · 思考 中等"
+  },
+  "controlledCancel": {
+    "ok": true,
+    "draftStill": "CHV-11 受控订阅草稿 UNIQUE"
+  },
+  "controlledFailure": {
+    "ok": true,
+    "alert": "换取登录凭据失败（HTTP 400 · invalid_grant）：本次授权码已失效或不匹配，请重新发起一次登录",
+    "draftPreserved": true
+  },
+  "controlledSuccess": {
+    "ok": true,
+    "ready": true,
+    "authMode": "chatgpt",
+    "budgetUsd": 0,
+    "primaryEnabled": true,
+    "draftPreserved": true,
+    "status": "下次配置与额度"
+  },
+  "controlledDisconnect": {
+    "ok": true,
+    "ready": false,
+    "modelConfigured": false,
+    "authModeStaysChatgpt": true,
+    "connectPromptVisible": true,
+    "draftPreserved": true
+  },
+  "pageErrors": [],
+  "blockedExternalConnectsAfter": 0,
+  "passed": true,
+  "chv11": {
+    "cancel": true,
+    "failure": true,
+    "successThenSendEnabled": true,
+    "disconnectInvalidates": true,
+    "draftPreservedAcross": true,
+    "subscriptionApiLimitsSeparated": true,
+    "realOAuth": false
+  }
+}

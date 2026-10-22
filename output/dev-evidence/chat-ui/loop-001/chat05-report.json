@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-21T16:20:23.664Z",
+  "staticDir": "output/chat-ui-build",
+  "evidence": "C:\\Users\\ZYF\\orca\\workspaces\\OS\\coffinfish\\output\\dev-evidence\\chat-ui\\loop-001",
+  "designVersion": "2026-10-21-chat-02",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "composerExpand": {
+    "expandLabel": "展开编辑",
+    "collapseOk": true
+  },
+  "pureImage": {
+    "hint": "请添加文字说明后发送",
+    "primaryDisabled": true
+  },
+  "ctrlEnterQueue": {
+    "status": 202,
+    "matchedPrimary": "排队追问"
+  },
+  "ctrlEnterSteer": {
+    "url": "http://127.0.0.1:4855/api/runs/71c24565-5111-4712-a78d-483cbefd1f93/steer",
+    "matchedPrimary": "指导当前执行"
+  },
+  "stopInProgress": {
+    "runId": "71c24565-5111-4712-a78d-483cbefd1f93",
+    "buttonDisabled": true,
+    "buttonText": "正在停止…",
+    "statusMentionsStopping": true
+  },
+  "enterNewline": {
+    "beforeLen": 6,
+    "afterLen": 7,
+    "hasNewline": true
+  },
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

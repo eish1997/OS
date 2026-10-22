@@ -1,0 +1,1 @@
+ed||(primaryKind==='steer'&&assetIds.length>0)} onClick={()=>void send(primaryKind)}>{actionLabel}</button></div>{!snapshot?.config.modelConfigured&&<a href="/legacy" target="_blank" rel="noreferrer">在旧版设置中连接模型 ↗</a>}</div></div></div>;

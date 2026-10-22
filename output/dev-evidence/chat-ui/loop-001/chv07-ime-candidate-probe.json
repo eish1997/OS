@@ -1,0 +1,157 @@
+{
+  "at": "2026-10-21T17:49:52.992Z",
+  "purpose": "Empirical Windows IME candidate-confirm via orca computer",
+  "staticDir": "output/chat-ui-build",
+  "base": "http://127.0.0.1:10543",
+  "realModelRequests": 0,
+  "target": {
+    "pwPid": 49784,
+    "hit": {
+      "index": 0,
+      "app": {
+        "name": "chrome",
+        "bundleId": "chrome",
+        "pid": 49784
+      },
+      "id": 28511282,
+      "title": "IMEPROBE-10543-UNIQUE - Google Chrome",
+      "x": -8,
+      "y": -8,
+      "width": 1936,
+      "height": 1056,
+      "isMinimized": false,
+      "isOffscreen": false,
+      "screenIndex": null,
+      "platform": {
+        "backend": "uia",
+        "nativeWindowHandle": 28511282
+      }
+    }
+  },
+  "imeSwitchAttempts": [
+    {
+      "key": "Ctrl+Space",
+      "ok": true,
+      "raw": "{\n  \"id\": \"0f1049c9-3fc2-4d0f-bc17-9c468113a59c\",\n  \"ok\": true,\n  \"result\": {\n    \"snapshot\": {\n      \"id\": \"13ef2b8d-c238-405e-a944-28af2ddb1519\",\n      \"app\": {\n        \"name\": \"chrome\",\n        \"bundleId\": \"chrome\",\n        \"pid\": 49784\n"
+    },
+    {
+      "key": "CmdOrCtrl+Space",
+      "ok": true,
+      "raw": "{\n  \"id\": \"0bc8ef15-11cf-4368-851d-693d14a12072\",\n  \"ok\": true,\n  \"result\": {\n    \"snapshot\": {\n      \"id\": \"29792c04-f147-41f9-9024-b67d1624d27f\",\n      \"app\": {\n        \"name\": \"chrome\",\n        \"bundleId\": \"chrome\",\n        \"pid\": 49784\n"
+    },
+    {
+      "key": "Alt+Shift",
+      "ok": false,
+      "raw": "{\n  \"id\": \"local\",\n  \"ok\": false,\n  \"error\": {\n    \"code\": \"invalid_argument\",\n    \"message\": \"Hotkey requires a modifier and one key, e.g. CmdOrCtrl+A. Use press-key for a single key.\",\n    \"data\": {\n      \"nextSteps\": [\n        \"Fix the c"
+    }
+  ],
+  "composerBeforeLetters": "",
+  "letterByLetter": [
+    {
+      "key": "n",
+      "ok": true
+    },
+    {
+      "key": "i",
+      "ok": true
+    },
+    {
+      "key": "h",
+      "ok": true
+    },
+    {
+      "key": "a",
+      "ok": true
+    },
+    {
+      "key": "o",
+      "ok": true
+    }
+  ],
+  "appsDuringComposition": [
+    {
+      "name": "设置",
+      "pid": 17192
+    },
+    {
+      "name": "chrome",
+      "pid": 30552
+    },
+    {
+      "name": "chrome",
+      "pid": 49784
+    },
+    {
+      "name": "Clover",
+      "pid": 45424
+    },
+    {
+      "name": "Cursor",
+      "pid": 16004
+    },
+    {
+      "name": "explorer",
+      "pid": 9904
+    },
+    {
+      "name": "msedgewebview2",
+      "pid": 52132
+    },
+    {
+      "name": "NVIDIA Overlay",
+      "pid": 10100
+    },
+    {
+      "name": "Orca",
+      "pid": 7732
+    },
+    {
+      "name": "python",
+      "pid": 24664
+    },
+    {
+      "name": "QQLive",
+      "pid": 55288
+    },
+    {
+      "name": "ssn",
+      "pid": 1808
+    },
+    {
+      "name": "TextInputHost",
+      "pid": 4936
+    },
+    {
+      "name": "ToDesk",
+      "pid": 9440
+    },
+    {
+      "name": "Weixin",
+      "pid": 14392
+    },
+    {
+      "name": "抖音账号工作台",
+      "pid": 18856
+    }
+  ],
+  "candidateUiInTree": false,
+  "imeHostApp": {
+    "name": "TextInputHost",
+    "pid": 4936
+  },
+  "composerAfterPinyin": "",
+  "confirmKeys": {
+    "one": true
+  },
+  "composerAfterConfirm": "你好",
+  "chineseAppearedAfterConfirm": true,
+  "latinCompositionCleared": false,
+  "verdict": {
+    "imeCandidateConfirm": "verified",
+    "reason": "soft composition (empty value) after letter keys then digit-1 → Chinese (OS IME candidate)",
+    "typeTextNotEquivalent": true,
+    "doNotMarkChv07OsImePassed": false,
+    "note": "Win+Space unsupported by orca; Ctrl+Space/Alt+Shift attempted; may use pre-selected Chinese IME"
+  },
+  "passed": true
+}

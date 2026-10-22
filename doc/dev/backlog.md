@@ -1,28 +1,28 @@
 # 权威开发台账
 
-## CHAT 对话窗口交互重构（2026-10-21，仅计划）
+## CHAT 对话窗口交互重构（2026-10-21，实施中）
 
-用户当前授权为编写与子Agent审查计划，未启动本节实现。范围和任务退出条件见[开发执行计划v1.1](../对话窗口交互重构开发执行计划.md)，来源见[交互审查](../reviews/对话窗口交互审查与产品参考-2026-10-21.md)，三方意见及处理见[计划审查](../reviews/对话窗口执行计划审查-2026-10-21.md)。CHV-01–22归14、23归15、24归16；默认单 Agent 开发，本次三个子Agent仅审查。本节为唯一实施状态，不改写历史 PIF/WB/EMB 记录。
+用户已授权本地代码/文档/独立构建与离线验证；真实模型、日常服务重启与 Git 提交/推送另需会话授权。范围见[开发执行计划v1.1](../对话窗口交互重构开发执行计划.md)。CHV-01–22归14、23归15、24归16。证据根 `output/dev-evidence/chat-ui/`；候选 `output/chat-ui-build`。本节为唯一实施状态，不改写历史 PIF/WB/EMB 记录。
 
 | ID | 状态 | 依赖 | 验收/下一步 |
 | --- | --- | --- | --- |
-| CHAT-00 | todo | 实施授权 | 现场/独立构建基线，导入前配置隔离与非回环外连拒绝，核对关键复现 |
-| CHAT-01 | todo | 00 | 活动执行、待答和停止不随三条追问或历史分页消失 |
-| CHAT-02 | todo | 00；默认01后 | 冻结分区、可测尺寸/字号/断点、发送键与纯图规则；覆盖宽窄窗 |
-| CHAT-03 | todo | 01、02 | 宿主消息/原生entry/轮次锚点映射、活动/历史、归属/分页/请求竞态 |
-| CHAT-04 | todo | 03 | 默认主区、可逆聚焦、跟随/回到最新与阅读锚点 |
-| CHAT-05 | todo | 03、04 | 输入/键映射/指导/排队/停止中与提交浏览器契约；系统IME归13/14 |
-| CHAT-06 | todo | 05 | 图片三入口/预览/恢复、纯图必填文字提示、资料附加；系统剪贴板归13/14 |
-| CHAT-07 | todo | 03、04 | 消息/代码/表格、复制/选文引用与来源定位、成果预览返回 |
-| CHAT-08 | todo | 03、05、07 | 过程/完整历史、独立恢复；提交前限制与接近上限反馈 |
-| CHAT-09 | todo | 05 | 首次连接→返回原话题草稿；下次配置/额度入口与旧Run冻结 |
-| CHAT-10 | todo | 03、07 | 标题、新建/切换/改名、话题与全历史查找 |
-| CHAT-11 | todo | 07、08、10 | 本条分支、来源返回、压缩与原生导入导出 |
-| CHAT-12 | todo | 08、09、11 | 工具轮次安全基点、附件继承与幂等；重新生成不默认重做成功工具 |
-| CHAT-13 | todo | 04–12 | 多窗口/项目、窄窗/缩放、焦点、主题及画板三层回归 |
-| CHAT-14 | todo | 01–13 | 仅CHV-01–22、候选构建与阶段串行全套，不依赖23/24 |
-| CHAT-15 | todo | 14、模型与开发预算授权 | CHV-23真实模型主界面联调，累计成本与能力可核对 |
-| CHAT-16 | todo | 14、15、本机应用授权 | CHV-24备份/在途核对、正常应用、摘要抽验与回退 |
+| CHAT-00 | done | 实施授权 | loop-001/isolation.json；skip dotenv + 外连拒绝 |
+| CHAT-01 | done | 00 | loop-001/chv04-report.json；selectVisibleRuns |
+| CHAT-02 | done | 00；默认01后 | chat-ui-design-freeze.md；loop-001/chat02-report.json |
+| CHAT-03 | done | 01、02 | chat-turn-model；轮次/宿主锚点 DOM；历史 generation 竞态；chv04 含 turn 断言 |
+| CHAT-04 | done | 03 | 跟随 chat04-report；聚焦/还原 chat04-focus-report；分页锚点 |
+| CHAT-05 | done | 03、04 | chat05-report：展开/纯图/radiogroup/Ctrl+Enter 一致/停止中；IME 系统实测归13/14 |
+| CHAT-06 | done | 05 | chat06-report：选图/合成粘贴拖入/缩略图/非图拒绝/资料附加；系统剪贴板归13/14 |
+| CHAT-07 | done | 03、04 | chat07-report：代码复制/表格约束/消息复制/引用/定位执行；成果卡对消息图片 |
+| CHAT-08 | done | 03、05、07 | chat08-report：全部历史、本轮工具过程、普通重试/追加额度分离、提交前限制与接近上限 |
+| CHAT-09 | done | 05 | chat09-report：对话内连接/下次配置（非仅 legacy）、草稿保留、旧 Run 冻结摘要 |
+| CHAT-10 | done | 03、07 | chat10-report：自动标题/改名/切换/服务端全文查找定位；跨项目标题筛选不串 |
+| CHAT-11 | done | 07、08、10 | chat11-report：话题菜单达分支/导入/压缩；从此分支；来源按钮；导出链 |
+| CHAT-12 | done | 08、09、11 | chat12-report：工具基点重生/首条编辑重发/幂等/附件继承 UI；`agent.continue` 不重做工具 |
+| CHAT-13 | done | 04–12 | chat13-report：工具栏「＋ 窗口」双窗（无 fixture）；窄窗/IME 组合守卫；OS 剪贴板 chv07-09-os-gui；IME 候选 chv07-ime-candidate-probe |
+| CHAT-14 | done | 01–13 | **完整候选完成**：CHV-01–22 均有当前证据；IME 候选见 `chv07-ime-candidate-probe.json`；OS 剪贴板见 chv07-09-os-gui；受控订阅见 chat09；suite `chat14-suite-report.json`；候选 `output/chat-ui-build`；未含 15/16 |
+| CHAT-15 | done | 14、模型与开发预算授权 | CHV-23：`chat15-report`+`chat15-steer-queue-report`+`chat15-budget-ledger`；DeepSeek 累计 16 次 / ≈¥0.049 |
+| CHAT-16 | done | 14、15、本机应用授权 | CHV-24：`chat16-report.json` passed；候选已应用到 `F:\AI\OS`；业务摘要不变；回退包 `AI-OS-Backups\chat16-20261022-112312` |
 
 ## EMB 画板嵌入（2026-10-16，已授权开发与隔离验证）
 

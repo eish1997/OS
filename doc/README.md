@@ -1,6 +1,8 @@
 # 开发文档索引
 
-2026-10-21 对话窗口交互重构：[Agent LOOP 与开发执行计划v1.1](对话窗口交互重构开发执行计划.md)、[问题审查与产品参考](reviews/对话窗口交互审查与产品参考-2026-10-21.md)、[三方计划审查与处理](reviews/对话窗口执行计划审查-2026-10-21.md)。覆盖信息分区、输入、消息、过程、待答、恢复与历史，定义 CHAT-00–16、CHV-01–24。当前仅计划；未启动产品实现、模型调用或日常服务应用。
+2026-10-22 对话窗口布局 v2：**已实施**——[layout-v2](dev/chat-ui-layout-v2.md)（默认只露话题+消息+Composer；能力进 `⋯`）。行为契约见[设计冻结](dev/chat-ui-design-freeze.md)。候选需 `build:chat-ui`；应用到日常另授权。
+
+2026-10-22 对话窗口交互重构：**整体本机交付完成**（CHAT-00–16 / CHV-01–24）。[使用说明](dev/对话窗口使用说明.md)、[执行计划v1.1](对话窗口交互重构开发执行计划.md)、[设计冻结](dev/chat-ui-design-freeze.md)、[loop-001](dev/iterations/chat-ui-loop-001.md)、[审查](reviews/对话窗口交互审查与产品参考-2026-10-21.md)。候选已应用到日常 `F:\AI\OS`；证据 `output/dev-evidence/chat-ui/loop-001/`（含 `chat15-*`、`chat16-report.json`）。DeepSeek 联调累计 16 次 / ≈¥0.049；未 Git。
 
 2026-10-17 画板嵌入隔离交付与残余闭合：[使用说明](dev/画板嵌入使用说明.md)、[097](dev/iterations/097-canvas-residual-closure.md)、[计划](dev/画板嵌入工作台开发计划.md)。默认关闭；证据见 `output/dev-evidence/canvas-embedding/`。
 2026-10-16 Pi能力保留计划：[开发计划](Pi能力保留与体验补齐开发计划.md)、[联合复查](reviews/pi-capability-audit-2026-10-16.md)。覆盖长任务、压缩与历史恢复、思考配置、重试、实时过程、MCP、插件交互、图片和会话分支；包含PIF任务、PIV验收、长期LOOP及原版对照方法。当前为计划，不代表已开始实施或补齐通过。

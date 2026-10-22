@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-21T16:24:09.057Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "canvasEnabled": false,
+  "embeddingNote": "chat-ui isolate defaults CANVAS_ENABLED off; iframe mount is a separate embedding gate",
+  "blockedExternalConnectsBefore": 0,
+  "canvasReceivesNative": true,
+  "layoutGapForwards": true,
+  "editorBlocksCanvas": true,
+  "floatingOpaque": true,
+  "titleDragChrome": true,
+  "toolbarChromeBlocks": true,
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

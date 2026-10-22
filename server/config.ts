@@ -2,7 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defaultStorageLimits } from './storage.js';
 // Explicit local .env only. No global credential discovery.
-if (existsSync('.env')) for (const line of readFileSync('.env', 'utf8').split(/\r?\n/)) {
+// Chat UI offline runners set WORKBENCH_SKIP_DOTENV=1 before import to prove isolation.
+if (process.env.WORKBENCH_SKIP_DOTENV !== '1' && existsSync('.env')) for (const line of readFileSync('.env', 'utf8').split(/\r?\n/)) {
   const match = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
   if (match && process.env[match[1]] === undefined) process.env[match[1]] = match[2].replace(/^['"]|['"]$/g, '');
 }

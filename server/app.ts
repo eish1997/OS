@@ -170,8 +170,38 @@ export function createApp(options: { dataDir?: string; staticDir?: string; canva
           return await canvasApi.handle(req,res,path.slice('/api/canvas'.length)+url.search,transport,config.origin);
         }
         if (path === '/api/conversations') {
-          if (method === 'GET') return reply(res, store.list('conversation', url.searchParams.get('projectId') || undefined));
-          if (method === 'POST') { const data = await json(req); return reply(res, service.createConversation(text(data.projectId,'项目'), text(data.title,'对话标题',120), text(data.commandId,'命令',120)), 201); }
+          if (method === 'GET') {
+            const projectId = url.searchParams.get('projectId');
+            if (!projectId) return reply(res, store.list('conversation'));
+            const q = url.searchParams.get('q') || undefined;
+            return reply(res, service.listConversations(text(projectId, '项目'), q || undefined));
+          }
+          if (method === 'POST') {
+            const data = await json(req);
+            const stamp = new Date().toLocaleString('zh-CN', { hour12: false });
+            const title = typeof data.title === 'string' && data.title.trim() ? text(data.title, '对话标题', 120) : `对话 · ${stamp}`;
+            return reply(res, service.createConversation(text(data.projectId, '项目'), title, text(data.commandId, '命令', 120)), 201);
+          }
+        }
+        if (path.match(/^\/api\/conversations\/[^/]+$/) && method === 'PATCH') {
+          const data = await json(req);
+          return reply(res, service.renameConversation(path.split('/')[3], revision(data.revision), text(data.title, '对话标题', 120)));
+        }
+        if (path.match(/^\/api\/conversations\/[^/]+\/search$/) && method === 'GET') {
+          const conversation = store.get<Conversation>('conversation', path.split('/')[3]);
+          const q = text(url.searchParams.get('q'), '查找内容', 200);
+          const after = url.searchParams.has('after') ? Number(url.searchParams.get('after')) : 0;
+          const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : 20;
+          if (!Number.isSafeInteger(after) || after < 0) throw new AppError(400, '查找游标无效');
+          if (!Number.isSafeInteger(limit) || limit < 1 || limit > 50) throw new AppError(400, '查找条数无效');
+          const controller = new AbortController();
+          const stop = () => controller.abort();
+          res.once('close', stop);
+          try {
+            return reply(res, service.searchConversation(conversation.projectId, conversation.id, q, after, limit, controller.signal));
+          } finally {
+            res.removeListener('close', stop);
+          }
         }
         if(path.match(/^\/api\/conversations\/[^/]+\/inherited-history$/)&&method==='GET'){
           const conversation=store.get<Conversation>('conversation',path.split('/')[3]);
@@ -370,6 +400,27 @@ export function createApp(options: { dataDir?: string; staticDir?: string; canva
           if(res.destroyed)return;if(!auth.valid(sessionHash))throw new AppError(401,'请登录工作台');
           return reply(res,store.command(key,digest,()=>service.branchConversation(projectId,sourceId,text(data.entryId,'历史节点',120),text(data.sourceHash,'原会话校验值',64),text(data.title,'新话题名称',120),text(data.goal,'目标'),commandId,grant)),202);
         }
+        if(path.match(/^\/api\/runs\/[^/]+\/version-targets$/)&&method==='GET'){
+          const projectId=text(url.searchParams.get('projectId'),'项目');
+          const source=service.scope(store.get<Run>('run',path.split('/')[3]),projectId);
+          return reply(res,versionTargetsForRun(store,source));
+        }
+        if(path.match(/^\/api\/runs\/[^/]+\/version$/)&&method==='POST'){
+          const data=await json(req);const sourceId=path.split('/')[3];const projectId=text(data.projectId,'项目');
+          const kind=data.kind==='edit_resend'||data.kind==='regenerate'?data.kind:undefined;
+          if(!kind)throw new AppError(400,'版本操作类型无效');
+          const commandId=text(data.commandId,'命令ID',120),digest=fingerprint({sourceId,data}),key=`api-version:v1:${commandId}`;
+          const receipt=store.commandReceipt<ReturnType<typeof service.versionConversation>>(key,digest);if(receipt)return reply(res,receipt.value,202);
+          const source=service.scope(store.get<Run>('run',sourceId),projectId);
+          if(!modelAccess.settings().modelConfigured)throw new AppError(503,'请先连接获准模型');
+          const grant=policy(projectId,'pi');if(grant.modelBinding)grant.piRuntime=await piSettings.freeze(grant.modelBinding);
+          if(grant.piRuntime?.executionMode==='long')grant.timeoutMs=30*60*1000;
+          if(kind==='edit_resend'&&data.assetIds)await imageAttachments(store,assets,projectId,strings(data.assetIds),(await piSettings.snapshot(grant.modelBinding)).model?.supportsImages===true);
+          const controller=new AbortController();const stop=()=>controller.abort();res.once('close',stop);
+          try{await prepareSource(store,source,controller.signal);}finally{res.removeListener('close',stop);}
+          if(res.destroyed)return;if(!auth.valid(sessionHash))throw new AppError(401,'请登录工作台');
+          return reply(res,store.command(key,digest,()=>service.versionConversation(projectId,sourceId,kind,text(data.sourceHash,'原会话校验值',64),text(data.title,'新话题名称',120),text(data.goal,'目标'),commandId,grant,data.assetIds?strings(data.assetIds):[])),202);
+        }
         if (path === '/api/tasks' && method === 'POST') {
           const data = await json(req); const projectId = text(data.projectId, '项目'); const mode = data.mode ?? 'pi'; if (!['pi', 'fixture', 'node'].includes(String(mode))) throw new AppError(400, '执行模式无效');
           if (data.sessionAction !== undefined && (data.sessionAction !== 'compact' || mode !== 'pi' || typeof data.continueFromRunId !== 'string' || !data.continueFromRunId || data.research !== undefined || data.selectedDraftId !== undefined)) throw new AppError(400, '手动压缩参数无效');
@@ -551,7 +602,7 @@ export function createApp(options: { dataDir?: string; staticDir?: string; canva
       if (!existsSync(target)) { res.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('界面尚未构建，请运行 npm run build'); }
       const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
       res.writeHead(200, { 'Content-Type': types[extname(target)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(readFileSync(target));
-    } catch (error) { if (!res.headersSent) reply(res, { error: error instanceof AppError ? error.message : '操作失败，请检查本机诊断' }, error instanceof AppError ? error.status : 500); else res.end(); }
+    } catch (error) { if (process.env.CHAT_UI_ISOLATED === '1' && !(error instanceof AppError)) console.error('[chat-ui-offline]', error); if (!res.headersSent) reply(res, { error: error instanceof AppError ? error.message : '操作失败，请检查本机诊断' }, error instanceof AppError ? error.status : 500); else res.end(); }
   });
   if (options.schedule !== false) {scheduler.start();automaticBackup.start();plugins.start();}
   return { server, store, service, assets, auth, scheduler, canvasService, plugins, mcp, chatgpt, modelAccess, automaticBackup, snapshot, close: async () => { await canvasService?.dispose();await assets.searchIndex.close();await automaticBackup.stop();await plugins.stop();chatgpt.close();await scheduler.stop(); server.closeAllConnections(); await new Promise<void>(r => server.close(() => r())); store.close(); } };
@@ -559,4 +610,5 @@ export function createApp(options: { dataDir?: string; staticDir?: string; canva
 import {imageAttachments} from './image-attachments.js';
 import {prepareSource,sourceInspection,reconcileUnpublishedSessions} from './native-session.js';
 import {branchPoints} from './native-branch-points.js';
+import {versionTargetsForRun} from './native-version-ops.js';
 import {streamNativeImage,streamNativeExport} from './native-image-stream.js';

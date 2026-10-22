@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-21T16:23:39.602Z",
+  "staticDir": "output/chat-ui-build",
+  "realModelRequests": 0,
+  "blockedExternalConnectsBefore": 0,
+  "targets": {
+    "afterCompaction": true,
+    "regenBase": "59a58c66",
+    "regenTarget": "3c91d7a1",
+    "editUser": "59a58c66"
+  },
+  "uiAfterCompactionLabel": true,
+  "toolBaseCaption": "基点：user · 无工具轮次 · 位于压缩之后",
+  "blockedExternalConnectsAfter": 0,
+  "passed": true
+}

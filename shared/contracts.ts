@@ -7,7 +7,7 @@ export interface Run { mcpDiagnostics?: import('./mcp.js').McpDiagnostic[]; mcpC
 export interface Policy { piRuntime?: import('./pi-runtime.js').PiExecutionProfile }
 export interface Run { compaction?: import('./pi-runtime.js').PiCompactionState }
 export interface Run { retryState?: import('./pi-runtime.js').PiRetryState }
-export interface Run { sessionAction?: 'compact'; compactionFocus?: string }
+export interface Run { sessionAction?: 'compact' | 'regenerate'; compactionFocus?: string; versionKind?: 'edit_resend' | 'regenerate' }
 export interface SessionBinding { pluginSignature?: string }
 export interface Project extends Entity { name: string; description: string; archived: boolean }
 export interface Conversation extends Entity { projectId: string; title: string }
@@ -20,8 +20,22 @@ export interface ConversationMessage { phase?: import('./run-stream.js').Message
 export interface ConversationMessage {inputState?:import('./run-input.js').RunInputState;inputReason?:string}
 export interface ConversationMessage {followUp?:{state:Run['status'];sourceRunId:string;runId:string;reason?:string}}
 export interface ConversationMessage { images?:{assetId:string;name:string;hash:string;url?:string}[] }
-export interface Conversation { branch?:{sourceRunId:string;sourceEntryId:string;sourceConversationId?:string;sourceHash:string} }
+export interface Conversation { branch?:{sourceRunId:string;sourceEntryId:string;sourceConversationId?:string;sourceHash:string;versionKind?:'edit_resend'|'regenerate'} }
 export interface ConversationPage { messages: ConversationMessage[]; olderThan?: number }
+export interface ConversationSearchHit {
+  messageId: string;
+  sequence: number;
+  role: 'user' | 'assistant';
+  snippet: string;
+  at: string;
+  runId?: string;
+  conversationId: string;
+}
+export interface ConversationSearchPage {
+  query: string;
+  hits: ConversationSearchHit[];
+  nextAfter?: number;
+}
 export interface NativeContinuation { runId:string; sessionId:string; sha256:string; entryId?:string }
 export interface ImportedContinuation {importId:string;sha256:string;entryId:string;pluginSignature:string;mcpSignature:string;externalEffectsReview:string}
 export interface Run {importedContinuation?:ImportedContinuation}
